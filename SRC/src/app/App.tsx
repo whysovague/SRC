@@ -329,6 +329,8 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           </div>
         </div>
       </section>
+      <TimelineSection />
+      
 
       {/* CTA band */}
       <section className="py-16" style={{ background: `linear-gradient(135deg, ${TEAL}15 0%, ${ORANGE}10 100%)`, borderTop: `1px solid ${TEAL}25`, borderBottom: `1px solid ${TEAL}25` }}>
@@ -630,6 +632,203 @@ function RegistrationPage() {
         </div>
       </div>
     </div>
+  );
+}
+// ─── Timeline Section (Important Dates) ─────────────────────────────────────
+function TimelineSection() {
+  const milestones = [
+    {
+      date: "Q1 2026",
+      event: "Registration Opens",
+      desc: "Team and individual registration officially opens for all GCC universities.",
+      status: "upcoming" as const,
+    },
+    {
+      date: "Q1 2026",
+      event: "Team Registration Deadline",
+      desc: "Final deadline for teams to confirm their participation.",
+      status: "upcoming" as const,
+    },
+    {
+      date: "Q2 2026",
+      event: "Abstract Submission Deadline",
+      desc: "Technical presentation abstracts must be submitted for review.",
+      status: "upcoming" as const,
+    },
+    {
+      date: "Q2 2026",
+      event: "Poster Submission Deadline",
+      desc: "Research posters due for the Poster Competition.",
+      status: "upcoming" as const,
+    },
+    {
+      date: "TBA",
+      event: "SRC 2026 Conference",
+      desc: "The main event — three days of competitions, technical sessions, and networking.",
+      status: "main" as const,
+      schedule: [
+        "Opening Ceremony",
+        "Chem-E-Car Competition",
+        "Technical Sessions",
+        "Workshops",
+        "Networking Events",
+        "Closing Gala",
+      ],
+    },
+  ];
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [fillPct, setFillPct] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (!trackRef.current) return;
+        const rect = trackRef.current.getBoundingClientRect();
+        const viewportCenter = window.innerHeight * 0.5;
+
+        // % of the track the viewport's center has passed
+        const pct = ((viewportCenter - rect.top) / rect.height) * 100;
+        setFillPct(Math.min(100, Math.max(0, pct)));
+
+        // nearest node to viewport center becomes "active"
+        let closest = 0;
+        let minDist = Infinity;
+        nodeRefs.current.forEach((el, i) => {
+          if (!el) return;
+          const dist = Math.abs(el.getBoundingClientRect().top - viewportCenter);
+          if (dist < minDist) {
+            minDist = dist;
+            closest = i;
+          }
+        });
+        setActiveIndex(closest);
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <section className="py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
+      <div className="max-w-4xl mx-auto px-6">
+        <SectionTag>Roadmap</SectionTag>
+        <SectionTitle>Important Dates</SectionTitle>
+        <Divider />
+
+        <div ref={trackRef} className="relative mt-16 pl-10 md:pl-0">
+          {/* Track background */}
+          <div
+            className="absolute top-0 bottom-0 w-px left-[7px] md:left-1/2"
+            style={{ background: `${TEAL}18` }}
+          />
+          {/* Track fill — the moving highlight */}
+          <div
+            className="absolute top-0 w-px left-[7px] md:left-1/2 transition-[height] duration-150 ease-out"
+            style={{
+              height: `${fillPct}%`,
+              background: `linear-gradient(180deg, ${TEAL}, ${ORANGE})`,
+              boxShadow: `0 0 12px ${TEAL}80`,
+            }}
+          />
+
+          <div className="space-y-16 md:space-y-24">
+            {milestones.map((m, i) => {
+              const isActive = i === activeIndex;
+              const isLit = i <= activeIndex;
+              const accent = m.status === "main" ? ORANGE : TEAL;
+              const alignLeft = i % 2 === 0;
+
+              return (
+                <div
+                  key={m.event}
+                  className={`relative md:flex md:items-center md:gap-12 ${
+                    alignLeft ? "" : "md:flex-row-reverse"
+                  }`}
+                >
+                  {/* Node */}
+                  <div
+                    ref={(el) => (nodeRefs.current[i] = el)}
+                    className="absolute left-0 md:left-1/2 -translate-x-1/2 top-1 z-10"
+                  >
+                    <div
+                      className="rounded-full flex items-center justify-center transition-all duration-500"
+                      style={{
+                        width: isActive ? 36 : 16,
+                        height: isActive ? 36 : 16,
+                        background: isLit ? accent : "var(--background)",
+                        border: `2px solid ${accent}`,
+                        boxShadow: isActive ? `0 0 0 8px ${accent}20` : "none",
+                        color: "#0a0a0a",
+                      }}
+                    >
+                      {isActive && (m.status === "main" ? <Star className="w-4 h-4" /> : <Calendar className="w-4 h-4" />)}
+                    </div>
+                  </div>
+
+                  {/* Spacer (desktop alternating layout) */}
+                  <div className="hidden md:block md:w-1/2" />
+
+                  {/* Content card */}
+                  <div
+                    className={`ml-10 md:ml-0 md:w-1/2 ${
+                      alignLeft ? "md:text-right md:pr-14" : "md:pl-14"
+                    }`}
+                  >
+                    <div
+                      className="rounded-xl p-5 border transition-all duration-500"
+                      style={{
+                        background: isActive ? `${accent}0d` : "var(--card)",
+                        borderColor: isActive ? `${accent}40` : "var(--border)",
+                        opacity: isActive ? 1 : 0.75,
+                      }}
+                    >
+                      <div
+                        className="text-xs font-mono font-bold mb-2 inline-block px-2 py-0.5 rounded"
+                        style={{ background: `${accent}15`, color: accent }}
+                      >
+                        {m.date}
+                      </div>
+                      <h4 className="font-display font-bold text-white text-lg mb-1">{m.event}</h4>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{m.desc}</p>
+
+                      {m.schedule && (
+                        <div
+                          className={`mt-4 pt-4 border-t space-y-2 ${alignLeft ? "md:text-right" : ""}`}
+                          style={{ borderColor: "var(--border)" }}
+                        >
+                          {m.schedule.map((item) => (
+                            <div
+                              key={item}
+                              className={`flex items-center gap-2 text-sm text-muted-foreground ${
+                                alignLeft ? "md:flex-row-reverse" : ""
+                              }`}
+                            >
+                              <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: TEAL }} />
+                              <span>{item}</span>
+                              <ComingSoonBadge />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 
