@@ -649,8 +649,6 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           </div>
         </div>
       </section>
-      <TimelineSection />
-      
 
  {/* About */}
       <section className="relative overflow-hidden py-28 md:py-36 border-t" style={{ borderColor: `${TEAL}15`, background: "linear-gradient(180deg, transparent 0%, rgba(12,191,206,0.03) 45%, transparent 100%)" }}>
@@ -780,6 +778,8 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           </div>
         </div>
       </section>
+
+      <TimelineSection />
 
 {/* SPONSORS & SPEAKERS */}
       <section className="relative overflow-hidden py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
@@ -1269,7 +1269,7 @@ function TimelineSection() {
                 >
                   {/* Node */}
                   <div
-                    ref={(el) => (nodeRefs.current[i] = el)}
+                    ref={(el) => { nodeRefs.current[i] = el; }}
                     className="absolute left-0 md:left-1/2 -translate-x-1/2 top-1 z-10"
                   >
                     <div
