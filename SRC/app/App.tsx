@@ -1800,8 +1800,12 @@ function PartnershipPage() {
 // ─── Sponsors Page ────────────────────────────────────────────────────────────
 function SponsorsPage() {
   return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative pt-24 pb-20 overflow-hidden">
+      
+      {/* Molecule Network Background */}
+      <MoleculeNetwork />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         <SectionTag>Thank You</SectionTag>
         <SectionTitle>Sponsors & Partners</SectionTitle>
         <Divider />
@@ -1813,12 +1817,12 @@ function SponsorsPage() {
           { level: "Supporters", color: "#4A9BB5" },
           { level: "Academic Partners", color: "#4A9BB5" },
         ].map((group) => (
-          <div key={group.level} className="mb-12">
-            <h3 className="font-display text-xl font-bold mb-6 flex items-center gap-3" style={{ color: group.color }}>
+          <div key={group.level} className="mb-30">
+            <h3 className="font-display text-xl font-bold mb-15 flex items-center gap-3" style={{ color: group.color }}>
               <span className="w-8 h-0.5 inline-block" style={{ background: group.color }} />
               {group.level}
             </h3>
-            <div className="rounded-xl border p-10 flex flex-wrap gap-8 items-center justify-center min-h-[120px]" style={{ background: "var(--card)", borderColor: `${group.color}20` }}>
+            <div className="rounded-xl border p-10 flex flex-wrap gap-8 items-center justify-center min-h-[120px] transition-all duration-500" style={{ background: `${group.color}0d`, borderColor: `${group.color}40`, }} >
               <div className="text-center">
                 <ComingSoonBadge />
                 <p className="text-xs text-muted-foreground mt-2">Announcements coming soon</p>
@@ -1827,11 +1831,19 @@ function SponsorsPage() {
           </div>
         ))}
 
-        <div className="rounded-xl p-8 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
-          <h3 className="font-display text-2xl font-bold text-white mb-3">Interested in Sponsoring?</h3>
-          <p className="text-muted-foreground mb-6 max-w-xl mx-auto">Join us as a partner and make a lasting impact on the engineering community of the GCC.</p>
-          <CTAButton primary>View Partnership Packages <ArrowRight className="w-4 h-4" /></CTAButton>
-        </div>
+        <div className="mt-20 text-center">
+  <p className="text-xs text-muted-foreground">
+    Interested in sponsoring? Join us as a partner and make a lasting impact
+    on the engineering community of the GCC.
+  </p>
+
+  <button
+    className="mt-2 text-xs font-medium transition-opacity hover:opacity-80"
+    style={{ color: TEAL }}
+  >
+    View Partnership Packages →
+  </button>
+</div>
       </div>
     </div>
   );
@@ -1840,8 +1852,12 @@ function SponsorsPage() {
 // ─── Speakers Page ────────────────────────────────────────────────────────────
 function SpeakersPage() {
   return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative pt-24 pb-20 overflow-hidden">
+      
+      {/* Molecule Network Background */}
+      <MoleculeNetwork />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         <SectionTag>Meet The Experts</SectionTag>
         <SectionTitle>Speakers, Judges & Mentors</SectionTitle>
         <Divider />
@@ -1852,7 +1868,7 @@ function SpeakersPage() {
             { label: "Competition Judges", icon: <Award className="w-7 h-7" />, desc: "Experienced engineers and academics evaluating student work across all competitions." },
             { label: "Mentors & Guests", icon: <Star className="w-7 h-7" />, desc: "Industry professionals available for 1-on-1 mentoring, career advice, and networking." },
           ].map((cat) => (
-            <div key={cat.label} className="rounded-xl border p-6 text-center" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <div key={cat.label} className="rounded-xl border p-6 text-center backdrop-blur-md" style={{ background: "rgba(15, 23, 42, 0.4)", borderColor: "rgba(255, 255, 255, 0.08)" }}>
               <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${TEAL}15`, color: TEAL }}>
                 {cat.icon}
               </div>
@@ -1863,7 +1879,7 @@ function SpeakersPage() {
           ))}
         </div>
 
-        <div className="rounded-xl border p-8 text-center" style={{ background: `${ORANGE}08`, borderColor: `${ORANGE}25` }}>
+        <div className="rounded-xl border p-8 text-center backdrop-blur-md" style={{ background: `${ORANGE}0d`, borderColor: `${ORANGE}35` }}>
           <h3 className="font-display text-xl font-bold text-white mb-3">Interested in Speaking or Judging?</h3>
           <p className="text-muted-foreground mb-5 max-w-lg mx-auto text-sm">We welcome industry experts, researchers, and professionals who want to share their knowledge and mentor the next generation.</p>
           <CTAButton primary>Express Interest <ArrowRight className="w-4 h-4" /></CTAButton>
