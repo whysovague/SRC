@@ -43,8 +43,8 @@ function Divider() {
   return <div className="w-16 h-1 rounded-full mb-8" style={{ background: `linear-gradient(90deg, ${TEAL}, ${ORANGE})` }} />;
 }
 
-function CTAButton({ children, primary, onClick, className = "" }: {
-  children: React.ReactNode; primary?: boolean; onClick?: () => void; className?: string;
+function CTAButton({ children, primary, ghost, onClick, className = "" }: {
+  children: React.ReactNode; primary?: boolean; ghost?: boolean; onClick?: () => void; className?: string;
 }) {
   return (
     <button
@@ -52,12 +52,16 @@ function CTAButton({ children, primary, onClick, className = "" }: {
       className={`inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-sm tracking-wide transition-all duration-200 ${
         primary
           ? "text-[#07111E] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-          : "border text-foreground hover:bg-white/5 active:scale-[0.98]"
+          : ghost
+            ? "text-muted-foreground hover:text-white active:scale-[0.98]"
+            : "border text-foreground hover:bg-white/5 active:scale-[0.98]"
       } ${className}`}
       style={
         primary
           ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)` }
-          : { borderColor: `${TEAL}50` }
+          : ghost
+            ? undefined
+            : { borderColor: `${TEAL}50` }
       }
     >
       {children}
@@ -246,9 +250,7 @@ function SRCLogo({ size = 40 }: { size?: number }) {
 // ─── Navigation ───────────────────────────────────────────────────────────────
 const navItems: { label: string; section: Section }[] = [
   { label: "Home", section: "home" },
-  { label: "About", section: "about" },
   { label: "Competitions", section: "competitions" },
-  { label: "Program", section: "program" },
   { label: "Registration", section: "registration" },
   { label: "Logistics", section: "logistics" },
   { label: "Partnership", section: "partnership" },
@@ -256,15 +258,11 @@ const navItems: { label: string; section: Section }[] = [
 ];
 
 function Navbar({ active, setSection }: { active: Section; setSection: (s: Section) => void }) {
-  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handler);
-    return () => window.removeEventListener("scroll", handler);
-  }, []);
+  const navRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
 
   const mainNav = navItems.slice(0, 6);
   const moreNav: { label: string; section: Section }[] = [
@@ -273,89 +271,176 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
     { label: "FAQ", section: "faq" },
   ];
 
+  const updateHover = (key: string) => {
+    const el = itemRefs.current[key];
+    const parent = navRef.current;
+    if (!el || !parent) return;
+    const elR = el.getBoundingClientRect();
+    const pR = parent.getBoundingClientRect();
+    setHoverRect({
+      left: elR.left - pR.left,
+      top: elR.top - pR.top,
+      width: elR.width,
+      height: elR.height,
+    });
+  };
+
+  // Pixelated noise SVG used as overlay for the "pixelated-blur glass" feel
+  const pixelNoise =
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
-      style={{
-        background: scrolled ? "rgba(7,17,30,0.97)" : "rgba(7,17,30,0.4)",
-        backdropFilter: "blur(16px)",
-        borderBottom: scrolled ? `1px solid ${TEAL}20` : "1px solid transparent",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <button onClick={() => setSection("home")} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <SRCLogo size={36} />
-        </button>
-
-        {/* Desktop nav */}
-        <nav className="hidden lg:flex items-center gap-1">
-          {mainNav.map((item) => (
-            <button
-              key={item.section}
-              onClick={() => setSection(item.section)}
-              className={`px-3 py-2 text-sm font-medium rounded transition-all ${
-                active === item.section
-                  ? "text-white"
-                  : "text-muted-foreground hover:text-white"
-              }`}
-              style={active === item.section ? { color: TEAL } : {}}
-            >
-              {item.label}
-            </button>
-          ))}
-          {/* More dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setMoreOpen(!moreOpen)}
-              className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-white rounded transition-all flex items-center gap-1"
-            >
-              More <ChevronDown className="w-3 h-3" />
-            </button>
-            {moreOpen && (
-              <div
-                className="absolute top-full right-0 mt-2 w-48 rounded-lg overflow-hidden shadow-2xl"
-                style={{ background: "#0D1E30", border: `1px solid ${TEAL}25` }}
-              >
-                {moreNav.map((item) => (
-                  <button
-                    key={item.section}
-                    onClick={() => { setSection(item.section); setMoreOpen(false); }}
-                    className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            )}
+    <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
+      <div className="max-w-7xl mx-auto px-4 pt-4 pointer-events-auto">
+        <div className="relative w-full overflow-visible">
+          <div
+            aria-hidden
+            className="absolute inset-0 rounded-full overflow-hidden"
+            style={{
+              background: "rgba(7,17,30,0.55)",
+              backdropFilter: "blur(18px) saturate(160%)",
+              WebkitBackdropFilter: "blur(18px) saturate(160%)",
+              border: `1px solid ${TEAL}30`,
+              boxShadow: `0 10px 40px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
+            }}
+          >
+            <span
+              aria-hidden
+              className="absolute inset-0 opacity-[0.18] mix-blend-overlay pointer-events-none"
+              style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
+            />
           </div>
-        </nav>
 
-        <div className="hidden lg:flex items-center gap-3">
-          <CTAButton onClick={() => setSection("partnership")}>Become a Partner</CTAButton>
-          <CTAButton primary onClick={() => setSection("registration")}>Register Now</CTAButton>
+          <div className="relative z-10 flex h-14 w-full items-center gap-2 rounded-full px-2">
+            <button
+              onClick={() => setSection("home")}
+              className="relative z-10 flex items-center gap-2 h-10 px-3 rounded-full transition-transform hover:scale-[1.02] overflow-hidden"
+              style={{ background: "transparent" }}
+            >
+              <SRCLogo size={36} />
+            </button>
+
+            <div
+              ref={navRef}
+              onMouseLeave={() => setHoverRect(null)}
+              className="relative z-10 hidden lg:flex items-center gap-1"
+            >
+            {/* Animated hover ring */}
+            <span
+              aria-hidden
+              className="absolute pointer-events-none rounded-full"
+              style={{
+                left: hoverRect?.left ?? 0,
+                top: hoverRect?.top ?? 0,
+                width: hoverRect?.width ?? 0,
+                height: hoverRect?.height ?? 0,
+                border: `1px solid ${TEAL}`,
+                boxShadow: `0 0 0 3px ${TEAL}1A, 0 0 18px ${TEAL}55, inset 0 0 12px ${TEAL}22`,
+                background: `${TEAL}10`,
+                opacity: hoverRect ? 1 : 0,
+                transition: "left 280ms cubic-bezier(.22,1,.36,1), top 280ms cubic-bezier(.22,1,.36,1), width 280ms cubic-bezier(.22,1,.36,1), height 280ms cubic-bezier(.22,1,.36,1), opacity 180ms ease",
+              }}
+            />
+
+            {mainNav.map((item) => (
+              <button
+                key={item.section}
+                ref={(el) => { itemRefs.current[item.section] = el; }}
+                onMouseEnter={() => updateHover(item.section)}
+                onFocus={() => updateHover(item.section)}
+                onClick={() => setSection(item.section)}
+                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                  active === item.section ? "text-white" : "text-muted-foreground hover:text-white"
+                }`}
+                style={active === item.section ? { color: TEAL } : {}}
+              >
+                {item.label}
+              </button>
+            ))}
+
+            {/* More dropdown */}
+            <div className="relative z-10">
+              <button
+                ref={(el) => { itemRefs.current["__more"] = el; }}
+                onMouseEnter={() => updateHover("__more")}
+                onFocus={() => updateHover("__more")}
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-white rounded-full transition-colors flex items-center gap-1"
+              >
+                More <ChevronDown className="w-3 h-3" />
+              </button>
+              {moreOpen && (
+                <div
+                  className="absolute top-full right-0 mt-3 w-48 rounded-2xl overflow-hidden shadow-2xl z-20"
+                  style={{
+                    background: "rgba(13,30,48,0.85)",
+                    backdropFilter: "blur(18px) saturate(160%)",
+                    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+                    border: `1px solid ${TEAL}25`,
+                  }}
+                >
+                  {moreNav.map((item) => (
+                    <button
+                      key={item.section}
+                      onClick={() => { setSection(item.section); setMoreOpen(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            </div>
+
+            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
+              <CTAButton ghost onClick={() => setSection("partnership")}>Become a Partner</CTAButton>
+              <CTAButton ghost onClick={() => setSection("registration")}>Register Now</CTAButton>
+            </div>
+
+            <button
+              className="lg:hidden relative z-10 text-foreground h-10 w-10 rounded-full flex items-center justify-center overflow-hidden ml-auto"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              style={{ background: "transparent" }}
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
-
-        <button className="lg:hidden text-foreground" onClick={() => setMobileOpen(!mobileOpen)}>
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="lg:hidden" style={{ background: "rgba(7,17,30,0.98)", borderTop: `1px solid ${TEAL}20` }}>
-          {[...navItems, ...moreNav].map((item) => (
-            <button
-              key={item.section}
-              onClick={() => { setSection(item.section); setMobileOpen(false); }}
-              className="w-full text-left px-6 py-3 text-sm text-muted-foreground hover:text-white border-b border-white/5 transition-colors"
-              style={active === item.section ? { color: TEAL } : {}}
-            >
-              {item.label}
-            </button>
-          ))}
-          <div className="px-6 py-4 flex flex-col gap-3">
-            <CTAButton onClick={() => { setSection("partnership"); setMobileOpen(false); }}>Become a Partner</CTAButton>
-            <CTAButton primary onClick={() => { setSection("registration"); setMobileOpen(false); }}>Register Now</CTAButton>
+        <div
+          className="lg:hidden mx-4 mt-3 rounded-3xl overflow-hidden pointer-events-auto relative"
+          style={{
+            background: "rgba(7,17,30,0.85)",
+            backdropFilter: "blur(18px) saturate(160%)",
+            WebkitBackdropFilter: "blur(18px) saturate(160%)",
+            border: `1px solid ${TEAL}25`,
+            boxShadow: `0 10px 40px -10px rgba(0,0,0,0.6)`,
+          }}
+        >
+          <span
+            aria-hidden
+            className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none"
+            style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
+          />
+          <div className="relative z-10">
+            {[...navItems, ...moreNav].map((item) => (
+              <button
+                key={item.section}
+                onClick={() => { setSection(item.section); setMobileOpen(false); }}
+                className="w-full text-left px-6 py-3 text-sm text-muted-foreground hover:text-white border-b border-white/5 transition-colors"
+                style={active === item.section ? { color: TEAL } : {}}
+              >
+                {item.label}
+              </button>
+            ))}
+            <div className="px-6 py-4 flex flex-col gap-3">
+              <CTAButton ghost onClick={() => { setSection("partnership"); setMobileOpen(false); }}>Become a Partner</CTAButton>
+              <CTAButton primary onClick={() => { setSection("registration"); setMobileOpen(false); }}>Register Now</CTAButton>
+            </div>
           </div>
         </div>
       )}
@@ -514,12 +599,22 @@ function CountUp({ to, suffix = "", duration = 6000 }: { to: number; suffix?: st
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
 function HomePage({ setSection }: { setSection: (s: Section) => void }) {
+  const aboutSectionRef = useRef<HTMLElement | null>(null);
   const stats: { to: number; suffix: string; label: string }[] = [
     { to: 1000, suffix: "+", label: "Expected Participants" },
     { to: 10,   suffix: "+", label: "Universities" },
     { to: 5,    suffix: "+", label: "GCC Countries" },
     { to: 20,   suffix: "+", label: "Activities & Events" },
   ];
+
+  const scrollToAbout = () => {
+    const aboutSection = aboutSectionRef.current;
+    if (!aboutSection) return;
+
+    const navbarOffset = 88;
+    const top = aboutSection.getBoundingClientRect().top + window.scrollY - navbarOffset;
+    window.scrollTo({ top, behavior: "smooth" });
+  };
 
   return (
     <div className="min-h-screen">
@@ -653,7 +748,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                 <CTAButton primary onClick={() => setSection("registration")}>
                   Register Now <ArrowRight className="w-4 h-4" />
                 </CTAButton>
-                <CTAButton onClick={() => setSection("about")}>
+                <CTAButton onClick={scrollToAbout}>
                   Learn More <ChevronRight className="w-4 h-4" />
                 </CTAButton>
                 <CTAButton onClick={() => setSection("partnership")}>
@@ -704,7 +799,12 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
       </section>
 
  {/* About */}
-      <section className="relative overflow-hidden py-28 md:py-36 border-t" style={{ borderColor: `${TEAL}15` }}>
+      <section
+        ref={aboutSectionRef}
+        id="about"
+        className="relative overflow-hidden py-28 md:py-36 border-t"
+        style={{ borderColor: `${TEAL}15`, scrollMarginTop: "88px" }}
+      >
  
         <div className="relative max-w-7xl mx-auto px-6">
           {/* Eyebrow */}
@@ -898,7 +998,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
     </div>
   );
 }
-
+// TODO DELETE ABOUT PAGE
 // ─── About Page ───────────────────────────────────────────────────────────────
 function AboutPage() {
   const values = [
@@ -1267,13 +1367,16 @@ function TimelineSection() {
   }, []);
 
   return (
-    <section className="relative py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
-      
-      {/* Molecule Network Background */}
-      <MoleculeNetwork />
+    <section className="relative overflow-hidden py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
+      <div aria-hidden="true" className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(180deg, rgba(7,17,30,0.02) 0%, rgba(12,191,206,0.015) 50%, rgba(7,17,30,0.03) 100%)",
+      }} />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6">
-        <SectionTag>Roadmap</SectionTag>
+        <div className="flex items-center gap-3 mb-7 src-rise">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Roadmap</span>
+          </div>
         <SectionTitle>Important Dates</SectionTitle>
         <Divider />
 
@@ -1383,7 +1486,7 @@ function TimelineSection() {
     </section>
   );
 }
-
+//TODO Delete PROGRAM PAGE!!!!!!
 // ─── Program & Schedule ───────────────────────────────────────────────────────
 function ProgramPage() {
   const importantDates = [
