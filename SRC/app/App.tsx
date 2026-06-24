@@ -7,7 +7,6 @@ import {
   FlaskConical, Presentation, FileText, Lightbulb, Network, Wrench,
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
-import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import srcLogoImg from "@/imports/Screenshot_2026-06-19_160229.png";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -269,8 +268,6 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
 
   const mainNav = navItems.slice(0, 6);
   const moreNav: { label: string; section: Section }[] = [
-    { label: "Sponsors", section: "sponsors" },
-    { label: "Speakers", section: "speakers" },
     { label: "Organizing Team", section: "organizing" },
     { label: "Media", section: "media" },
     { label: "FAQ", section: "faq" },
@@ -366,6 +363,118 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
   );
 }
 
+// ─── Hero Logo (large brand mark with traveling glow outline) ─────────────────
+function HeroLogo() {
+  // Saudi silhouette path — shared between fill, base stroke, and animated stroke
+  const SAUDI_PATH =
+    "M60 80 L120 60 L180 50 L240 55 L300 48 L360 60 L410 80 L430 110 L440 150 L430 190 L410 230 L390 260 L370 280 L350 310 L330 340 L310 360 L295 350 L280 330 L270 310 L255 300 L240 305 L230 295 L220 270 L205 260 L190 255 L175 260 L160 255 L145 245 L135 230 L125 215 L115 195 L100 180 L80 165 L65 145 L55 120 Z";
+
+  return (
+    <div className="relative w-full max-w-[480px] aspect-square src-hero-logo">
+      {/* Soft ambient glow behind the mark */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 50% 50%, ${TEAL}33 0%, transparent 65%)`,
+          filter: "blur(40px)",
+        }}
+      />
+
+      <svg
+        viewBox="0 0 500 420"
+        xmlns="http://www.w3.org/2000/svg"
+        className="relative w-full h-full"
+        aria-label="SRC 2026 logo"
+      >
+        <defs>
+          <filter id="srcHeroGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <linearGradient id="srcHeroFill" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#0d2238" />
+            <stop offset="100%" stopColor="#0a1828" />
+          </linearGradient>
+          <linearGradient id="srcHeroTrace" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor={TEAL} />
+            <stop offset="60%" stopColor="#7CE7F0" />
+            <stop offset="100%" stopColor={ORANGE} />
+          </linearGradient>
+        </defs>
+
+        {/* Filled silhouette */}
+        <path d={SAUDI_PATH} fill="url(#srcHeroFill)" />
+
+        {/* Faint static outline so the shape is always visible */}
+        <path
+          d={SAUDI_PATH}
+          fill="none"
+          stroke={`${TEAL}33`}
+          strokeWidth={1.5}
+          strokeLinejoin="round"
+        />
+
+        {/* Animated traveling glow — a small bright segment that runs along the perimeter */}
+        <path
+          d={SAUDI_PATH}
+          pathLength={1000}
+          fill="none"
+          stroke="url(#srcHeroTrace)"
+          strokeWidth={3}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          filter="url(#srcHeroGlow)"
+          className="src-hero-trace"
+        />
+
+        {/* SRC monogram */}
+        <text
+          x="250"
+          y="240"
+          textAnchor="middle"
+          fontFamily="'Exo 2', 'Inter', sans-serif"
+          fontWeight={900}
+          fontSize={140}
+          letterSpacing={4}
+        >
+          <tspan fill={TEAL}>S</tspan>
+          <tspan fill={ORANGE}>R</tspan>
+          <tspan fill={TEAL}>C</tspan>
+        </text>
+        <text
+          x="250"
+          y="290"
+          textAnchor="middle"
+          fontFamily="'Thamanyah Sans', sans-serif"
+          fontWeight={600}
+          fontSize={28}
+          letterSpacing={6}
+          fill="#FFFFFF"
+          opacity={0.9}
+        >
+          2026
+        </text>
+        <text
+          x="250"
+          y="320"
+          textAnchor="middle"
+          fontFamily="'Thamanyah Sans', sans-serif"
+          fontWeight={500}
+          fontSize={14}
+          letterSpacing={4}
+          fill={TEAL}
+          opacity={0.85}
+        >
+          KFUPM · AIChE
+        </text>
+      </svg>
+    </div>
+  );
+}
+
 // ─── Home Page ────────────────────────────────────────────────────────────────
 function HomePage({ setSection }: { setSection: (s: Section) => void }) {
   const stats = [
@@ -423,10 +532,26 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
           mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
         }
+        @keyframes srcOutlineTrace {
+          to { stroke-dashoffset: -1000; }
+        }
+        .src-hero-trace {
+          stroke-dasharray: 60 940;
+          stroke-dashoffset: 0;
+          animation: srcOutlineTrace 5.5s linear infinite;
+        }
+        @keyframes srcHeroFloat {
+          0%, 100% { transform: translateY(0); }
+          50%      { transform: translateY(-10px); }
+        }
+        .src-hero-logo {
+          animation: srcHeroFloat 7s ease-in-out infinite;
+        }
         @media (prefers-reduced-motion: reduce) {
           .src-rise, .src-rise-2, .src-rise-3 { animation: none; }
           .val-card .val-desc { transition: none; }
           .src-track { animation: none; }
+          .src-hero-trace, .src-hero-logo { animation: none; }
         }
       `}</style>
       {/* Hero */}
@@ -441,65 +566,64 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
         }} />
         {/* Radial glow */}
         <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(12,191,206,0.06) 0%, transparent 70%)"
+          background: "radial-gradient(ellipse 80% 60% at 70% 50%, rgba(12,191,206,0.08) 0%, transparent 70%)"
         }} />
-        {/* Saudi Arabia silhouette large behind text */}
-        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[55vw] max-w-3xl opacity-[0.04] pointer-events-none select-none pr-4">
-          <svg viewBox="0 0 500 400" fill="white" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-            <path d="M60 80 L120 60 L180 50 L240 55 L300 48 L360 60 L410 80 L430 110 L440 150 L430 190 L410 230 L390 260 L370 280 L350 310 L330 340 L310 360 L295 350 L280 330 L270 310 L255 300 L240 305 L230 295 L220 270 L205 260 L190 255 L175 260 L160 255 L145 245 L135 230 L125 215 L115 195 L100 180 L80 165 L65 145 L55 120 Z" />
-          </svg>
-        </div>
 
         <div className="relative max-w-7xl mx-auto px-6 pt-28 pb-16 w-full">
-          <div className="max-w-3xl">
-            <div className="flex items-center gap-3 mb-6">
-              <span className="text-xs font-mono tracking-[0.25em] uppercase px-3 py-1 rounded-sm" style={{ color: TEAL, background: `${TEAL}12`, border: `1px solid ${TEAL}30` }}>
-                First AIChE Student Regional Conference in the GCC
-              </span>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* LEFT — Conference info */}
+            <div className="max-w-2xl order-2 lg:order-1">
+              <div className="flex items-center gap-3 mb-6">
+              </div>
+
+              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] mb-6 tracking-tight">
+                <span style={{ color: TEAL }}>SRC</span>
+                <span className="text-white"> 2026</span>
+                <br />
+                <span className="text-white/90 text-3xl md:text-4xl font-bold">KFUPM</span>
+              </h1>
+
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4 max-w-xl">
+                The inaugural AIChE Student Regional Conference in the Gulf — bringing together the brightest minds in chemical engineering from across the GCC and beyond.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-10 text-sm text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
+                  <span className="font-semibold text-foreground">2026 · TBA</span>
+                </span>
+                <span className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
+                  <span className="font-semibold text-foreground">KFUPM, Dhahran, Saudi Arabia</span>
+                </span>
+              </div>
+
+              <div className="flex flex-wrap gap-3 mb-12">
+                <CTAButton primary onClick={() => setSection("registration")}>
+                  Register Now <ArrowRight className="w-4 h-4" />
+                </CTAButton>
+                <CTAButton onClick={() => setSection("about")}>
+                  Learn More <ChevronRight className="w-4 h-4" />
+                </CTAButton>
+                <CTAButton onClick={() => setSection("partnership")}>
+                  Become a Partner
+                </CTAButton>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {stats.map((s) => (
+                  <div key={s.label} className="rounded-lg p-4 border" style={{ background: `${TEAL}08`, borderColor: `${TEAL}20` }}>
+                    <div className="font-display text-2xl md:text-3xl font-black mb-1" style={{ color: TEAL }}>{s.value}</div>
+                    <div className="text-xs text-muted-foreground">{s.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-black leading-[0.95] mb-6 tracking-tight">
-              <span style={{ color: TEAL }}>SRC</span>
-              <span className="text-white"> 2026</span>
-              <br />
-              <span className="text-white/90 text-4xl md:text-5xl font-bold">KFUPM</span>
-            </h1>
-
-            <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4 max-w-xl">
-              The inaugural AIChE Student Regional Conference in the Gulf — bringing together the brightest minds in chemical engineering from across the GCC and beyond.
-            </p>
-
-            <div className="flex items-center gap-6 mb-10 text-sm text-muted-foreground">
-              <span className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
-                <span className="font-semibold text-foreground">2026 · TBA</span>
-              </span>
-              <span className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
-                <span className="font-semibold text-foreground">KFUPM, Dhahran, Saudi Arabia</span>
-              </span>
-            </div>
-
-            <div className="flex flex-wrap gap-3 mb-16">
-              <CTAButton primary onClick={() => setSection("registration")}>
-                Register Now <ArrowRight className="w-4 h-4" />
-              </CTAButton>
-              <CTAButton onClick={() => setSection("about")}>
-                Learn More <ChevronRight className="w-4 h-4" />
-              </CTAButton>
-              <CTAButton onClick={() => setSection("partnership")}>
-                Become a Partner
-              </CTAButton>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {stats.map((s) => (
-                <div key={s.label} className="rounded-lg p-4 border" style={{ background: `${TEAL}08`, borderColor: `${TEAL}20` }}>
-                  <div className="font-display text-3xl font-black mb-1" style={{ color: TEAL }}>{s.value}</div>
-                  <div className="text-xs text-muted-foreground">{s.label}</div>
-                </div>
-              ))}
+            {/* RIGHT — Animated SRC logo with glowing outline */}
+            <div className="order-1 lg:order-2 flex items-center justify-center">
+              <HeroLogo />
             </div>
           </div>
         </div>
@@ -1838,7 +1962,7 @@ export default function App() {
     >
       <style>{`
         .font-display { font-family: 'Exo 2', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .font-mono { font-family: 'Thamanyah Sans', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: ${TEAL}40; border-radius: 3px; }
