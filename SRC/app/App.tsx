@@ -1103,8 +1103,12 @@ function TimelineSection() {
   }, []);
 
   return (
-    <section className="py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
-      <div className="max-w-4xl mx-auto px-6">
+    <section className="relative py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
+      
+      {/* Molecule Network Background */}
+      <MoleculeNetwork />
+
+      <div className="relative z-10 max-w-4xl mx-auto px-6">
         <SectionTag>Roadmap</SectionTag>
         <SectionTitle>Important Dates</SectionTitle>
         <Divider />
@@ -1187,7 +1191,7 @@ function TimelineSection() {
 
                       {m.schedule && (
                         <div
-                          className={`mt-4 pt-4 border-t space-y-2 ${alignLeft ? "md:text-right" : ""}`}
+                          className={`make-mt-4 pt-4 border-t space-y-2 ${alignLeft ? "md:text-right" : ""}`}
                           style={{ borderColor: "var(--border)" }}
                         >
                           {m.schedule.map((item) => (
