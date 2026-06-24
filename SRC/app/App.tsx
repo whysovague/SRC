@@ -7,7 +7,7 @@ import {
   FlaskConical, Presentation, FileText, Lightbulb, Network, Wrench,
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
-import srcLogoImg from "@/imports/Screenshot_2026-06-19_160229.png";
+import srcTealSvg from "@/assets/src_teal.svg";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -222,27 +222,17 @@ function MoleculeNetwork() {
 }
 
 // ─── SRC SVG Logo (inline recreation of brand mark) ───────────────────────────
-function SRCLogo({ size = 40 }: { size?: number }) {
+function SRCLogo({ size = 64, yOffset = 1 }: { size?: number; yOffset?: number }) {
   return (
-    <div className="flex items-center gap-2">
-      <div style={{ width: size, height: size }} className="relative flex-shrink-0">
-        {/* Saudi Arabia map silhouette simplified */}
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" width={size} height={size}>
-          <path
-            d="M8 12 L14 10 L18 8 L22 9 L26 8 L30 11 L32 14 L32 20 L28 24 L26 30 L22 32 L20 28 L16 26 L12 27 L10 24 L8 20 Z"
-            fill="#4A5568" opacity="0.8"
-          />
-          <text x="6" y="28" fontFamily="'Exo 2', sans-serif" fontWeight="900" fontSize="14" letterSpacing="1">
-            <tspan fill={TEAL}>S</tspan>
-            <tspan fill={ORANGE} dy="0">R</tspan>
-            <tspan fill={TEAL}>C</tspan>
-          </text>
-        </svg>
-      </div>
-      <div className="flex flex-col leading-none">
-        <span className="font-display font-extrabold text-white text-sm tracking-widest">SRC 2026</span>
-        <span className="text-[10px] font-mono tracking-wide" style={{ color: TEAL }}>KFUPM · AIChE</span>
-      </div>
+    <div
+      style={{ width: size * 1.16, height: size, transform: `translateY(${yOffset}px)` }}
+      className="relative flex-shrink-0"
+    >
+      <img
+        src={srcTealSvg}
+        alt="SRC 2026 Logo"
+        className="w-full h-full object-contain drop-shadow-[0_0_14px_rgba(12,191,206,0.55)]"
+      />
     </div>
   );
 }
@@ -314,10 +304,10 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
           <div className="relative z-10 flex h-14 w-full items-center gap-2 rounded-full px-2">
             <button
               onClick={() => setSection("home")}
-              className="relative z-10 flex items-center gap-2 h-10 px-3 rounded-full transition-transform hover:scale-[1.02] overflow-hidden"
+              className="relative z-10 flex h-full items-center px-2 rounded-full transition-transform hover:scale-[1.02] overflow-visible"
               style={{ background: "transparent" }}
             >
-              <SRCLogo size={36} />
+              <SRCLogo size={72} yOffset={4} />
             </button>
 
             <div
@@ -2221,7 +2211,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
       <div className="max-w-7xl mx-auto px-6 py-16">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div className="md:col-span-2">
-            <SRCLogo size={44} />
+            <SRCLogo size={70} />
             <p className="text-muted-foreground text-sm mt-4 mb-6 max-w-sm leading-relaxed">
               The first AIChE Student Regional Conference in the GCC — bringing together the brightest chemical engineering minds across the region.
             </p>
