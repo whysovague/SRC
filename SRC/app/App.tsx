@@ -475,13 +475,50 @@ function HeroLogo() {
   );
 }
 
+// ─── Count-up number (fast → slow ease-out, triggers when visible) ────────────
+function CountUp({ to, suffix = "", duration = 6000 }: { to: number; suffix?: string; duration?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const [value, setValue] = useState(0);
+  const started = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { setValue(to); return; }
+
+    const run = () => {
+      if (started.current) return;
+      started.current = true;
+      const start = performance.now();
+      const tick = (now: number) => {
+        const t = Math.min(1, (now - start) / duration);
+        // ease-out exponential — fast at the start, asymptotes into the target for a smooth halt
+        const eased = t === 1 ? 1 : 1 - Math.pow(2, -10 * t);
+        setValue(Math.round(to * eased));
+        if (t < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) { run(); io.disconnect(); }
+    }, { threshold: 0.3 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [to, duration]);
+
+  return <span ref={ref}>{value.toLocaleString()}{suffix}</span>;
+}
+
 // ─── Home Page ────────────────────────────────────────────────────────────────
 function HomePage({ setSection }: { setSection: (s: Section) => void }) {
-  const stats = [
-    { value: "1,000+", label: "Expected Participants" },
-    { value: "10+", label: "Universities" },
-    { value: "5+", label: "GCC Countries" },
-    { value: "20+", label: "Activities & Events" },
+  const stats: { to: number; suffix: string; label: string }[] = [
+    { to: 1000, suffix: "+", label: "Expected Participants" },
+    { to: 10,   suffix: "+", label: "Universities" },
+    { to: 5,    suffix: "+", label: "GCC Countries" },
+    { to: 20,   suffix: "+", label: "Activities & Events" },
   ];
 
   return (
@@ -623,22 +660,24 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                   Become a Partner
                 </CTAButton>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.map((s) => (
-                  <div key={s.label} className="rounded-lg p-4 border" style={{ background: `${TEAL}08`, borderColor: `${TEAL}20` }}>
-                    <div className="font-display text-2xl md:text-3xl font-black mb-1" style={{ color: TEAL }}>{s.value}</div>
-                    <div className="text-xs text-muted-foreground">{s.label}</div>
-                  </div>
-                ))}
-              </div>
             </div>
 
             {/* RIGHT — Animated SRC logo with glowing outline */}
             <div className="order-1 lg:order-2 flex items-center justify-center">
               <HeroLogo />
             </div>
+          </div>
+
+          {/* Stats — centered along the bottom of the landing section */}
+          <div className="mt-5 md:mt-5 grid grid-cols-2 md:grid-cols-4 gap-6 text-center justify-items-center max-w-4xl mx-auto">
+            {stats.map((s) => (
+              <div key={s.label} className="p-4 w-full">
+                <div className="font-display text-2xl md:text-3xl font-black mb-1" style={{ color: TEAL }}>
+                  <CountUp to={s.to} suffix={s.suffix} />
+                </div>
+                <div className="text-xs text-muted-foreground">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
