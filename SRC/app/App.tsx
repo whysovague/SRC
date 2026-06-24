@@ -554,17 +554,31 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           .src-hero-trace, .src-hero-logo { animation: none; }
         }
       `}</style>
+
+      {/* Shared homepage background — molecule network + glow orbs + faint grid */}
+      <div
+        aria-hidden="true"
+        className="fixed inset-0 pointer-events-none overflow-hidden"
+        style={{ zIndex: 0, background: "linear-gradient(180deg, transparent 0%, rgba(12,191,206,0.03) 45%, transparent 100%)" }}
+      >
+        <MoleculeNetwork />
+        <div className="absolute -left-32 top-10 w-[460px] h-[460px] rounded-full"
+          style={{ background: `radial-gradient(circle, ${TEAL}33 0%, transparent 65%)`, filter: "blur(60px)", animation: "srcFloat 14s ease-in-out infinite, srcGlowPulse 9s ease-in-out infinite" }} />
+        <div className="absolute right-[-10rem] bottom-0 w-[520px] h-[520px] rounded-full"
+          style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "srcDrift 18s ease-in-out infinite, srcGlowPulse 11s ease-in-out infinite" }} />
+        <div className="absolute inset-0 opacity-60" style={{
+          backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+          backgroundSize: "72px 72px",
+          maskImage: "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
+        }} />
+      </div>
+
+      {/* Content sits above the fixed background */}
+      <div className="relative" style={{ zIndex: 1 }}>
       {/* Hero */}
       <section className="relative min-h-screen flex items-center overflow-hidden">
-        {/* Geometric grid background */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `
-            linear-gradient(rgba(12,191,206,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(12,191,206,0.04) 1px, transparent 1px)
-          `,
-          backgroundSize: "60px 60px"
-        }} />
-        {/* Radial glow */}
+        {/* Hero-only radial accent on top of the shared background */}
         <div className="absolute inset-0 pointer-events-none" style={{
           background: "radial-gradient(ellipse 80% 60% at 70% 50%, rgba(12,191,206,0.08) 0%, transparent 70%)"
         }} />
@@ -651,21 +665,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
       </section>
 
  {/* About */}
-      <section className="relative overflow-hidden py-28 md:py-36 border-t" style={{ borderColor: `${TEAL}15`, background: "linear-gradient(180deg, transparent 0%, rgba(12,191,206,0.03) 45%, transparent 100%)" }}>
-        {/* Animated molecule network */}
-        <MoleculeNetwork />
-        {/* Soft glow orbs */}
-        <div className="absolute -left-32 top-10 w-[460px] h-[460px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${TEAL}33 0%, transparent 65%)`, filter: "blur(60px)", animation: "srcFloat 14s ease-in-out infinite, srcGlowPulse 9s ease-in-out infinite" }} />
-        <div className="absolute right-[-10rem] bottom-0 w-[520px] h-[520px] rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "srcDrift 18s ease-in-out infinite, srcGlowPulse 11s ease-in-out infinite" }} />
-        {/* Faint grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-60" style={{
-          backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
-          backgroundSize: "72px 72px",
-          maskImage: "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
-          WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 40%, black 30%, transparent 80%)",
-        }} />
+      <section className="relative overflow-hidden py-28 md:py-36 border-t" style={{ borderColor: `${TEAL}15` }}>
  
         <div className="relative max-w-7xl mx-auto px-6">
           {/* Eyebrow */}
@@ -855,6 +855,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           </div>
         </div>
       </section>
+      </div>
     </div>
   );
 }
