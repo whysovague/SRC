@@ -204,30 +204,6 @@ pnpm preview
 # 5. Deploy the contents of the dist/ folder
 ```
 
-## 🎨 Working with Components
-
-### Using shadcn/ui Components
-
-All UI components are in `src/app/components/ui/`. To use a component:
-
-```tsx
-import { Button } from '@/app/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
-
-export function MyComponent() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Welcome</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button>Click me</Button>
-      </CardContent>
-    </Card>
-  )
-}
-```
-
 ### Customizing Themes
 
 Edit `src/styles/theme.css` to customize colors and other theme variables. These changes will apply globally to all shadcn components.
