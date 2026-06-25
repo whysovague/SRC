@@ -77,6 +77,89 @@ function ComingSoonBadge() {
   );
 }
 
+// ─── InteractiveCard ──────────────────────────────────────────────────────────
+// Wrapper that adds a mouse-tracked 3D tilt and a radial glow that follows
+// the cursor. Pass `accent` to color the glow, `tiltMax` to tune the angle,
+// and `glowSize` to tune the highlight radius. Wraps any card-shaped child.
+function InteractiveCard({
+  accent = TEAL,
+  tiltMax = 7,
+  glowSize = 360,
+  className = "",
+  style,
+  children,
+  onClick,
+}: {
+  accent?: string;
+  tiltMax?: number;
+  glowSize?: number;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  const handleMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = el.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+      const px = x / rect.width - 0.5;
+      const py = y / rect.height - 0.5;
+      el.style.setProperty("--mx", `${x}px`);
+      el.style.setProperty("--my", `${y}px`);
+      el.style.setProperty("--rx", `${(-py * tiltMax).toFixed(2)}deg`);
+      el.style.setProperty("--ry", `${(px * tiltMax).toFixed(2)}deg`);
+      el.style.setProperty("--active", "1");
+    });
+  };
+
+  const handleEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - rect.left}px`);
+    el.style.setProperty("--my", `${e.clientY - rect.top}px`);
+    el.style.setProperty("--active", "1");
+  };
+
+  const handleLeave = () => {
+    const el = ref.current;
+    if (!el) return;
+    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    el.style.setProperty("--rx", "0deg");
+    el.style.setProperty("--ry", "0deg");
+    el.style.setProperty("--active", "0");
+  };
+
+  return (
+    <div
+      ref={ref}
+      onMouseMove={handleMove}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onClick={onClick}
+      className={`src-icard ${className}`}
+      style={{
+        ...(style ?? {}),
+        ["--accent" as never]: accent,
+        ["--glow-size" as never]: `${glowSize}px`,
+      }}
+    >
+      <span className="src-icard-glow" aria-hidden="true" />
+      <span className="src-icard-border" aria-hidden="true" />
+      {children}
+    </div>
+  );
+}
+
 function MoleculeNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
  
@@ -598,6 +681,62 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           .src-hero-logo { animation: none; }
           .src-tl-card { opacity: 1; transform: none; transition: none; }
         }
+
+        /* InteractiveCard — mouse-tracked 3D tilt + radial glow */
+        .src-icard {
+          position: relative;
+          isolation: isolate;
+          transform-style: preserve-3d;
+          transform:
+            perspective(1100px)
+            rotateX(var(--rx, 0deg))
+            rotateY(var(--ry, 0deg))
+            translateZ(0);
+          transition: transform .45s cubic-bezier(.22,.61,.36,1),
+                      border-color .3s ease,
+                      box-shadow .3s ease;
+          will-change: transform;
+        }
+        .src-icard:hover {
+          box-shadow:
+            0 18px 50px -22px color-mix(in srgb, var(--accent, #0CBFCE) 55%, transparent),
+            0 4px 14px -6px rgba(0,0,0,0.5);
+        }
+        .src-icard-glow {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          border-radius: inherit;
+          opacity: calc(var(--active, 0) * 1);
+          transition: opacity .35s ease;
+          background: radial-gradient(
+            var(--glow-size, 360px) circle
+            at var(--mx, 50%) var(--my, 50%),
+            color-mix(in srgb, var(--accent, #0CBFCE) 28%, transparent) 0%,
+            color-mix(in srgb, var(--accent, #0CBFCE) 10%, transparent) 28%,
+            transparent 60%
+          );
+          mix-blend-mode: screen;
+          z-index: -1;
+        }
+        /* Subtle highlight ring that intensifies on hover */
+        .src-icard-border {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+          border-radius: inherit;
+          opacity: calc(var(--active, 0) * 1);
+          transition: opacity .35s ease;
+          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #0CBFCE) 35%, transparent);
+          z-index: 0;
+        }
+        @media (hover: none), (prefers-reduced-motion: reduce) {
+          .src-icard {
+            transform: none !important;
+            transition: border-color .3s ease;
+          }
+          .src-icard-glow, .src-icard-border { display: none; }
+        }
       `}</style>
 
       {/* Shared homepage background — molecule network + glow orbs + faint grid */}
@@ -730,13 +869,12 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                 { title: "Why SRC Matters", icon: <Zap className="w-5 h-5" />, accent: TEAL, text: "SRC creates a platform where students sharpen technical skills, compete at a high level, and build professional networks that last a career. It bridges academic learning with real-world engineering challenges." },
                 { title: "Why KFUPM?", icon: <Building2 className="w-5 h-5" />, accent: ORANGE, text: "KFUPM is the premier engineering and science university in the GCC, located at the epicenter of the global energy industry. Its world-class facilities, faculty, and industry connections make it the ideal host for a landmark event." },
               ].map((item) => (
-                <div
+                <InteractiveCard
                   key={item.title}
-                  className="group relative rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1"
+                  accent={item.accent}
+                  className="group relative rounded-2xl p-6 overflow-hidden transition-colors duration-300"
                   style={{ background: "rgba(13,30,48,0.55)", border: `1px solid ${item.accent}28`, backdropFilter: "blur(6px)" }}
                 >
-                  <div className="absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                    style={{ boxShadow: `0 0 0 1px ${item.accent}55, 0 18px 50px -12px ${item.accent}55` }} />
                   <div className="relative flex items-center gap-3 mb-3">
                     <span className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ background: `${item.accent}18`, color: item.accent, boxShadow: `inset 0 0 0 1px ${item.accent}40` }}>
@@ -745,7 +883,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                     <h4 className="font-display font-bold text-white text-lg">{item.title}</h4>
                   </div>
                   <p className="relative text-sm text-muted-foreground leading-relaxed">{item.text}</p>
-                </div>
+                </InteractiveCard>
               ))}
             </div>
           </div>
@@ -756,9 +894,12 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
               { label: "Mission", icon: <Target className="w-5 h-5" />, color: TEAL, text: "To provide an exceptional platform that empowers chemical engineering students across the GCC to showcase their talents, engage with industry, and develop as global engineering leaders — while establishing a sustainable regional AIChE tradition." },
               { label: "Vision", icon: <Eye className="w-5 h-5" />, color: ORANGE, text: "To be the premier student engineering conference in the Middle East, recognized for its academic rigor, cultural richness, and its role in shaping the next generation of engineers who will drive the region's industrial transformation." },
             ].map((mv) => (
-              <div key={mv.label} className="group relative rounded-2xl p-8 overflow-hidden transition-transform duration-300 hover:-translate-y-1"
-                style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${mv.color}30` }}>
-
+              <InteractiveCard
+                key={mv.label}
+                accent={mv.color}
+                className="group relative rounded-2xl p-8 overflow-hidden transition-colors duration-300"
+                style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${mv.color}30` }}
+              >
                 <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
                   style={{ background: `radial-gradient(circle, ${mv.color}40 0%, transparent 70%)`, filter: "blur(28px)" }} />
                 <div className="relative flex items-center gap-3 mb-4">
@@ -768,7 +909,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                   <span className="font-display text-2xl font-extrabold text-white">{mv.label}</span>
                 </div>
                 <p className="relative text-muted-foreground leading-relaxed">{mv.text}</p>
-              </div>
+              </InteractiveCard>
             ))}
           </div>
  
@@ -1083,7 +1224,12 @@ function CompetitionsPage() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((item) => (
-            <div key={item.title} className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-all duration-300 hover:-translate-y-1" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+            <InteractiveCard
+              key={item.title}
+              accent={item.color}
+              className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300"
+              style={{ background: "var(--card)", borderColor: "var(--border)" }}
+            >
               <div className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
@@ -1104,7 +1250,7 @@ function CompetitionsPage() {
                   ))}
                 </ul>
               </div>
-            </div>
+            </InteractiveCard>
           ))}
         </div>
       </div>
@@ -1362,8 +1508,9 @@ function TimelineSection() {
                       className={`src-tl-card ${isIn ? "is-in" : ""}`}
                       style={{ ["--src-tl-from" as never]: desktopFromX }}
                     >
-                    <div
-                      className="rounded-xl p-5 border transition-all duration-500"
+                    <InteractiveCard
+                      accent={accent}
+                      className="rounded-xl p-5 border overflow-hidden transition-colors duration-500"
                       style={{
                         background: isActive ? `${accent}0d` : "var(--card)",
                         borderColor: isActive ? `${accent}40` : "var(--border)",
@@ -1398,7 +1545,7 @@ function TimelineSection() {
                           ))}
                         </div>
                       )}
-                    </div>
+                    </InteractiveCard>
                     </div>
                   </div>
                 </div>
