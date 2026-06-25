@@ -572,11 +572,31 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
         .src-hero-logo {
           animation: srcHeroFloat 7s ease-in-out infinite;
         }
+        /* Timeline card slide-in from the viewport edges */
+        .src-tl-card {
+          opacity: 0;
+          /* Mobile: cards live to the right of the line — always come from the right edge */
+          transform: translate3d(60vw, 0, 0);
+          transition:
+            opacity 1.1s cubic-bezier(.16,.84,.44,1),
+            transform 1.1s cubic-bezier(.16,.84,.44,1);
+          will-change: opacity, transform;
+        }
+        @media (min-width: 768px) {
+          .src-tl-card {
+            transform: translate3d(var(--src-tl-from, 60vw), 0, 0);
+          }
+        }
+        .src-tl-card.is-in {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
         @media (prefers-reduced-motion: reduce) {
           .src-rise, .src-rise-2, .src-rise-3 { animation: none; }
           .val-card .val-desc { transition: none; }
           .src-track { animation: none; }
           .src-hero-logo { animation: none; }
+          .src-tl-card { opacity: 1; transform: none; transition: none; }
         }
       `}</style>
 
@@ -1195,9 +1215,37 @@ function TimelineSection() {
   ];
 
   const trackRef = useRef<HTMLDivElement>(null);
+  const rowRefs = useRef<(HTMLDivElement | null)[]>([]);
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [revealed, setRevealed] = useState<boolean[]>(() => milestones.map(() => false));
   const [fillPct, setFillPct] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    rowRefs.current.forEach((el, i) => {
+      if (!el) return;
+      const io = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              setRevealed((prev) => {
+                if (prev[i]) return prev;
+                const next = prev.slice();
+                next[i] = true;
+                return next;
+              });
+              io.disconnect();
+            }
+          }
+        },
+        { threshold: 0.25, rootMargin: "0px 0px -10% 0px" }
+      );
+      io.observe(el);
+      observers.push(io);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
 
   useEffect(() => {
     let raf = 0;
@@ -1208,11 +1256,9 @@ function TimelineSection() {
         const rect = trackRef.current.getBoundingClientRect();
         const viewportCenter = window.innerHeight * 0.5;
 
-        // % of the track the viewport's center has passed
         const pct = ((viewportCenter - rect.top) / rect.height) * 100;
         setFillPct(Math.min(100, Math.max(0, pct)));
 
-        // nearest node to viewport center becomes "active"
         let closest = 0;
         let minDist = Infinity;
         nodeRefs.current.forEach((el, i) => {
@@ -1271,10 +1317,14 @@ function TimelineSection() {
               const isLit = i <= activeIndex;
               const accent = m.status === "main" ? ORANGE : TEAL;
               const alignLeft = i % 2 === 0;
+              const isIn = revealed[i];
+              // Desktop: alternating sides — slide in from the matching viewport edge.
+              const desktopFromX = alignLeft ? "-60vw" : "60vw";
 
               return (
                 <div
                   key={m.event}
+                  ref={(el) => { rowRefs.current[i] = el; }}
                   className={`relative md:flex md:items-center md:gap-12 ${
                     alignLeft ? "" : "md:flex-row-reverse"
                   }`}
@@ -1308,6 +1358,10 @@ function TimelineSection() {
                       alignLeft ? "md:text-right md:pr-14" : "md:pl-14"
                     }`}
                   >
+                    <div
+                      className={`src-tl-card ${isIn ? "is-in" : ""}`}
+                      style={{ ["--src-tl-from" as never]: desktopFromX }}
+                    >
                     <div
                       className="rounded-xl p-5 border transition-all duration-500"
                       style={{
@@ -1344,6 +1398,7 @@ function TimelineSection() {
                           ))}
                         </div>
                       )}
+                    </div>
                     </div>
                   </div>
                 </div>
