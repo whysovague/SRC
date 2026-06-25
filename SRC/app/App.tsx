@@ -438,12 +438,8 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
   );
 }
 
-// ─── Hero Logo (large brand mark with traveling glow outline) ─────────────────
+// ─── Hero Logo (original SRC mark with a gentle float animation) ─────────────
 function HeroLogo() {
-  // Saudi silhouette path — shared between fill, base stroke, and animated stroke
-  const SAUDI_PATH =
-    "M60 80 L120 60 L180 50 L240 55 L300 48 L360 60 L410 80 L430 110 L440 150 L430 190 L410 230 L390 260 L370 280 L350 310 L330 340 L310 360 L295 350 L280 330 L270 310 L255 300 L240 305 L230 295 L220 270 L205 260 L190 255 L175 260 L160 255 L145 245 L135 230 L125 215 L115 195 L100 180 L80 165 L65 145 L55 120 Z";
-
   return (
     <div className="relative w-full max-w-[480px] aspect-square src-hero-logo">
       {/* Soft ambient glow behind the mark */}
@@ -455,97 +451,12 @@ function HeroLogo() {
         }}
       />
 
-      <svg
-        viewBox="0 0 500 420"
-        xmlns="http://www.w3.org/2000/svg"
-        className="relative w-full h-full"
-        aria-label="SRC 2026 logo"
-      >
-        <defs>
-          <filter id="srcHeroGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-          <linearGradient id="srcHeroFill" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#0d2238" />
-            <stop offset="100%" stopColor="#0a1828" />
-          </linearGradient>
-          <linearGradient id="srcHeroTrace" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={TEAL} />
-            <stop offset="60%" stopColor="#7CE7F0" />
-            <stop offset="100%" stopColor={ORANGE} />
-          </linearGradient>
-        </defs>
-
-        {/* Filled silhouette */}
-        <path d={SAUDI_PATH} fill="url(#srcHeroFill)" />
-
-        {/* Faint static outline so the shape is always visible */}
-        <path
-          d={SAUDI_PATH}
-          fill="none"
-          stroke={`${TEAL}33`}
-          strokeWidth={1.5}
-          strokeLinejoin="round"
-        />
-
-        {/* Animated traveling glow — a small bright segment that runs along the perimeter */}
-        <path
-          d={SAUDI_PATH}
-          pathLength={1000}
-          fill="none"
-          stroke="url(#srcHeroTrace)"
-          strokeWidth={3}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          filter="url(#srcHeroGlow)"
-          className="src-hero-trace"
-        />
-
-        {/* SRC monogram */}
-        <text
-          x="250"
-          y="240"
-          textAnchor="middle"
-          fontFamily="'Exo 2', 'Inter', sans-serif"
-          fontWeight={900}
-          fontSize={140}
-          letterSpacing={4}
-        >
-          <tspan fill={TEAL}>S</tspan>
-          <tspan fill={ORANGE}>R</tspan>
-          <tspan fill={TEAL}>C</tspan>
-        </text>
-        <text
-          x="250"
-          y="290"
-          textAnchor="middle"
-          fontFamily="'Thamanyah Sans', sans-serif"
-          fontWeight={600}
-          fontSize={28}
-          letterSpacing={6}
-          fill="#FFFFFF"
-          opacity={0.9}
-        >
-          2026
-        </text>
-        <text
-          x="250"
-          y="320"
-          textAnchor="middle"
-          fontFamily="'Thamanyah Sans', sans-serif"
-          fontWeight={500}
-          fontSize={14}
-          letterSpacing={4}
-          fill={TEAL}
-          opacity={0.85}
-        >
-          KFUPM · AIChE
-        </text>
-      </svg>
+      <img
+        src={srcTealSvg}
+        alt="SRC 2026 — Saudi Research Conference"
+        className="absolute inset-0 w-full h-full object-contain"
+        draggable={false}
+      />
     </div>
   );
 }
@@ -654,14 +565,6 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
           mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
         }
-        @keyframes srcOutlineTrace {
-          to { stroke-dashoffset: -1000; }
-        }
-        .src-hero-trace {
-          stroke-dasharray: 60 940;
-          stroke-dashoffset: 0;
-          animation: srcOutlineTrace 5.5s linear infinite;
-        }
         @keyframes srcHeroFloat {
           0%, 100% { transform: translateY(0); }
           50%      { transform: translateY(-10px); }
@@ -673,7 +576,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           .src-rise, .src-rise-2, .src-rise-3 { animation: none; }
           .val-card .val-desc { transition: none; }
           .src-track { animation: none; }
-          .src-hero-trace, .src-hero-logo { animation: none; }
+          .src-hero-logo { animation: none; }
         }
       `}</style>
 
@@ -712,12 +615,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
               <div className="flex items-center gap-3 mb-6">
               </div>
 
-              <h1 className="font-display text-5xl md:text-6xl lg:text-7xl font-black leading-[0.95] mb-6 tracking-tight">
-                <span style={{ color: TEAL }}>SRC</span>
-                <span className="text-white"> 2026</span>
-                <br />
-                <span className="text-white/90 text-3xl md:text-4xl font-bold">KFUPM</span>
-              </h1>
+             
 
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4 max-w-xl">
                 The inaugural AIChE Student Regional Conference in the Gulf — bringing together the brightest minds in chemical engineering from across the GCC and beyond.
@@ -767,26 +665,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
         </div>
       </section>
 
-      {/* Quick intro */}
-      <section className="py-20 border-t" style={{ borderColor: `${TEAL}15` }}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { icon: <Trophy className="w-6 h-6" />, title: "World-Class Competitions", desc: "Chem-E-Car, ChemE Jeopardy, Student Technical Presentations, and Poster Competitions." },
-              { icon: <Globe className="w-6 h-6" />, title: "International Teams", desc: "Delegations from universities across the GCC and beyond, united by engineering excellence." },
-              { icon: <Network className="w-6 h-6" />, title: "Industry Connection", desc: "Direct engagement with leading energy, petrochemical, and technology companies." },
-            ].map((item) => (
-              <div key={item.title} className="rounded-xl p-6 border group hover:border-[#0CBFCE]/40 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4" style={{ background: `${TEAL}15`, color: TEAL }}>
-                  {item.icon}
-                </div>
-                <h3 className="font-display text-lg font-bold text-foreground mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+     
 
  {/* About */}
       <section
