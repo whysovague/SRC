@@ -18,6 +18,9 @@ type Section =
 // ─── Brand constants ──────────────────────────────────────────────────────────
 const TEAL = "#0CBFCE";
 const ORANGE = "#E87C2A";
+// Palette accents for section-header gradient (light blue → orange)
+const PALETTE_BLUE = "#4c90c1";
+const PALETTE_ORANGE = "#e47d1b";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function SectionTag({ children }: { children: React.ReactNode }) {
@@ -66,6 +69,16 @@ function CTAButton({ children, primary, ghost, onClick, className = "" }: {
     >
       {children}
     </button>
+  );
+}
+
+// Section-header eyebrow with a gradient-bordered pill (blue → orange).
+// Used at the top of each home-page section in place of the bare label.
+function GradientEyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span className={`src-eyebrow ${className}`}>
+      <span className="src-eyebrow-inner">{children}</span>
+    </span>
   );
 }
 
@@ -737,6 +750,27 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           }
           .src-icard-glow, .src-icard-border { display: none; }
         }
+
+        /* Section eyebrow — gradient-bordered pill */
+        .src-eyebrow {
+          display: inline-block;
+          padding: 1.5px;
+          border-radius: 9999px;
+          background: linear-gradient(135deg, ${PALETTE_BLUE} 0%, ${PALETTE_ORANGE} 100%);
+          box-shadow: 0 0 18px -8px ${PALETTE_BLUE}66, 0 0 18px -8px ${PALETTE_ORANGE}66;
+        }
+        .src-eyebrow-inner {
+          display: inline-block;
+          padding: 6px 14px;
+          border-radius: inherit;
+          background: #07111E;
+          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.92);
+        }
       `}</style>
 
       {/* Shared homepage background — molecule network + glow orbs + faint grid */}
@@ -836,9 +870,8 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
  
         <div className="relative max-w-7xl mx-auto px-6">
           {/* Eyebrow */}
-          <div className="flex items-center gap-3 mb-7 src-rise">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>About the Conference</span>
+          <div className="mb-7 src-rise">
+            <GradientEyebrow>About the Conference</GradientEyebrow>
           </div>
  
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
@@ -915,8 +948,8 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
  
           {/* Values */}
           <div className="mt-20">
-            <div className="flex items-center gap-3 mb-6">
-              <p className="text-xs font-mono tracking-[0.28em] uppercase" style={{ color: TEAL }}>What We Stand For</p>
+            <div className="mb-6">
+              <GradientEyebrow>What We Stand For</GradientEyebrow>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
@@ -967,7 +1000,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           {/* Sponsors */}
           <div className="px-6 flex items-end justify-between mb-8">
             <div>
-              <p className="text-xs font-mono tracking-[0.28em] uppercase mb-2" style={{ color: TEAL }}>Our Supporters</p>
+              <div className="mb-3"><GradientEyebrow>Our Supporters</GradientEyebrow></div>
               <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Sponsors &amp; Partners</h2>
             </div>
             <button onClick={() => setSection("sponsors")} className="inline-flex items-center gap-1 hover:gap-2 text-sm font-semibold transition-all" style={{ color: TEAL }}>
@@ -986,7 +1019,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           {/* Speakers */}
           <div className="px-6 flex items-end justify-between mb-8 mt-16">
             <div>
-              <p className="text-xs font-mono tracking-[0.28em] uppercase mb-2" style={{ color: ORANGE }}>Meet The Experts</p>
+              <div className="mb-3"><GradientEyebrow>Meet The Experts</GradientEyebrow></div>
               <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Speakers &amp; Judges</h2>
             </div>
             <button onClick={() => setSection("speakers")} className="inline-flex items-center gap-1 hover:gap-2 text-sm font-semibold transition-all" style={{ color: ORANGE }}>
@@ -1434,9 +1467,8 @@ function TimelineSection() {
       }} />
 
       <div className="relative z-10 max-w-4xl mx-auto px-6">
-        <div className="flex items-center gap-3 mb-7 src-rise">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Roadmap</span>
+        <div className="mb-7 src-rise">
+            <GradientEyebrow>Roadmap</GradientEyebrow>
           </div>
         <SectionTitle>Important Dates</SectionTitle>
         <Divider />
