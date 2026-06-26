@@ -224,6 +224,43 @@ function InteractiveCard({
   );
 }
 
+// ─── Glassy card ─────────────────────
+function GlassCard({ children, className = "", delay = 0 }: {
+  children: React.ReactNode; className?: string; delay?: number;
+}) {
+  return (
+    <div
+      className={`faq-pop relative rounded-xl overflow-hidden transition-all duration-300 ${className}`}
+      style={{
+        background: "rgba(13,30,48,0.55)",
+        border: `1px solid ${ORANGE}22`,
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+        animationDelay: `${delay}ms`,
+      }}
+    >
+      {/* Diagonal reflection cut */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: "linear-gradient(115deg, transparent 6%, rgba(255,255,255,0.0) 9%, rgba(255,255,255,0.08) 13%, rgba(255,255,255,0.13) 16%, rgba(255,255,255,0.0) 21%, transparent 26%)",
+      }} />
+      {/* Internal ambient orange glow */}
+      <div className="absolute right-0 top-0 w-80 h-full pointer-events-none" style={{
+        background: `radial-gradient(circle at 80% 30%, ${ORANGE}1E 0%, ${ORANGE}08 50%, transparent 100%)`,
+      }} />
+      {/* Top-edge flash */}
+      <div className="absolute inset-x-0 -top-16 h-48 pointer-events-none" style={{
+        background: `radial-gradient(60% 80% at 50% 0%, ${ORANGE}5C 0%, ${ORANGE}26 38%, transparent 72%)`,
+        filter: "blur(10px)", opacity: 0.7, zIndex: 0,
+      }} />
+      {/* Orange status bar (top-right) */}
+      <div className="absolute top-0 right-14 w-12 h-1 rounded-b-md pointer-events-none" style={{ background: `${ORANGE}25` }} />
+      {/* Content */}
+      <div className="relative z-10">{children}</div>
+    </div>
+  );
+}
+
 function MoleculeNetwork() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
  
@@ -327,36 +364,91 @@ function MoleculeNetwork() {
       aria-hidden="true"
     />
   );
-}function Marquee({ children, reverse = false, speed = 55 }: { children: React.ReactNode; reverse?: boolean; speed?: number }) {
+}
+
+function Marquee({ children, reverse = false, speed = 55 }: { children: React.ReactNode; reverse?: boolean; speed?: number }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const paused = useRef(false);
-  const offset = useRef(0);
+  const paused = useRef(false); // hover-pause for auto-scroll
+
   useEffect(() => {
+    const container = containerRef.current;
     const track = trackRef.current;
-    if (!track) return;
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    if (!container || !track) return;
+
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
     let raf = 0;
     let last = performance.now();
+    let offset = 0;      // scroll position in px
+    let dragging = false;
+    let lastX = 0;
+
+    const halfWidth = () => track.scrollWidth / 2;
+
+    // wrap offset into one copy's width (keeps the loop seamless), then paint
+    const render = () => {
+      const half = halfWidth();
+      if (half <= 0) return;
+      offset = ((offset % half) + half) % half;
+      const x = reverse ? offset - half : -offset;
+      track.style.transform = `translateX(${x}px)`;
+    };
+
     const step = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      if (!paused.current) {
-        const half = track.scrollWidth / 2;
-        if (half > 0) {
-          offset.current += speed * dt;
-          if (offset.current >= half) offset.current -= half;
-          const x = reverse ? offset.current - half : -offset.current;
-          track.style.transform = `translateX(${x}px)`;
-        }
+      if (!paused.current && !dragging) {
+        offset += speed * dt;
+        render();
       }
       raf = requestAnimationFrame(step);
     };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
+
+    // ── Drag / swipe to scroll manually ──────────────────────────────
+    const onPointerDown = (e: PointerEvent) => {
+      dragging = true;
+      lastX = e.clientX;
+      container.setPointerCapture?.(e.pointerId);
+      container.style.cursor = "grabbing";
+    };
+    const onPointerMove = (e: PointerEvent) => {
+      if (!dragging) return;
+      const dx = e.clientX - lastX;
+      lastX = e.clientX;
+      // drag right → content moves right, in both directions
+      offset += reverse ? dx : -dx;
+      render();
+    };
+    const onPointerUp = (e: PointerEvent) => {
+      if (!dragging) return;
+      dragging = false;
+      container.releasePointerCapture?.(e.pointerId);
+      container.style.cursor = "grab";
+    };
+
+    container.addEventListener("pointerdown", onPointerDown);
+    container.addEventListener("pointermove", onPointerMove);
+    container.addEventListener("pointerup", onPointerUp);
+    container.addEventListener("pointercancel", onPointerUp);
+
+    if (reduceMotion) render();          // static, but drag still works
+    else raf = requestAnimationFrame(step);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      container.removeEventListener("pointerdown", onPointerDown);
+      container.removeEventListener("pointermove", onPointerMove);
+      container.removeEventListener("pointerup", onPointerUp);
+      container.removeEventListener("pointercancel", onPointerUp);
+    };
   }, [reverse, speed]);
+
   return (
     <div
-      className="src-edge-fade overflow-hidden"
+      ref={containerRef}
+      className="src-edge-fade overflow-hidden select-none"
+      style={{ cursor: "grab", touchAction: "pan-y" }}
       onMouseEnter={() => { paused.current = true; }}
       onMouseLeave={() => { paused.current = false; }}
     >
@@ -585,6 +677,164 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
   );
 }
 
+// ─── Molecular Orbit (press-and-hold to spin) ────────────────────────────────
+function MolecularOrbit() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+    let W = 0, H = 0, cx = 0, cy = 0, raf = 0, drive = 0;
+    let held = false; // true while the pointer is pressed down on the logo
+
+    type Electron = { angle: number; speed: number; warm: boolean; trail: { x: number; y: number }[] };
+    type Orbit = { rxF: number; ryF: number; tilt: number; warm: boolean; electrons: Electron[] };
+
+    const orbits: Orbit[] = [
+      { rxF: 0.45, ryF: 0.18, tilt: -0.32, warm: false, electrons: [] },
+      { rxF: 0.41, ryF: 0.41, tilt: 0.60,  warm: false, electrons: [] },
+      { rxF: 0.44, ryF: 0.23, tilt: 1.25,  warm: true,  electrons: [] },
+    ];
+    const benzene = { angle: 0, speed: 0.0017, spin: 0, rxF: 0.45, ryF: 0.30, tilt: 0.2 };
+
+    const seed = () => {
+      orbits.forEach((o, i) => {
+        const count = o.rxF === o.ryF ? 2 : 1;
+        o.electrons = Array.from({ length: count }, (_, k) => ({
+          angle: (Math.PI * 2 * k) / count + i,
+          speed: (0.003 + Math.random() * 0.002) * (i % 2 ? -1 : 1),
+          warm: o.warm, trail: [],
+        }));
+      });
+    };
+
+    const resize = () => {
+      const r = canvas.getBoundingClientRect();
+      W = r.width; H = r.height; cx = W / 2; cy = H / 2;
+      canvas.width = W * dpr; canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+
+    const onEllipse = (rx: number, ry: number, tilt: number, a: number) => {
+      const ex = rx * Math.cos(a), ey = ry * Math.sin(a);
+      return {
+        x: cx + ex * Math.cos(tilt) - ey * Math.sin(tilt),
+        y: cy + ex * Math.sin(tilt) + ey * Math.cos(tilt),
+        depth: Math.sin(a),
+      };
+    };
+
+    const drawPath = (o: Orbit) => {
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(o.tilt);
+      ctx.beginPath(); ctx.ellipse(0, 0, o.rxF * W, o.ryF * H, 0, 0, Math.PI * 2);
+      const c = o.warm ? "232,124,42" : "12,191,206";
+      ctx.strokeStyle = `rgba(${c},0.10)`; ctx.lineWidth = 1; ctx.stroke(); ctx.restore();
+    };
+
+    const drawBenzene = (x: number, y: number, size: number, spin: number, alpha: number) => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate(spin);
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        const px = Math.cos(a) * size, py = Math.sin(a) * size;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.strokeStyle = `rgba(232,124,42,${0.7 * alpha})`; ctx.lineWidth = 1.4; ctx.stroke();
+      ctx.beginPath(); ctx.arc(0, 0, size * 0.55, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(232,124,42,${0.4 * alpha})`; ctx.lineWidth = 1; ctx.stroke();
+      for (let i = 0; i < 6; i++) {
+        const a = (Math.PI / 3) * i - Math.PI / 6;
+        ctx.beginPath(); ctx.arc(Math.cos(a) * size, Math.sin(a) * size, 1.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,210,170,${0.9 * alpha})`; ctx.fill();
+      }
+      ctx.restore();
+    };
+
+    const frame = () => {
+      drive += ((held ? 1 : 0) - drive) * 0.07;
+      ctx.clearRect(0, 0, W, H);
+
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 900);
+      const ng = ctx.createRadialGradient(cx, cy, 0, cx, cy, W * 0.22);
+      ng.addColorStop(0, `rgba(12,191,206,${0.16 + pulse * 0.10 + drive * 0.10})`);
+      ng.addColorStop(1, "rgba(12,191,206,0)");
+      ctx.fillStyle = ng; ctx.fillRect(0, 0, W, H);
+
+      orbits.forEach(drawPath);
+
+      orbits.forEach((o) => {
+        const rx = o.rxF * W, ry = o.ryF * H;
+        o.electrons.forEach((e) => {
+          e.angle += e.speed * drive;
+          const p = onEllipse(rx, ry, o.tilt, e.angle);
+          const x = p.x, y = p.y;
+          const depth = (p.depth + 1) / 2;
+          const size = 1.6 + depth * 2.2;
+          const alpha = 0.45 + depth * 0.55;
+          const c = e.warm ? "232,124,42" : "12,191,206";
+
+          e.trail.push({ x, y }); if (e.trail.length > 14) e.trail.shift();
+          for (let i = 0; i < e.trail.length; i++) {
+            const t = i / e.trail.length;
+            ctx.beginPath(); ctx.arc(e.trail[i].x, e.trail[i].y, size * t * 0.8, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(${c},${alpha * t * 0.35})`; ctx.fill();
+          }
+          ctx.beginPath(); ctx.arc(x, y, size * 3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${c},${alpha * 0.12})`; ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${c},${alpha})`; ctx.fill();
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(x, y);
+          ctx.strokeStyle = `rgba(${c},${alpha * 0.06})`; ctx.lineWidth = 1; ctx.stroke();
+        });
+      });
+
+      benzene.angle += benzene.speed * drive;
+      benzene.spin  += 0.01 * drive;
+      const bp = onEllipse(benzene.rxF * W, benzene.ryF * H, benzene.tilt, benzene.angle);
+      const bD = (bp.depth + 1) / 2;
+      drawBenzene(bp.x, bp.y, 9 + bD * 5, benzene.spin, 0.4 + bD * 0.6);
+
+      if (!reduce) raf = requestAnimationFrame(frame);
+    };
+
+    const press   = () => { held = true;  canvas.style.cursor = "grabbing"; };
+    const release = () => { held = false; canvas.style.cursor = "grab"; };
+
+    canvas.addEventListener("pointerdown", press);
+    canvas.addEventListener("pointerup", release);
+    canvas.addEventListener("pointercancel", release);
+    canvas.addEventListener("pointerleave", release);
+    window.addEventListener("resize", resize);
+
+    resize(); seed(); frame();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      canvas.removeEventListener("pointerdown", press);
+      canvas.removeEventListener("pointerup", release);
+      canvas.removeEventListener("pointercancel", release);
+      canvas.removeEventListener("pointerleave", release);
+      window.removeEventListener("resize", resize);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute"
+      style={{ top: "-12%", left: "-12%", width: "124%", height: "124%", cursor: "grab", touchAction: "pan-y" }}
+      aria-hidden="true"
+    />
+  );
+}
+
 // ─── Hero Logo (original SRC mark with a gentle float animation) ─────────────
 function HeroLogo() {
   return (
@@ -604,6 +854,8 @@ function HeroLogo() {
         className="absolute inset-0 w-full h-full object-contain"
         draggable={false}
       />
+
+      <MolecularOrbit />
     </div>
   );
 }
@@ -1036,6 +1288,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
 
 {/* SPONSORS & SPEAKERS */}
       <section className="relative overflow-hidden py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
+        <MoleculeNetwork />
         {/* Ambient background — faint grid + stage glows */}
         <div className="absolute inset-0 pointer-events-none" style={{
           backgroundImage: `linear-gradient(rgba(12,191,206,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.03) 1px, transparent 1px)`,
@@ -1769,59 +2022,103 @@ function LogisticsPage() {
     { q: "What transportation is available from the airport?", a: "Taxis, ride-hailing apps (Uber, Careem), and rental cars are available from DMM airport. A shuttle service for registered teams is under consideration." },
   ];
 
-  return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionTag>Logistics</SectionTag>
-        <SectionTitle>Venue & Travel</SectionTitle>
-        <Divider />
+  const hotels = [
+    { name: "On-Campus Guest Housing", note: "Available for registered teams — contact teams.src2026@kfupm.edu.sa" },
+    { name: "Dhahran Palace Hotel", note: "~5 min from campus · dhahranpalacehotel.com" },
+    { name: "JW Marriott Dammam", note: "~20 min from campus · marriott.com" },
+    { name: "Le Méridien Al Khobar", note: "~15 min from campus · marriott.com" },
+  ];
 
-        <div className="grid md:grid-cols-2 gap-8 mb-12">
-          <div>
-            <h3 className="font-display text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <MapPin className="w-5 h-5" style={{ color: TEAL }} /> Venue
+  const travel = [
+    { icon: <Globe className="w-4 h-4" />, label: "Nearest Airport", value: "King Fahd International Airport (DMM), Dammam" },
+    { icon: <Clock className="w-4 h-4" />, label: "Drive from Airport", value: "~30 minutes" },
+    { icon: <MapPin className="w-4 h-4" />, label: "City", value: "Dhahran, Eastern Province, Saudi Arabia" },
+    { icon: <CheckCircle className="w-4 h-4" />, label: "Visa", value: "eVisa available for most nationalities — visitsaudi.com" },
+  ];
+
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const logisticsMailto = `mailto:logistics.src2026@kfupm.edu.sa?subject=${encodeURIComponent("Accommodation & travel — SRC 2026")}`;
+
+  return (
+    <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
+      {/* Scoped animations (same as FAQ) */}
+      <style>{`
+        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
+        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
+        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
+        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
+      `}</style>
+
+      {/* Molecule network background */}
+      <MoleculeNetwork />
+      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
+      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
+        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+        backgroundSize: "72px 72px",
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+      }} />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+        {/* Title — screenshot style: line + eyebrow, white + gradient over two lines */}
+        <div className="faq-pop">
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Logistics</span>
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="text-white">Venue &amp;</span>
+            <br />
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Travel</span>
+          </h2>
+          <Divider />
+        </div>
+
+        {/* Cards — each takes the full row */}
+        <div className="space-y-6 mt-4">
+          {/* Venue */}
+          <GlassCard className="p-6" delay={120}>
+            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
+              <MapPin className="w-5 h-5" style={{ color: ORANGE }} /> Venue
             </h3>
-            <div className="rounded-xl border p-6 mb-6" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-              <h4 className="font-bold text-white mb-1">King Fahd University of Petroleum & Minerals</h4>
-              <p className="text-muted-foreground text-sm mb-4">KFUPM Main Campus, Dhahran 31261, Eastern Province, Saudi Arabia</p>
-              <div className="rounded-lg overflow-hidden bg-muted h-48 flex items-center justify-center" style={{ background: `${TEAL}08`, border: `1px solid ${TEAL}20` }}>
-                <div className="text-center">
-                  <MapPin className="w-8 h-8 mx-auto mb-2" style={{ color: TEAL }} />
-                  <p className="text-sm text-muted-foreground">Interactive map coming soon</p>
-                </div>
+            <h4 className="font-bold text-white mb-1">King Fahd University of Petroleum &amp; Minerals</h4>
+            <p className="text-muted-foreground text-sm mb-5">KFUPM Main Campus, Dhahran 31261, Eastern Province, Saudi Arabia</p>
+            <div className="rounded-lg overflow-hidden h-56 flex items-center justify-center" style={{ background: `${TEAL}08`, border: `1px solid ${TEAL}20` }}>
+              <div className="text-center">
+                <MapPin className="w-8 h-8 mx-auto mb-2" style={{ color: TEAL }} />
+                <p className="text-sm text-muted-foreground">Interactive map coming soon</p>
               </div>
             </div>
+          </GlassCard>
 
-            <h3 className="font-display text-xl font-bold text-white mb-4 flex items-center gap-2">
-              <Building2 className="w-5 h-5" style={{ color: TEAL }} /> Accommodation
+          {/* Accommodation */}
+          <GlassCard className="p-6" delay={190}>
+            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
+              <Building2 className="w-5 h-5" style={{ color: ORANGE }} /> Accommodation
             </h3>
             <div className="space-y-3">
-              {[
-                { name: "On-Campus Guest Housing", note: "Available for registered teams — contact teams.src2026@kfupm.edu.sa" },
-                { name: "Dhahran Palace Hotel", note: "~5 min from campus · dhahranpalacehotel.com" },
-                { name: "JW Marriott Dammam", note: "~20 min from campus · marriott.com" },
-                { name: "Le Méridien Al Khobar", note: "~15 min from campus · marriott.com" },
-              ].map((hotel) => (
-                <div key={hotel.name} className="flex justify-between items-start rounded-lg p-4 border text-sm" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                  <div>
-                    <span className="font-medium text-white">{hotel.name}</span>
-                    <p className="text-muted-foreground text-xs mt-0.5">{hotel.note}</p>
-                  </div>
+              {hotels.map((hotel) => (
+                <div key={hotel.name} className="rounded-lg p-4 text-sm" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${ORANGE}18` }}>
+                  <span className="font-medium text-white">{hotel.name}</span>
+                  <p className="text-muted-foreground text-xs mt-0.5">{hotel.note}</p>
                 </div>
               ))}
             </div>
-          </div>
+          </GlassCard>
 
-          <div>
-            <h3 className="font-display text-xl font-bold text-white mb-6">Travel Information</h3>
-            <div className="space-y-4 mb-8">
-              {[
-                { icon: <Globe className="w-4 h-4" />, label: "Nearest Airport", value: "King Fahd International Airport (DMM), Dammam" },
-                { icon: <Clock className="w-4 h-4" />, label: "Drive from Airport", value: "~30 minutes" },
-                { icon: <MapPin className="w-4 h-4" />, label: "City", value: "Dhahran, Eastern Province, Saudi Arabia" },
-                { icon: <CheckCircle className="w-4 h-4" />, label: "Visa", value: "eVisa available for most nationalities — visitsaudi.com" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-start gap-4 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          {/* Travel Information */}
+          <GlassCard className="p-6" delay={260}>
+            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
+              <Globe className="w-5 h-5" style={{ color: ORANGE }} /> Travel Information
+            </h3>
+            <div className="space-y-3">
+              {travel.map((item) => (
+                <div key={item.label} className="flex items-start gap-4 rounded-lg p-4" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${ORANGE}18` }}>
                   <span style={{ color: TEAL }} className="mt-0.5 flex-shrink-0">{item.icon}</span>
                   <div>
                     <p className="text-xs text-muted-foreground">{item.label}</p>
@@ -1830,28 +2127,42 @@ function LogisticsPage() {
                 </div>
               ))}
             </div>
+          </GlassCard>
 
-            <h3 className="font-display text-xl font-bold text-white mb-4">FAQs for Visitors</h3>
+          {/* FAQs for Visitors */}
+          <GlassCard className="p-6" delay={330}>
+            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
+              <HelpCircle className="w-5 h-5" style={{ color: ORANGE }} /> FAQs for Visitors
+            </h3>
             <div className="space-y-3">
-              {faqs.map((faq) => (
-                <details key={faq.q} className="group rounded-lg border overflow-hidden" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                  <summary className="flex items-center justify-between p-4 cursor-pointer list-none text-sm font-medium text-white hover:text-[#0CBFCE] transition-colors">
-                    {faq.q}
-                    <ChevronDown className="w-4 h-4 flex-shrink-0 transition-transform group-open:rotate-180" />
-                  </summary>
-                  <div className="px-4 pb-4 text-sm text-muted-foreground">{faq.a}</div>
-                </details>
-              ))}
+              {faqs.map((faq, i) => {
+                const isOpen = openFaq === i;
+                return (
+                  <div key={faq.q} className="rounded-lg overflow-hidden" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${isOpen ? `${ORANGE}55` : `${ORANGE}18`}` }}>
+                    <button className="w-full flex items-center justify-between p-4 text-left focus:outline-none" onClick={() => setOpenFaq(isOpen ? null : i)}>
+                      <span className="text-sm font-medium text-white pr-4">{faq.q}</span>
+                      <span style={{ color: ORANGE }} className="flex-shrink-0">
+                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed border-t" style={{ borderColor: `${ORANGE}20` }}>
+                        <div className="pt-3">{faq.a}</div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          </GlassCard>
+        </div>
 
-            <div className="mt-6 rounded-lg p-4 border" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
-              <p className="text-sm text-muted-foreground mb-2">Accommodation & travel questions:</p>
-              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Mail className="w-4 h-4" style={{ color: TEAL }} />
-                logistics.src2026@kfupm.edu.sa
-              </div>
-            </div>
-          </div>
+        {/* Still have a question? — opens the logistics inbox (FAQ-style link) */}
+        <div className="faq-pop mt-10 flex flex-col items-start text-left">
+          <a href={logisticsMailto} className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80 no-underline" style={{ color: ORANGE }}>
+            Still have a question?
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
         </div>
       </div>
     </div>
@@ -2269,7 +2580,7 @@ function MediaPage() {
   );
 }
 
-// ─── FAQ Page ─────────────────────────────────────────────────────────────────
+// ─── FAQ Page ───────────────────────────────────────────────────────────────
 function FAQPage() {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -2286,41 +2597,142 @@ function FAQPage() {
     { q: "How do I volunteer?", a: "A volunteer interest form will be available on the Registration page soon. Contact us at src2026@kfupm.edu.sa to be notified when it opens." },
   ];
 
-  return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-4xl mx-auto px-6">
-        <SectionTag>Got Questions?</SectionTag>
-        <SectionTitle>Frequently Asked Questions</SectionTitle>
-        <Divider />
+  const askMailto = `mailto:src2026@kfupm.edu.sa?subject=${encodeURIComponent("Question about SRC 2026")}`;
 
-        <div className="space-y-3 mt-8">
-          {faqs.map((faq, i) => (
-            <div key={i} className="rounded-xl border overflow-hidden transition-all" style={{ background: "var(--card)", borderColor: open === i ? `${TEAL}40` : "var(--border)" }}>
-              <button
-                className="w-full flex items-center justify-between p-5 text-left"
-                onClick={() => setOpen(open === i ? null : i)}
-              >
-                <span className="font-semibold text-white text-sm pr-4">{faq.q}</span>
-                <span style={{ color: TEAL }} className="flex-shrink-0">
-                  {open === i ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </span>
-              </button>
-              {open === i && (
-                <div className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t" style={{ borderColor: `${TEAL}20` }}>
-                  <div className="pt-4">{faq.a}</div>
-                </div>
-              )}
-            </div>
-          ))}
+  return (
+    <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
+      {/* Scoped animations */}
+      <style>{`
+        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
+        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
+        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
+        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
+      `}</style>
+
+      <MoleculeNetwork />
+      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
+      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
+        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+        backgroundSize: "72px 72px",
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+      }} />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+        {/* Header — eyebrow line + gradient title (matches Logistics) */}
+        <div className="faq-pop" style={{ animationDelay: "0ms" }}>
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Got Questions?</span>
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="text-white">Frequently Asked</span>
+            <br />
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Questions</span>
+          </h2>
+          <Divider />
         </div>
 
-        <div className="mt-12 rounded-xl p-8 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
-          <HelpCircle className="w-10 h-10 mx-auto mb-3" style={{ color: TEAL }} />
-          <h3 className="font-display text-xl font-bold text-white mb-2">Still have questions?</h3>
-          <p className="text-muted-foreground text-sm mb-5">Reach out and we'll get back to you within 48 hours.</p>
-          <div className="flex items-center justify-center gap-2 text-sm font-medium" style={{ color: TEAL }}>
-            <Mail className="w-4 h-4" /> src2026@kfupm.edu.sa
-          </div>
+        {/* Question Cards Stack */}
+        <div className="space-y-3 mt-4">
+          {faqs.map((faq, i) => {
+            const isOpen = open === i;
+            return (
+              <div
+                key={i}
+                className="faq-pop relative rounded-xl overflow-hidden transition-all duration-300"
+                style={{
+                  background: "rgba(13,30,48,0.55)",
+                  border: `1px solid ${isOpen ? `${ORANGE}75` : `${ORANGE}22`}`,
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  boxShadow: isOpen
+                    ? `0 20px 50px -16px ${ORANGE}40, inset 0 1px 0 rgba(255,255,255,0.06)`
+                    : "inset 0 1px 0 rgba(255,255,255,0.04)",
+                  animationDelay: `${140 + i * 70}ms`,
+                }}
+              >
+                {/* Thick reflection cut with a finely lowered stable opacity */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    background: "linear-gradient(115deg, transparent 6%, rgba(255,255,255,0.0) 9%, rgba(255,255,255,0.08) 13%, rgba(255,255,255,0.13) 16%, rgba(255,255,255,0.0) 21%, transparent 26%)",
+                  }}
+                />
+
+                {/* Internal static ambient background orange glow */}
+                <div
+                  className="absolute right-0 top-0 w-80 h-full pointer-events-none"
+                  style={{
+                    background: `radial-gradient(circle at 80% 30%, ${ORANGE}1E 0%, ${ORANGE}08 50%, transparent 100%)`,
+                  }}
+                />
+
+                {/* Main top edge active flash overflow backdrop glow */}
+                <div
+                  className="absolute inset-x-0 -top-16 h-48 pointer-events-none transition-opacity duration-300"
+                  style={{
+                    background: `radial-gradient(60% 80% at 50% 0%, ${ORANGE}5C 0%, ${ORANGE}26 38%, transparent 72%)`,
+                    filter: "blur(10px)",
+                    opacity: isOpen ? 0.95 : 0.7,
+                    zIndex: 0,
+                  }}
+                />
+
+                {/* Orange status indicator bar on the top edge right side */}
+                <div 
+                  className="absolute top-0 right-14 w-12 h-1 rounded-b-md transition-all duration-300 pointer-events-none"
+                  style={{ 
+                    background: isOpen ? ORANGE : `${ORANGE}25`,
+                    boxShadow: isOpen ? `0 1px 10px ${ORANGE}` : "none"
+                  }} 
+                />
+
+                {/* Question Trigger Row */}
+                <button
+                  className="relative z-10 w-full flex items-center justify-between p-5 text-left focus:outline-none"
+                  onClick={() => setOpen(isOpen ? null : i)}
+                >
+                  <span className="font-semibold text-white text-sm pr-4 tracking-wide">
+                    {faq.q}
+                  </span>
+                  <span style={{ color: ORANGE }} className="flex-shrink-0">
+                    {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </span>
+                </button>
+
+                {/* Answer Area */}
+                {isOpen && (
+                  <div
+                    className="relative z-10 px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t"
+                    style={{ borderColor: `${ORANGE}26` }}
+                  >
+                    <div className="pt-4 text-foreground/85 font-normal">{faq.a}</div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Hyperlink section optimized down to text-sm scale footprint */}
+        <div
+          className="faq-pop mt-10 flex flex-col items-end text-right"
+          style={{ animationDelay: `${140 + faqs.length * 70 + 80}ms` }}
+        >
+          <a
+            href={askMailto}
+            className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80 no-underline"
+            style={{ color: ORANGE }}
+          >
+            Still have a question?
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
         </div>
       </div>
     </div>
