@@ -89,7 +89,58 @@ function ComingSoonBadge() {
     </span>
   );
 }
+// ─── RevealOnScroll ───────────────────────────────────────────────────────────
+// Fades + slides an element up into place the first time it scrolls into view.
+function RevealOnScroll({
+  children,
+  delay = 0,
+  className = "",
+}: {
+  children: React.ReactNode;
+  delay?: number;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [isIn, setIsIn] = useState(false);
 
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let io: IntersectionObserver | null = null;
+
+    // Wait one frame so the hidden state actually paints before we
+    // start watching — otherwise elements already in the viewport
+    // (short pages, fast mounts) skip the transition entirely.
+    const raf = requestAnimationFrame(() => {
+      io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsIn(true);
+            io?.disconnect();
+          }
+        },
+        { threshold: 0.2, rootMargin: "0px 0px -10% 0px" }
+      );
+      io.observe(el);
+    });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      io?.disconnect();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`src-reveal ${isIn ? "is-in" : ""} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
 // ─── InteractiveCard ──────────────────────────────────────────────────────────
 // Wrapper that adds a mouse-tracked 3D tilt and a radial glow that follows
 // the cursor. Pass `accent` to color the glow, `tiltMax` to tune the angle,
@@ -1904,8 +1955,6 @@ function PartnershipPage() {
 function SponsorsPage() {
   return (
     <div className="relative pt-24 pb-20 overflow-hidden">
-      
-      {/* Molecule Network Background */}
       <MoleculeNetwork />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
@@ -1919,34 +1968,32 @@ function SponsorsPage() {
           { level: "Strategic Partners", color: TEAL },
           { level: "Supporters", color: "#4A9BB5" },
           { level: "Academic Partners", color: "#4A9BB5" },
-        ].map((group) => (
-          <div key={group.level} className="mb-30">
+        ].map((group, i) => (
+          <RevealOnScroll key={group.level} delay={i * 100} className="mb-32">
             <h3 className="font-display text-xl font-bold mb-15 flex items-center gap-3" style={{ color: group.color }}>
               <span className="w-8 h-0.5 inline-block" style={{ background: group.color }} />
               {group.level}
             </h3>
-            <div className="rounded-xl border p-10 flex flex-wrap gap-8 items-center justify-center min-h-[120px] transition-all duration-500" style={{ background: `${group.color}0d`, borderColor: `${group.color}40`, }} >
+            <div className="rounded-xl border p-10 flex flex-wrap gap-8 items-center justify-center min-h-[120px] transition-all duration-500" style={{ background: `${group.color}0d`, borderColor: `${group.color}40` }}>
               <div className="text-center">
                 <ComingSoonBadge />
                 <p className="text-xs text-muted-foreground mt-2">Announcements coming soon</p>
               </div>
             </div>
-          </div>
+          </RevealOnScroll>
         ))}
 
-        <div className="mt-20 text-center">
-  <p className="text-xs text-muted-foreground">
-    Interested in sponsoring? Join us as a partner and make a lasting impact
-    on the engineering community of the GCC.
-  </p>
-
-  <button
-    className="mt-2 text-xs font-medium transition-opacity hover:opacity-80"
-    style={{ color: TEAL }}
-  >
-    View Partnership Packages →
-  </button>
-</div>
+        <RevealOnScroll>
+          <div className="mt-20 text-center">
+            <p className="text-xs text-muted-foreground">
+              Interested in sponsoring? Join us as a partner and make a lasting impact
+              on the engineering community of the GCC.
+            </p>
+            <button className="mt-2 text-xs font-medium transition-opacity hover:opacity-80" style={{ color: TEAL }}>
+              View Partnership Packages →
+            </button>
+          </div>
+        </RevealOnScroll>
       </div>
     </div>
   );
@@ -1954,10 +2001,14 @@ function SponsorsPage() {
 
 // ─── Speakers Page ────────────────────────────────────────────────────────────
 function SpeakersPage() {
+  const categories = [
+    { label: "Keynote Speakers", icon: <Mic2 className="w-7 h-7" />, desc: "Industry leaders and innovators sharing their vision for the future of chemical engineering.", color: TEAL },
+    { label: "Competition Judges", icon: <Award className="w-7 h-7" />, desc: "Experienced engineers and academics evaluating student work across all competitions.", color: ORANGE },
+    { label: "Mentors & Guests", icon: <Star className="w-7 h-7" />, desc: "Industry professionals available for 1-on-1 mentoring, career advice, and networking.", color: TEAL },
+  ];
+
   return (
     <div className="relative pt-24 pb-20 overflow-hidden">
-      
-      {/* Molecule Network Background */}
       <MoleculeNetwork />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6">
@@ -1965,39 +2016,57 @@ function SpeakersPage() {
         <SectionTitle>Speakers, Judges & Mentors</SectionTitle>
         <Divider />
 
-        <div className="grid md:grid-cols-3 gap-8 mb-12">
-          {[
-            { label: "Keynote Speakers", icon: <Mic2 className="w-7 h-7" />, desc: "Industry leaders and innovators sharing their vision for the future of chemical engineering." },
-            { label: "Competition Judges", icon: <Award className="w-7 h-7" />, desc: "Experienced engineers and academics evaluating student work across all competitions." },
-            { label: "Mentors & Guests", icon: <Star className="w-7 h-7" />, desc: "Industry professionals available for 1-on-1 mentoring, career advice, and networking." },
-          ].map((cat) => (
-            <div key={cat.label} className="rounded-xl border p-6 text-center backdrop-blur-md" style={{ background: "rgba(15, 23, 42, 0.4)", borderColor: "rgba(255, 255, 255, 0.08)" }}>
-              <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${TEAL}15`, color: TEAL }}>
-                {cat.icon}
-              </div>
-              <h3 className="font-display font-bold text-white text-lg mb-2">{cat.label}</h3>
-              <p className="text-sm text-muted-foreground mb-5">{cat.desc}</p>
-              <ComingSoonBadge />
-            </div>
+        <div className="grid md:grid-cols-3 gap-8 mb-12 mt-8">
+          {categories.map((cat, i) => (
+            <RevealOnScroll key={cat.label} delay={i * 120}>
+              <InteractiveCard
+                accent={cat.color}
+                className="group relative rounded-2xl p-8 overflow-hidden text-center transition-colors duration-300"
+                style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${cat.color}30` }}
+              >
+                {/* Corner glow blob — same treatment as Mission/Vision cards */}
+                <div
+                  className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${cat.color}40 0%, transparent 70%)`, filter: "blur(28px)" }}
+                />
+
+                <div className="relative flex flex-col items-center">
+                  <div
+                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
+                    style={{ background: `${cat.color}18`, color: cat.color, boxShadow: `inset 0 0 0 1px ${cat.color}40` }}
+                  >
+                    {cat.icon}
+                  </div>
+                  <h3 className="font-display font-bold text-white text-lg mb-2">{cat.label}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">{cat.desc}</p>
+                  <ComingSoonBadge />
+                </div>
+              </InteractiveCard>
+            </RevealOnScroll>
           ))}
         </div>
 
-        <div className="rounded-xl border p-8 text-center backdrop-blur-md" style={{ background: `${ORANGE}0d`, borderColor: `${ORANGE}35` }}>
-          <h3 className="font-display text-xl font-bold text-white mb-3">Interested in Speaking or Judging?</h3>
-          <p className="text-muted-foreground mb-5 max-w-lg mx-auto text-sm">We welcome industry experts, researchers, and professionals who want to share their knowledge and mentor the next generation.</p>
-          <CTAButton primary>Express Interest <ArrowRight className="w-4 h-4" /></CTAButton>
-        </div>
+        <RevealOnScroll>
+          <div className="mt-35 text-center text-xs text-muted-foreground">
+            Interested in speaking or judging?{" "}
+            <span className="cursor-pointer font-medium" style={{ color: ORANGE }}>
+              Express Interest →
+            </span>
+          </div>
+        </RevealOnScroll>
       </div>
     </div>
   );
 }
-
 // ─── Organizing Team ──────────────────────────────────────────────────────────
 function OrganizingPage() {
-  const roles = [
-    { title: "Conference Advisor", note: "Faculty oversight and strategic guidance" },
-    { title: "Conference Chair", note: "Overall leadership and direction" },
-    { title: "Vice Chair", note: "Operational coordination" },
+  const leadership = [
+    { title: "Conference Advisor", note: "Faculty oversight and strategic guidance", icon: <Star className="w-6 h-6" />, color: TEAL },
+    { title: "Conference Chair", note: "Overall leadership and direction", icon: <Award className="w-7 h-7" />, color: ORANGE, featured: true },
+    { title: "Vice Chair", note: "Operational coordination", icon: <Target className="w-6 h-6" />, color: TEAL },
+  ];
+
+  const committees = [
     { title: "Competitions Committee", note: "All competition logistics and judging" },
     { title: "Logistics Committee", note: "Venue, accommodation, transportation" },
     { title: "Marketing & Media Committee", note: "Communications, social media, press" },
@@ -2008,39 +2077,126 @@ function OrganizingPage() {
   ];
 
   return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
+    <div className="relative pt-24 pb-20 overflow-hidden">
+      <MoleculeNetwork />
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         <SectionTag>The Team Behind SRC</SectionTag>
         <SectionTitle>Organizing Committee</SectionTitle>
         <Divider />
 
-        <p className="text-muted-foreground max-w-2xl mb-12 text-lg leading-relaxed">
-          SRC 2026 is organized by a dedicated team of KFUPM students under faculty and professional guidance. Full team profiles will be published soon.
-        </p>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-          {roles.map((role) => (
-            <div key={role.title} className="rounded-lg border p-5 flex items-start gap-4" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-              <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-display font-black text-sm" style={{ background: `${TEAL}15`, color: TEAL }}>
-                {role.title.charAt(0)}
-              </div>
-              <div>
-                <p className="font-semibold text-white text-sm">{role.title}</p>
-                <p className="text-xs text-muted-foreground">{role.note}</p>
+        {/* ─── Hero: photo + intro text ─── */}
+        <RevealOnScroll>
+          <div className="grid md:grid-cols-12 gap-10 items-center mb-20 mt-4">
+            <div className="md:col-span-5 flex justify-center">
+              {/* "Photograph" placeholder — white mat, slight tilt, like a printed photo */}
+              <div
+                className="bg-white rounded-sm p-3 pb-9 shadow-2xl rotate-[-1.5deg] w-full max-w-sm"
+              >
+                <div className="aspect-[4/3] rounded-sm overflow-hidden flex items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300">
+                  <Users className="w-16 h-16 text-slate-400" />
+                </div>
               </div>
             </div>
-          ))}
+            <div className="md:col-span-7">
+              <p className="text-muted-foreground leading-relaxed text-lg md:text-xl">
+                SRC 2026 is organized by a dedicated team of KFUPM students under faculty and professional guidance. Full team profiles will be published soon.
+              </p>
+            </div>
+          </div>
+        </RevealOnScroll>
+
+        {/* ─── Leadership ─── */}
+        <div className="mb-20">
+          <RevealOnScroll>
+            <div className="mb-7"><GradientEyebrow>Leadership</GradientEyebrow></div>
+          </RevealOnScroll>
+
+          <div className="grid sm:grid-cols-3 gap-6 items-end">
+            {leadership.map((person, i) => (
+              <RevealOnScroll key={person.title} delay={i * 120}>
+                <div
+                  className={`rounded-2xl border p-6 text-center ${person.featured ? "sm:scale-105" : ""}`}
+                  style={{
+                    background: person.featured ? `${person.color}0d` : "rgba(13,30,48,0.55)",
+                    borderColor: `${person.color}40`,
+                  }}
+                >
+                  {/* Small photo placeholder per person */}
+                  <div className="bg-white rounded-sm p-2 pb-5 shadow-lg mx-auto mb-4 w-28">
+                    <div
+                      className="aspect-square rounded-sm flex items-center justify-center"
+                      style={{ background: `${person.color}1a`, color: person.color }}
+                    >
+                      {person.icon}
+                    </div>
+                  </div>
+                  <h4 className="font-display font-bold text-white text-base mb-1">{person.title}</h4>
+                  <p className="text-xs text-muted-foreground mb-3">{person.note}</p>
+                  <ComingSoonBadge />
+                </div>
+              </RevealOnScroll>
+            ))}
+          </div>
         </div>
 
-        <div className="rounded-xl p-8 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
-          <ComingSoonBadge />
-          <p className="text-muted-foreground text-sm mt-4">Individual team member profiles and photos will be published here soon.</p>
+        {/* ─── Committees — each with a horizontal scrolling member strip ─── */}
+        <div className="mb-12">
+          <RevealOnScroll>
+            <div className="mb-7"><GradientEyebrow>Committees</GradientEyebrow></div>
+          </RevealOnScroll>
+
+          <div className="space-y-14">
+            {committees.map((committee, i) => (
+              <RevealOnScroll key={committee.title}>
+                <div>
+                  <div className="flex items-center gap-4 mb-5">
+                    <div
+                      className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center font-display font-black text-sm"
+                      style={{ background: `${TEAL}15`, color: TEAL }}
+                    >
+                      {committee.title.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white text-sm">{committee.title}</p>
+                      <p className="text-xs text-muted-foreground">{committee.note}</p>
+                    </div>
+                  </div>
+
+                  <Marquee reverse={i % 2 === 1} speed={40}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <div
+                        key={j}
+                        className="w-36 shrink-0 rounded-xl p-4 flex flex-col items-center text-center"
+                        style={{ background: "rgba(13,30,48,0.5)", border: `1px solid ${TEAL}22` }}
+                      >
+                        <div
+                          className="w-14 h-14 rounded-full mb-3 flex items-center justify-center"
+                          style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}30`, color: `${TEAL}99` }}
+                        >
+                          <Users className="w-5 h-5" />
+                        </div>
+                        <div className="h-2 w-16 rounded-full mb-2" style={{ background: `${TEAL}22` }} />
+                        <div className="h-2 w-10 rounded-full" style={{ background: `${TEAL}15` }} />
+                      </div>
+                    ))}
+                  </Marquee>
+                </div>
+              </RevealOnScroll>
+            ))}
+          </div>
         </div>
+
+        <RevealOnScroll>
+  <div className="text-center">
+    <ComingSoonBadge />
+    <p className="text-muted-foreground text-sm mt-4">Individual team member profiles and photos will be published here soon.</p>
+  </div>
+</RevealOnScroll>
       </div>
     </div>
   );
 }
-
 // ─── Media Center ─────────────────────────────────────────────────────────────
 function MediaPage() {
   return (
@@ -2399,7 +2555,7 @@ export default function App() {
 
   // Scroll to top on section change
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, [section]);
 
   const pages: Record<Section, React.ReactNode> = {
@@ -2433,6 +2589,20 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: ${TEAL}40; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: ${TEAL}70; }
         details summary::-webkit-details-marker { display: none; }
+        .src-reveal {
+  opacity: 0;
+  transform: translateY(36px);
+  transition: opacity .8s cubic-bezier(.16,.84,.44,1),
+              transform .8s cubic-bezier(.16,.84,.44,1);
+  will-change: opacity, transform;
+}
+.src-reveal.is-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .src-reveal { opacity: 1; transform: none; transition: none; }
+}
       `}</style>
 
       <Navbar active={section} setSection={setSection} />
