@@ -8,6 +8,10 @@ import {
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
 import srcTealSvg from "@/assets/src_teal.svg";
+<<<<<<< HEAD
+=======
+import srcLettersSvg from "@/assets/src_letters.svg";
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -49,6 +53,7 @@ function Divider() {
 function CTAButton({ children, primary, ghost, onClick, className = "" }: {
   children: React.ReactNode; primary?: boolean; ghost?: boolean; onClick?: () => void; className?: string;
 }) {
+<<<<<<< HEAD
   return (
     <button
       onClick={onClick}
@@ -68,6 +73,33 @@ function CTAButton({ children, primary, ghost, onClick, className = "" }: {
       }
     >
       {children}
+=======
+  if (ghost) {
+    return (
+      <button
+        onClick={onClick}
+        className={`src-cta inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-muted-foreground hover:text-white ${className}`}
+      >
+        <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
+      </button>
+    );
+  }
+
+  const variantClass = primary ? "src-cta-primary text-[#07111E]" : "src-cta-secondary border text-foreground";
+  const variantStyle = primary
+    ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)` }
+    : { borderColor: `${TEAL}50` };
+
+  return (
+    <button
+      onClick={onClick}
+      className={`src-cta inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide ${variantClass} ${className}`}
+      style={variantStyle}
+    >
+      {!primary && <span className="src-cta-fill" aria-hidden />}
+      <span className="src-cta-shine" aria-hidden />
+      <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     </button>
   );
 }
@@ -477,6 +509,7 @@ function SRCLogo({ size = 64, yOffset = 1 }: { size?: number; yOffset?: number }
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 const mainNavItems: { label: string; section: Section }[] = [
   { label: "Home",         section: "home" },
   { label: "Competitions", section: "competitions" },
@@ -504,12 +537,38 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
 
+=======
+const navItems: { label: string; section: Section }[] = [
+  { label: "Home", section: "home" },
+  { label: "Competitions", section: "competitions" },
+  { label: "Registration", section: "registration" },
+  { label: "Logistics", section: "logistics" },
+  { label: "Partnership", section: "partnership" },
+  { label: "Contact", section: "contact" },
+];
+
+function Navbar({ active, setSection }: { active: Section; setSection: (s: Section) => void }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const navRef = useRef<HTMLDivElement | null>(null);
+  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
+
+  const mainNav = navItems.slice(0, 6);
+  const moreNav: { label: string; section: Section }[] = [
+    { label: "Organizing Team", section: "organizing" },
+    { label: "Media", section: "media" },
+    { label: "FAQ", section: "faq" },
+  ];
+
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   const updateHover = (key: string) => {
     const el = itemRefs.current[key];
     const parent = navRef.current;
     if (!el || !parent) return;
     const elR = el.getBoundingClientRect();
     const pR = parent.getBoundingClientRect();
+<<<<<<< HEAD
     setHoverRect({ left: elR.left - pR.left, top: elR.top - pR.top, width: elR.width, height: elR.height });
   };
 
@@ -528,6 +587,20 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
 
   const isMoreActive = moreNavItems.some(i => i.section === active);
 
+=======
+    setHoverRect({
+      left: elR.left - pR.left,
+      top: elR.top - pR.top,
+      width: elR.width,
+      height: elR.height,
+    });
+  };
+
+  // Pixelated noise SVG used as overlay for the "pixelated-blur glass" feel
+  const pixelNoise =
+    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
+
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   return (
     <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
       <div className="max-w-7xl mx-auto px-4 pt-4 pointer-events-auto">
@@ -551,7 +624,10 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
           </div>
 
           <div className="relative z-10 flex h-14 w-full items-center gap-2 rounded-full px-2">
+<<<<<<< HEAD
             {/* Logo */}
+=======
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <button
               onClick={() => setSection("home")}
               className="relative z-10 flex h-full items-center px-2 rounded-full transition-transform hover:scale-[1.02] overflow-visible"
@@ -560,12 +636,16 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
               <SRCLogo size={72} yOffset={4} />
             </button>
 
+<<<<<<< HEAD
             {/* Desktop nav */}
+=======
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <div
               ref={navRef}
               onMouseLeave={() => setHoverRect(null)}
               className="relative z-10 hidden lg:flex items-center gap-1"
             >
+<<<<<<< HEAD
               {/* Animated hover ring */}
               <span
                 aria-hidden
@@ -650,6 +730,81 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
             </div>
 
             {/* Mobile hamburger */}
+=======
+            {/* Animated hover ring */}
+            <span
+              aria-hidden
+              className="absolute pointer-events-none rounded-full"
+              style={{
+                left: hoverRect?.left ?? 0,
+                top: hoverRect?.top ?? 0,
+                width: hoverRect?.width ?? 0,
+                height: hoverRect?.height ?? 0,
+                border: `1px solid ${TEAL}`,
+                boxShadow: `0 0 0 3px ${TEAL}1A, 0 0 18px ${TEAL}55, inset 0 0 12px ${TEAL}22`,
+                background: `${TEAL}10`,
+                opacity: hoverRect ? 1 : 0,
+                transition: "left 280ms cubic-bezier(.22,1,.36,1), top 280ms cubic-bezier(.22,1,.36,1), width 280ms cubic-bezier(.22,1,.36,1), height 280ms cubic-bezier(.22,1,.36,1), opacity 180ms ease",
+              }}
+            />
+
+            {mainNav.map((item) => (
+              <button
+                key={item.section}
+                ref={(el) => { itemRefs.current[item.section] = el; }}
+                onMouseEnter={() => updateHover(item.section)}
+                onFocus={() => updateHover(item.section)}
+                onClick={() => setSection(item.section)}
+                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                  active === item.section ? "text-white" : "text-muted-foreground hover:text-white"
+                }`}
+                style={active === item.section ? { color: TEAL } : {}}
+              >
+                {item.label}
+              </button>
+            ))}
+
+            {/* More dropdown */}
+            <div className="relative z-10">
+              <button
+                ref={(el) => { itemRefs.current["__more"] = el; }}
+                onMouseEnter={() => updateHover("__more")}
+                onFocus={() => updateHover("__more")}
+                onClick={() => setMoreOpen(!moreOpen)}
+                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-white rounded-full transition-colors flex items-center gap-1"
+              >
+                More <ChevronDown className="w-3 h-3" />
+              </button>
+              {moreOpen && (
+                <div
+                  className="absolute top-full right-0 mt-3 w-48 rounded-2xl overflow-hidden shadow-2xl z-20"
+                  style={{
+                    background: "rgba(13,30,48,0.85)",
+                    backdropFilter: "blur(18px) saturate(160%)",
+                    WebkitBackdropFilter: "blur(18px) saturate(160%)",
+                    border: `1px solid ${TEAL}25`,
+                  }}
+                >
+                  {moreNav.map((item) => (
+                    <button
+                      key={item.section}
+                      onClick={() => { setSection(item.section); setMoreOpen(false); }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            </div>
+
+            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
+              <CTAButton ghost onClick={() => setSection("partnership")}>Become a Partner</CTAButton>
+              <CTAButton ghost onClick={() => setSection("registration")}>Register Now</CTAButton>
+            </div>
+
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <button
               className="lg:hidden relative z-10 text-foreground h-10 w-10 rounded-full flex items-center justify-center overflow-hidden ml-auto"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -666,7 +821,11 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
         <div
           className="lg:hidden mx-4 mt-3 rounded-3xl overflow-hidden pointer-events-auto relative"
           style={{
+<<<<<<< HEAD
             background: "rgba(7,17,30,0.92)",
+=======
+            background: "rgba(7,17,30,0.85)",
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             backdropFilter: "blur(18px) saturate(160%)",
             WebkitBackdropFilter: "blur(18px) saturate(160%)",
             border: `1px solid ${TEAL}25`,
@@ -679,6 +838,7 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
             style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
           />
           <div className="relative z-10">
+<<<<<<< HEAD
             {[...mainNavItems, ...moreNavItems].map((item, i, arr) => (
               <button
                 key={item.section}
@@ -688,12 +848,26 @@ function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSe
                   color: active === item.section ? TEAL : "rgba(160,185,210,0.75)",
                   borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
                 }}
+=======
+            {[...navItems, ...moreNav].map((item) => (
+              <button
+                key={item.section}
+                onClick={() => { setSection(item.section); setMobileOpen(false); }}
+                className="w-full text-left px-6 py-3 text-sm text-muted-foreground hover:text-white border-b border-white/5 transition-colors"
+                style={active === item.section ? { color: TEAL } : {}}
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
               >
                 {item.label}
               </button>
             ))}
+<<<<<<< HEAD
             <div className="px-6 py-4">
               <CTAButton primary onClick={() => { onRegisterOpen(); setMobileOpen(false); }}>Register Now</CTAButton>
+=======
+            <div className="px-6 py-4 flex flex-col gap-3">
+              <CTAButton ghost onClick={() => { setSection("partnership"); setMobileOpen(false); }}>Become a Partner</CTAButton>
+              <CTAButton primary onClick={() => { setSection("registration"); setMobileOpen(false); }}>Register Now</CTAButton>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             </div>
           </div>
         </div>
@@ -923,7 +1097,11 @@ function CountUp({ to, suffix = "", duration = 6000 }: { to: number; suffix?: st
 }
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
+<<<<<<< HEAD
 function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => void; onRegisterOpen: () => void }) {
+=======
+function HomePage({ setSection }: { setSection: (s: Section) => void }) {
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   const aboutSectionRef = useRef<HTMLElement | null>(null);
   const stats: { to: number; suffix: string; label: string }[] = [
     { to: 1000, suffix: "+", label: "Expected Participants" },
@@ -1133,6 +1311,7 @@ function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => 
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* LEFT — Conference info */}
             <div className="max-w-2xl order-2 lg:order-1">
+<<<<<<< HEAD
               <div className="flex items-center gap-3 mb-6">
               </div>
 
@@ -1143,6 +1322,66 @@ function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => 
               </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-10 text-sm text-muted-foreground">
+=======
+              {/* Hero title — SRC letters + host + year, locked up as a single entity */}
+              <div className="mb-3 src-rise">
+                <div
+                  role="img"
+                  aria-label="SRC · AIChE · 2026"
+                  className="flex items-stretch gap-4 md:gap-5"
+                >
+                  {/* SRC letters from the logo, painted with the palette blend */}
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: "min(46%, 260px)",
+                      aspectRatio: "402 / 312.75",
+                      background:
+                        "linear-gradient(45deg, #4c90c1 10%, #ffffff 0%, #e47d1b 10%, #0f3d6a 100%)",
+                      WebkitMaskImage: `url(${srcLettersSvg})`,
+                      maskImage: `url(${srcLettersSvg})`,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "left center",
+                      maskPosition: "left center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+
+                  {/* Divider line — palette-tinted, ties the lockup together */}
+                  <div
+                    className="w-px self-stretch my-2"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, transparent 0%, #4c90c1 35%, #e47d1b 75%, transparent 100%)",
+                    }}
+                  />
+
+                  {/* Org + year — stacked, same display weight as the letters */}
+                  <div className="flex flex-col justify-center min-w-0">
+                    <span
+                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight"
+                      style={{ color: "#4c90c1" }}
+                    >
+                      AIChE
+                    </span>
+                    <span
+                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight mt-1"
+                      style={{ color: "#e47d1b" }}
+                    >
+                      2026
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-5 max-w-xl">
+              Bringing together the brightest minds in chemical engineering from across the GCC and beyond.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 text-sm text-muted-foreground">
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                 <span className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
                   <span className="font-semibold text-foreground">2026 · TBA</span>
@@ -1153,13 +1392,24 @@ function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => 
                 </span>
               </div>
 
+<<<<<<< HEAD
               <div className="flex flex-wrap gap-3 mb-12">
                 <CTAButton primary onClick={onRegisterOpen}>
+=======
+              <div className="flex flex-wrap gap-3 mb-10">
+                <CTAButton primary onClick={() => setSection("registration")}>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   Register Now <ArrowRight className="w-4 h-4" />
                 </CTAButton>
                 <CTAButton onClick={scrollToAbout}>
                   Learn More <ChevronRight className="w-4 h-4" />
                 </CTAButton>
+<<<<<<< HEAD
+=======
+                <CTAButton onClick={() => setSection("partnership")}>
+                  Become a Partner <ChevronRight className="w-4 h-4" />
+                </CTAButton>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
               </div>
             </div>
 
@@ -1378,7 +1628,11 @@ function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => 
             SRC 2026 is the first-ever AIChE Student Regional Conference hosted in the GCC. Don't miss your chance to compete, learn, and connect.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
+<<<<<<< HEAD
             <CTAButton primary onClick={onRegisterOpen}>Register Now <ArrowRight className="w-4 h-4" /></CTAButton>
+=======
+            <CTAButton primary onClick={() => setSection("registration")}>Register Now <ArrowRight className="w-4 h-4" /></CTAButton>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <CTAButton onClick={() => setSection("contact")}>Contact Us</CTAButton>
           </div>
         </div>
@@ -1475,6 +1729,7 @@ function AboutPage() {
   );
 }
 
+<<<<<<< HEAD
 // ─── Competitions Page (redesigned) ───────────────────────────────────────────
 function useReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -1584,76 +1839,132 @@ function CompGlassCard({ item }: { item: CompItem }) {
 
 function CompetitionsPage() {
   const competitions: CompItem[] = [
+=======
+// ─── Competitions Page ────────────────────────────────────────────────────────
+function CompetitionsPage() {
+  const competitions = [
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     {
       icon: <FlaskConical className="w-7 h-7" />,
       title: "Chem-E-Car",
       category: "Competition",
+<<<<<<< HEAD
       desc: "Design and build a car powered by a chemical reaction that travels a set distance and stops on cue.",
       details: ["Team-based", "Design, build & present", "Chemical power & braking"],
+=======
+      desc: "Teams design and build a car powered by a chemical energy source that can travel a specified distance and stop using a chemical stopping mechanism. One of AIChE's most iconic student challenges.",
+      details: ["Team-based competition", "Design, build & present", "Chemical power & stopping mechanism"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Trophy className="w-7 h-7" />,
       title: "ChemE Jeopardy",
       category: "Competition",
+<<<<<<< HEAD
       desc: "A fast-paced, Jeopardy-style trivia battle across the full breadth of chemical engineering.",
       details: ["Team of 3–4", "Live Q&A format", "All ChE disciplines"],
+=======
+      desc: "A fast-paced, Jeopardy-style trivia competition testing breadth of chemical engineering knowledge — from thermodynamics to reactor design to safety.",
+      details: ["Team of 3-4 students", "Live Q&A format", "All ChE disciplines"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Presentation className="w-7 h-7" />,
+<<<<<<< HEAD
       title: "Technical Presentation",
       category: "Competition",
       desc: "Students present original research to a panel of industry and academic judges.",
       details: ["Individual", "Industry judges", "Research focus"],
+=======
+      title: "Student Technical Presentation",
+      category: "Competition",
+      desc: "Individual students present original technical research or analysis to a panel of industry and academic judges. Builds critical presentation and communication skills.",
+      details: ["Individual presentations", "Industry judges", "Research & analysis focus"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <FileText className="w-7 h-7" />,
+<<<<<<< HEAD
       title: "Poster Competition",
       category: "Competition",
       desc: "Present research in a poster format, engaging judges and attendees in an open gallery.",
       details: ["Research poster", "Judge engagement", "Open gallery"],
+=======
+      title: "Undergraduate Poster Competition",
+      category: "Competition",
+      desc: "Students present their research and technical projects in a poster format, engaging directly with judges and attendees in a dynamic gallery setting.",
+      details: ["Research poster", "Peer & judge engagement", "Open gallery format"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Zap className="w-7 h-7" />,
       title: "Youth Pulse",
       category: "Activity",
+<<<<<<< HEAD
       desc: "Hands-on demos, mentoring, and career exposure for younger and prospective engineers.",
       details: ["Mentorship", "Hands-on demos", "Career guidance"],
+=======
+      desc: "An energetic program designed for younger engineering students and prospective engineers, featuring hands-on demos, mentoring sessions, and career exposure.",
+      details: ["Mentorship sessions", "Hands-on demos", "Career guidance"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Wrench className="w-7 h-7" />,
       title: "Workshops",
       category: "Activity",
+<<<<<<< HEAD
       desc: "Practical skills sessions led by industry experts — from process safety to AI in ChE.",
       details: ["Industry-led", "Hands-on learning", "Multiple tracks"],
+=======
+      desc: "Practical, skills-based sessions led by industry experts and faculty. Topics range from process safety to digital engineering tools and AI in chemical engineering.",
+      details: ["Industry-led sessions", "Hands-on learning", "Multiple tracks"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <MessageSquare className="w-7 h-7" />,
       title: "Panels & Sessions",
       category: "Activity",
+<<<<<<< HEAD
       desc: "Moderated panels with leaders from industry, academia, and startups on the future of energy.",
       details: ["Expert panelists", "Q&A sessions", "Industry insight"],
+=======
+      desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
+      details: ["Expert panelists", "Q&A sessions", "Industry insights"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Network className="w-7 h-7" />,
+<<<<<<< HEAD
       title: "Networking",
       category: "Activity",
       desc: "Dedicated networking hours, a career fair, and structured engagement with employers.",
       details: ["Career fair", "Company booths", "Structured mixers"],
+=======
+      title: "Networking & Industry Engagement",
+      category: "Activity",
+      desc: "Dedicated networking hours, a career fair, and structured industry engagement activities connecting students directly with potential employers and mentors.",
+      details: ["Career fair", "Company booths", "Structured networking"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Lightbulb className="w-7 h-7" />,
       title: "Additional Programs",
       category: "Activity",
+<<<<<<< HEAD
       desc: "Cultural tours, social events, an opening ceremony and a closing gala — the full experience.",
       details: ["Opening ceremony", "Closing gala", "Cultural tours"],
+=======
+      desc: "Cultural tours, social events, an opening ceremony, closing gala, and more — making SRC 2026 an unforgettable complete experience.",
+      details: ["Opening ceremony", "Closing gala", "Cultural activities"],
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
   ];
@@ -1661,6 +1972,7 @@ function CompetitionsPage() {
   const [filter, setFilter] = useState<"All" | "Competition" | "Activity">("All");
   const filtered = competitions.filter((c) => filter === "All" || c.category === filter);
 
+<<<<<<< HEAD
   const highlights = [
     { icon: <Zap className="h-5 w-5" />, title: "Why Compete", color: TEAL, text: "Sharpen technical skills, compete at the highest level, and build professional networks that last a career." },
     { icon: <Network className="h-5 w-5" />, title: "Who Can Join", color: ORANGE, text: "Undergraduate chemical engineering students from universities across the GCC and the broader region." },
@@ -1888,6 +2200,63 @@ function CompetitionsPage() {
         <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((item) => (
             <CompGlassCard key={item.title} item={item} />
+=======
+  return (
+    <div className="pt-24 pb-20">
+      <div className="max-w-7xl mx-auto px-6">
+        <SectionTag>What Awaits You</SectionTag>
+        <SectionTitle>Competitions & Activities</SectionTitle>
+        <Divider />
+        <p className="text-muted-foreground max-w-2xl mb-10 text-lg leading-relaxed">
+          SRC 2026 features a rich program of technical competitions, professional development sessions, and networking activities designed to challenge and inspire.
+        </p>
+
+        <div className="flex gap-2 mb-10">
+          {(["All", "Competition", "Activity"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className="px-4 py-2 rounded text-sm font-semibold transition-all"
+              style={filter === f
+                ? { background: TEAL, color: "#07111E" }
+                : { background: `${TEAL}10`, color: "var(--muted-foreground)", border: `1px solid ${TEAL}25` }
+              }
+            >
+              {f}
+            </button>
+          ))}
+        </div>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {filtered.map((item) => (
+            <InteractiveCard
+              key={item.title}
+              accent={item.color}
+              className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300"
+              style={{ background: "var(--card)", borderColor: "var(--border)" }}
+            >
+              <div className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
+                    {item.icon}
+                  </div>
+                  <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color === TEAL ? TEAL : ORANGE, background: `${item.color}12`, border: `1px solid ${item.color}30` }}>
+                    {item.category}
+                  </span>
+                </div>
+                <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
+                <ul className="space-y-1">
+                  {item.details.map((d) => (
+                    <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
+                      {d}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </InteractiveCard>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
           ))}
         </div>
       </div>
@@ -1895,6 +2264,7 @@ function CompetitionsPage() {
   );
 }
 
+<<<<<<< HEAD
 
 // ─── Registration Modal ───────────────────────────────────────────────────────
 
@@ -2393,6 +2763,18 @@ function RegistrationModal({ onClose }: { onClose: () => void }) {
 
 // ─── Registration Page (kept for footer links) ────────────────────────────────
 function RegistrationPage() {
+=======
+// ─── Registration Page ────────────────────────────────────────────────────────
+function RegistrationPage() {
+  const tracks = [
+    { icon: <Users className="w-6 h-6" />, title: "Participant Registration", desc: "Register as an individual attendee to access all sessions, workshops, panels, and networking events.", badge: "Open Soon", color: TEAL },
+    { icon: <Trophy className="w-6 h-6" />, title: "Competing Team Registration", desc: "Register your university team for Chem-E-Car, ChemE Jeopardy, Technical Presentation, or Poster Competition.", badge: "Open Soon", color: ORANGE },
+    { icon: <Heart className="w-6 h-6" />, title: "Volunteer Interest Form", desc: "Join the SRC 2026 volunteer team and be part of making this historic conference a success.", badge: "Coming Soon", color: TEAL },
+    { icon: <Mic2 className="w-6 h-6" />, title: "Speaker / Judge / Mentor", desc: "Share your expertise as a speaker, competition judge, or career mentor at SRC 2026.", badge: "Coming Soon", color: ORANGE },
+    { icon: <Building2 className="w-6 h-6" />, title: "Partner Interest Form", desc: "Explore partnership and sponsorship opportunities to connect your organization with the next generation of engineers.", badge: "Coming Soon", color: TEAL },
+  ];
+
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   return (
     <div className="pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6">
@@ -2402,12 +2784,49 @@ function RegistrationPage() {
         <p className="text-muted-foreground max-w-2xl mb-12 text-lg leading-relaxed">
           Multiple pathways to participate in SRC 2026. Choose the track that fits your role.
         </p>
+<<<<<<< HEAD
         <div className="rounded-xl p-10 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
           <h3 className="font-display text-2xl font-bold text-white mb-3">Register Now</h3>
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">Click the "Register Now" button in the top navigation bar to open the registration form.</p>
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Mail className="w-4 h-4" style={{ color: TEAL }} />
             <span>src2026@kfupm.edu.sa</span>
+=======
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {tracks.map((track) => (
+            <div key={track.title} className="rounded-xl border p-6 flex flex-col group hover:border-[#0CBFCE]/40 transition-all duration-200" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center mb-4 flex-shrink-0" style={{ background: `${track.color}15`, color: track.color }}>
+                {track.icon}
+              </div>
+              <div className="flex items-start justify-between mb-2 gap-2">
+                <h3 className="font-display font-bold text-white text-base leading-tight">{track.title}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">{track.desc}</p>
+              <button
+                className="w-full py-2.5 rounded text-sm font-semibold flex items-center justify-center gap-2 border transition-all"
+                style={{ borderColor: `${track.color}40`, color: track.color }}
+                disabled
+              >
+                <Clock className="w-4 h-4" /> {track.badge}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-12 rounded-xl p-8 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
+          <h3 className="font-display text-2xl font-bold text-white mb-3">Stay Updated</h3>
+          <p className="text-muted-foreground mb-6">Registration forms will open soon. Contact us to be notified when registration opens.</p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Mail className="w-4 h-4" style={{ color: TEAL }} />
+              <span>src2026@kfupm.edu.sa</span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Phone className="w-4 h-4" style={{ color: TEAL }} />
+              <span>+966 13 860 0000</span>
+            </div>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
           </div>
         </div>
       </div>
@@ -3318,7 +3737,11 @@ function MediaPage() {
                 { label: "Brand Kit / Logos", icon: <Layers className="w-4 h-4" /> },
                 { label: "Press Kit", icon: <FileText className="w-4 h-4" /> },
               ].map((item) => (
+<<<<<<< HEAD
                 <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-lg border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+=======
+                <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-xl border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   <span className="flex items-center gap-2">{item.icon}{item.label}</span>
                   <ComingSoonBadge />
                 </button>
@@ -3567,7 +3990,11 @@ function ContactPage() {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
+<<<<<<< HEAD
                 <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
+=======
+                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   {s.icon}
                 </button>
               ))}
@@ -3635,6 +4062,10 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     { label: "About", section: "about" },
     { label: "Competitions", section: "competitions" },
     { label: "Program", section: "program" },
+<<<<<<< HEAD
+=======
+    { label: "Registration", section: "registration" },
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     { label: "Teams", section: "teams" },
     { label: "Logistics", section: "logistics" },
     { label: "Partnership", section: "partnership" },
@@ -3662,7 +4093,11 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
+<<<<<<< HEAD
                 <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
+=======
+                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   {s.icon}
                 </button>
               ))}
@@ -3722,7 +4157,10 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [section, setSection] = useState<Section>("home");
+<<<<<<< HEAD
   const [regModalOpen, setRegModalOpen] = useState(false);
+=======
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   const mainRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on section change
@@ -3730,11 +4168,16 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [section]);
 
+<<<<<<< HEAD
   const openRegModal = () => setRegModalOpen(true);
   const closeRegModal = () => setRegModalOpen(false);
 
   const pages: Record<Section, React.ReactNode> = {
     home: <HomePage setSection={setSection} onRegisterOpen={openRegModal} />,
+=======
+  const pages: Record<Section, React.ReactNode> = {
+    home: <HomePage setSection={setSection} />,
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     about: <AboutPage />,
     competitions: <CompetitionsPage />,
     registration: <RegistrationPage />,
@@ -3780,15 +4223,22 @@ export default function App() {
 }
       `}</style>
 
+<<<<<<< HEAD
       <Navbar active={section} setSection={setSection} onRegisterOpen={openRegModal} />
+=======
+      <Navbar active={section} setSection={setSection} />
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
 
       <main>
         {pages[section]}
       </main>
 
       <Footer setSection={setSection} />
+<<<<<<< HEAD
 
       {regModalOpen && <RegistrationModal onClose={closeRegModal} />}
+=======
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     </div>
   );
 }

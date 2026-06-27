@@ -179,3 +179,86 @@
     line-height: 1.5;
   }
 }
+<<<<<<< HEAD
+=======
+
+/* ─── CTA button — modern shine sweep, lift, arrow nudge ──────────────────── */
+.src-cta {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform .25s cubic-bezier(.16, .84, .44, 1),
+    box-shadow .3s ease,
+    border-color .25s ease;
+}
+.src-cta:hover { transform: translateY(-1px); }
+.src-cta:active { transform: translateY(0) scale(.98); }
+
+/* Primary — teal gradient with subtle inner highlight + glow on hover */
+.src-cta-primary {
+  box-shadow:
+    0 6px 18px -8px rgba(12, 191, 206, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.src-cta-primary:hover {
+  box-shadow:
+    0 12px 30px -10px rgba(12, 191, 206, 0.75),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+/* Secondary — border lights up + soft drop glow on hover */
+.src-cta-secondary:hover {
+  border-color: rgba(12, 191, 206, 0.9);
+  box-shadow: 0 10px 24px -14px rgba(12, 191, 206, 0.55);
+}
+
+/* Diagonal shine sweep — runs once on hover */
+.src-cta-shine {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 70%
+  );
+  transform: translateX(-110%);
+  transition: transform .8s cubic-bezier(.16, .84, .44, 1);
+}
+.src-cta-secondary .src-cta-shine {
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(12, 191, 206, 0.28) 50%,
+    transparent 70%
+  );
+}
+.src-cta:hover .src-cta-shine { transform: translateX(110%); }
+
+/* Secondary fill — wipes in from the left on hover */
+.src-cta-fill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(12, 191, 206, 0.18), rgba(12, 191, 206, 0.04));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .4s cubic-bezier(.16, .84, .44, 1);
+}
+.src-cta-secondary:hover .src-cta-fill { transform: scaleX(1); }
+
+/* Arrow / chevron nudges forward on hover */
+.src-cta svg { transition: transform .25s cubic-bezier(.16, .84, .44, 1); }
+.src-cta:hover svg:last-child { transform: translateX(3px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .src-cta,
+  .src-cta-shine,
+  .src-cta-fill,
+  .src-cta svg { transition: none; }
+  .src-cta:hover { transform: none; }
+  .src-cta:hover .src-cta-shine { transform: translateX(-110%); }
+}
+>>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
