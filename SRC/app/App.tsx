@@ -8,6 +8,7 @@ import {
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
 import srcTealSvg from "@/assets/src_teal.svg";
+import srcLettersSvg from "@/assets/src_letters.svg";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -49,25 +50,31 @@ function Divider() {
 function CTAButton({ children, primary, ghost, onClick, className = "" }: {
   children: React.ReactNode; primary?: boolean; ghost?: boolean; onClick?: () => void; className?: string;
 }) {
+  if (ghost) {
+    return (
+      <button
+        onClick={onClick}
+        className={`src-cta inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide text-muted-foreground hover:text-white ${className}`}
+      >
+        <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
+      </button>
+    );
+  }
+
+  const variantClass = primary ? "src-cta-primary text-[#07111E]" : "src-cta-secondary border text-foreground";
+  const variantStyle = primary
+    ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)` }
+    : { borderColor: `${TEAL}50` };
+
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-sm tracking-wide transition-all duration-200 ${
-        primary
-          ? "text-[#07111E] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-          : ghost
-            ? "text-muted-foreground hover:text-white active:scale-[0.98]"
-            : "border text-foreground hover:bg-white/5 active:scale-[0.98]"
-      } ${className}`}
-      style={
-        primary
-          ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)` }
-          : ghost
-            ? undefined
-            : { borderColor: `${TEAL}50` }
-      }
+      className={`src-cta inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm tracking-wide ${variantClass} ${className}`}
+      style={variantStyle}
     >
-      {children}
+      {!primary && <span className="src-cta-fill" aria-hidden />}
+      <span className="src-cta-shine" aria-hidden />
+      <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
     </button>
   );
 }
@@ -1108,16 +1115,64 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* LEFT — Conference info */}
             <div className="max-w-2xl order-2 lg:order-1">
-              <div className="flex items-center gap-3 mb-6">
+              {/* Hero title — SRC letters + host + year, locked up as a single entity */}
+              <div className="mb-3 src-rise">
+                <div
+                  role="img"
+                  aria-label="SRC · AIChE · 2026"
+                  className="flex items-stretch gap-4 md:gap-5"
+                >
+                  {/* SRC letters from the logo, painted with the palette blend */}
+                  <div
+                    className="shrink-0"
+                    style={{
+                      width: "min(46%, 260px)",
+                      aspectRatio: "402 / 312.75",
+                      background:
+                        "linear-gradient(45deg, #4c90c1 10%, #ffffff 0%, #e47d1b 10%, #0f3d6a 100%)",
+                      WebkitMaskImage: `url(${srcLettersSvg})`,
+                      maskImage: `url(${srcLettersSvg})`,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "left center",
+                      maskPosition: "left center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+
+                  {/* Divider line — palette-tinted, ties the lockup together */}
+                  <div
+                    className="w-px self-stretch my-2"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, transparent 0%, #4c90c1 35%, #e47d1b 75%, transparent 100%)",
+                    }}
+                  />
+
+                  {/* Org + year — stacked, same display weight as the letters */}
+                  <div className="flex flex-col justify-center min-w-0">
+                    <span
+                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight"
+                      style={{ color: "#4c90c1" }}
+                    >
+                      AIChE
+                    </span>
+                    <span
+                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight mt-1"
+                      style={{ color: "#e47d1b" }}
+                    >
+                      2026
+                    </span>
+                  </div>
+                </div>
               </div>
 
-             
-
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4 max-w-xl">
-                The inaugural AIChE Student Regional Conference in the Gulf — bringing together the brightest minds in chemical engineering from across the GCC and beyond.
+              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-5 max-w-xl">
+              Bringing together the brightest minds in chemical engineering from across the GCC and beyond.
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-10 text-sm text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
                   <span className="font-semibold text-foreground">2026 · TBA</span>
@@ -1128,7 +1183,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-3 mb-12">
+              <div className="flex flex-wrap gap-3 mb-10">
                 <CTAButton primary onClick={() => setSection("registration")}>
                   Register Now <ArrowRight className="w-4 h-4" />
                 </CTAButton>
@@ -1136,7 +1191,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                   Learn More <ChevronRight className="w-4 h-4" />
                 </CTAButton>
                 <CTAButton onClick={() => setSection("partnership")}>
-                  Become a Partner
+                  Become a Partner <ChevronRight className="w-4 h-4" />
                 </CTAButton>
               </div>
             </div>
@@ -2558,7 +2613,7 @@ function MediaPage() {
                 { label: "Brand Kit / Logos", icon: <Layers className="w-4 h-4" /> },
                 { label: "Press Kit", icon: <FileText className="w-4 h-4" /> },
               ].map((item) => (
-                <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-lg border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+                <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-xl border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
                   <span className="flex items-center gap-2">{item.icon}{item.label}</span>
                   <ComingSoonBadge />
                 </button>
@@ -2807,7 +2862,7 @@ function ContactPage() {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
-                <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
+                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
                   {s.icon}
                 </button>
               ))}
@@ -2903,7 +2958,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
-                <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
+                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
                   {s.icon}
                 </button>
               ))}
