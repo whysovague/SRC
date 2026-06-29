@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Menu, X, ChevronDown, ChevronRight, ArrowRight, MapPin, Calendar,
   Users, Trophy, Mic2, Building2, Mail, Phone, ExternalLink, Download,
@@ -8,10 +8,7 @@ import {
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
 import srcTealSvg from "@/assets/src_teal.svg";
-<<<<<<< HEAD
-=======
 import srcLettersSvg from "@/assets/src_letters.svg";
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -53,27 +50,6 @@ function Divider() {
 function CTAButton({ children, primary, ghost, onClick, className = "" }: {
   children: React.ReactNode; primary?: boolean; ghost?: boolean; onClick?: () => void; className?: string;
 }) {
-<<<<<<< HEAD
-  return (
-    <button
-      onClick={onClick}
-      className={`inline-flex items-center gap-2 px-6 py-3 rounded font-semibold text-sm tracking-wide transition-all duration-200 ${
-        primary
-          ? "text-[#07111E] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98]"
-          : ghost
-            ? "text-muted-foreground hover:text-white active:scale-[0.98]"
-            : "border text-foreground hover:bg-white/5 active:scale-[0.98]"
-      } ${className}`}
-      style={
-        primary
-          ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)` }
-          : ghost
-            ? undefined
-            : { borderColor: `${TEAL}50` }
-      }
-    >
-      {children}
-=======
   if (ghost) {
     return (
       <button
@@ -99,7 +75,6 @@ function CTAButton({ children, primary, ghost, onClick, className = "" }: {
       {!primary && <span className="src-cta-fill" aria-hidden />}
       <span className="src-cta-shine" aria-hidden />
       <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     </button>
   );
 }
@@ -509,35 +484,6 @@ function SRCLogo({ size = 64, yOffset = 1 }: { size?: number; yOffset?: number }
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-const mainNavItems: { label: string; section: Section }[] = [
-  { label: "Home",         section: "home" },
-  { label: "Competitions", section: "competitions" },
-  { label: "Program",      section: "program" },
-  { label: "Logistics",    section: "logistics" },
-  { label: "Partnership",  section: "partnership" },
-  { label: "Contact",      section: "contact" },
-];
-
-const moreNavItems: { label: string; section: Section }[] = [
-  { label: "About",           section: "about" },
-  { label: "Teams",           section: "teams" },
-  { label: "Sponsors",        section: "sponsors" },
-  { label: "Speakers",        section: "speakers" },
-  { label: "Organizing Team", section: "organizing" },
-  { label: "Media",           section: "media" },
-  { label: "FAQ",             section: "faq" },
-];
-
-function Navbar({ active, setSection, onRegisterOpen }: { active: Section; setSection: (s: Section) => void; onRegisterOpen: () => void }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const moreRef = useRef<HTMLDivElement | null>(null);
-  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
-
-=======
 const navItems: { label: string; section: Section }[] = [
   { label: "Home", section: "home" },
   { label: "Competitions", section: "competitions" },
@@ -547,7 +493,7 @@ const navItems: { label: string; section: Section }[] = [
   { label: "Contact", section: "contact" },
 ];
 
-function Navbar({ active, setSection }: { active: Section; setSection: (s: Section) => void }) {
+function Navbar({ active, setSection, onRegisterClick }: { active: Section; setSection: (s: Section) => void; onRegisterClick: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const navRef = useRef<HTMLDivElement | null>(null);
@@ -561,33 +507,12 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
     { label: "FAQ", section: "faq" },
   ];
 
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   const updateHover = (key: string) => {
     const el = itemRefs.current[key];
     const parent = navRef.current;
     if (!el || !parent) return;
     const elR = el.getBoundingClientRect();
     const pR = parent.getBoundingClientRect();
-<<<<<<< HEAD
-    setHoverRect({ left: elR.left - pR.left, top: elR.top - pR.top, width: elR.width, height: elR.height });
-  };
-
-  // Close More dropdown when clicking outside
-  useEffect(() => {
-    if (!moreOpen) return;
-    const handler = (e: MouseEvent) => {
-      if (moreRef.current && !moreRef.current.contains(e.target as Node)) setMoreOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [moreOpen]);
-
-  const pixelNoise =
-    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
-
-  const isMoreActive = moreNavItems.some(i => i.section === active);
-
-=======
     setHoverRect({
       left: elR.left - pR.left,
       top: elR.top - pR.top,
@@ -600,7 +525,6 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
   const pixelNoise =
     "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   return (
     <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
       <div className="max-w-7xl mx-auto px-4 pt-4 pointer-events-auto">
@@ -624,10 +548,6 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
           </div>
 
           <div className="relative z-10 flex h-14 w-full items-center gap-2 rounded-full px-2">
-<<<<<<< HEAD
-            {/* Logo */}
-=======
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <button
               onClick={() => setSection("home")}
               className="relative z-10 flex h-full items-center px-2 rounded-full transition-transform hover:scale-[1.02] overflow-visible"
@@ -636,101 +556,11 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
               <SRCLogo size={72} yOffset={4} />
             </button>
 
-<<<<<<< HEAD
-            {/* Desktop nav */}
-=======
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <div
               ref={navRef}
               onMouseLeave={() => setHoverRect(null)}
               className="relative z-10 hidden lg:flex items-center gap-1"
             >
-<<<<<<< HEAD
-              {/* Animated hover ring */}
-              <span
-                aria-hidden
-                className="absolute pointer-events-none rounded-full"
-                style={{
-                  left: hoverRect?.left ?? 0, top: hoverRect?.top ?? 0,
-                  width: hoverRect?.width ?? 0, height: hoverRect?.height ?? 0,
-                  border: `1px solid ${TEAL}`,
-                  boxShadow: `0 0 0 3px ${TEAL}1A, 0 0 18px ${TEAL}55, inset 0 0 12px ${TEAL}22`,
-                  background: `${TEAL}10`,
-                  opacity: hoverRect ? 1 : 0,
-                  transition: "left 280ms cubic-bezier(.22,1,.36,1), top 280ms cubic-bezier(.22,1,.36,1), width 280ms cubic-bezier(.22,1,.36,1), height 280ms cubic-bezier(.22,1,.36,1), opacity 180ms ease",
-                }}
-              />
-
-              {mainNavItems.map((item) => (
-                <button
-                  key={item.section}
-                  ref={(el) => { itemRefs.current[item.section] = el; }}
-                  onMouseEnter={() => updateHover(item.section)}
-                  onFocus={() => updateHover(item.section)}
-                  onClick={() => setSection(item.section)}
-                  className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                    active === item.section ? "text-white" : "text-muted-foreground hover:text-white"
-                  }`}
-                  style={active === item.section ? { color: TEAL } : {}}
-                >
-                  {item.label}
-                </button>
-              ))}
-
-              {/* More dropdown */}
-              <div ref={moreRef} className="relative z-10">
-                <button
-                  ref={(el) => { itemRefs.current["__more"] = el; }}
-                  onMouseEnter={() => updateHover("__more")}
-                  onFocus={() => updateHover("__more")}
-                  onClick={() => setMoreOpen(v => !v)}
-                  className="px-4 py-2 text-sm font-medium rounded-full transition-colors flex items-center gap-1.5"
-                  style={{ color: isMoreActive ? TEAL : undefined }}
-                  aria-expanded={moreOpen}
-                >
-                  <span className={isMoreActive ? "text-[color:var(--teal)]" : "text-muted-foreground hover:text-white"}>More</span>
-                  <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${moreOpen ? "rotate-180" : ""}`}
-                    style={{ color: isMoreActive ? TEAL : "rgba(160,185,210,0.60)" }} />
-                </button>
-                {moreOpen && (
-                  <div
-                    className="absolute top-full left-0 mt-3 w-52 rounded-2xl overflow-hidden shadow-2xl z-20 py-1.5"
-                    style={{
-                      background: "rgba(10,22,40,0.92)",
-                      backdropFilter: "blur(20px) saturate(160%)",
-                      WebkitBackdropFilter: "blur(20px) saturate(160%)",
-                      border: `1px solid ${TEAL}22`,
-                      boxShadow: `0 24px 60px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(12,191,206,0.08)`,
-                    }}
-                  >
-                    {moreNavItems.map((item) => (
-                      <button
-                        key={item.section}
-                        onClick={() => { setSection(item.section); setMoreOpen(false); }}
-                        className="w-full text-left px-5 py-2.5 text-sm transition-colors flex items-center gap-2"
-                        style={{
-                          color: active === item.section ? TEAL : "rgba(160,185,210,0.80)",
-                          background: active === item.section ? `${TEAL}10` : "transparent",
-                        }}
-                        onMouseEnter={e => { if (active !== item.section) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
-                        onMouseLeave={e => { if (active !== item.section) (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-                      >
-                        {active === item.section && <span className="w-1 h-1 rounded-full flex-shrink-0" style={{ background: TEAL }} />}
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Register Now CTA */}
-            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
-              <CTAButton ghost onClick={onRegisterOpen}>Register Now</CTAButton>
-            </div>
-
-            {/* Mobile hamburger */}
-=======
             {/* Animated hover ring */}
             <span
               aria-hidden
@@ -800,11 +630,9 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
             </div>
 
             <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
-              <CTAButton ghost onClick={() => setSection("partnership")}>Become a Partner</CTAButton>
-              <CTAButton ghost onClick={() => setSection("registration")}>Register Now</CTAButton>
+              <CTAButton primary onClick={onRegisterClick}>Register Now</CTAButton>
             </div>
 
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             <button
               className="lg:hidden relative z-10 text-foreground h-10 w-10 rounded-full flex items-center justify-center overflow-hidden ml-auto"
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -821,11 +649,7 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
         <div
           className="lg:hidden mx-4 mt-3 rounded-3xl overflow-hidden pointer-events-auto relative"
           style={{
-<<<<<<< HEAD
-            background: "rgba(7,17,30,0.92)",
-=======
             background: "rgba(7,17,30,0.85)",
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
             backdropFilter: "blur(18px) saturate(160%)",
             WebkitBackdropFilter: "blur(18px) saturate(160%)",
             border: `1px solid ${TEAL}25`,
@@ -838,36 +662,18 @@ function Navbar({ active, setSection }: { active: Section; setSection: (s: Secti
             style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
           />
           <div className="relative z-10">
-<<<<<<< HEAD
-            {[...mainNavItems, ...moreNavItems].map((item, i, arr) => (
-              <button
-                key={item.section}
-                onClick={() => { setSection(item.section); setMobileOpen(false); }}
-                className="w-full text-left px-6 py-3 text-sm transition-colors"
-                style={{
-                  color: active === item.section ? TEAL : "rgba(160,185,210,0.75)",
-                  borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                }}
-=======
             {[...navItems, ...moreNav].map((item) => (
               <button
                 key={item.section}
                 onClick={() => { setSection(item.section); setMobileOpen(false); }}
                 className="w-full text-left px-6 py-3 text-sm text-muted-foreground hover:text-white border-b border-white/5 transition-colors"
                 style={active === item.section ? { color: TEAL } : {}}
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
               >
                 {item.label}
               </button>
             ))}
-<<<<<<< HEAD
-            <div className="px-6 py-4">
-              <CTAButton primary onClick={() => { onRegisterOpen(); setMobileOpen(false); }}>Register Now</CTAButton>
-=======
             <div className="px-6 py-4 flex flex-col gap-3">
-              <CTAButton ghost onClick={() => { setSection("partnership"); setMobileOpen(false); }}>Become a Partner</CTAButton>
-              <CTAButton primary onClick={() => { setSection("registration"); setMobileOpen(false); }}>Register Now</CTAButton>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+              <CTAButton primary onClick={() => { onRegisterClick(); setMobileOpen(false); }}>Register Now</CTAButton>
             </div>
           </div>
         </div>
@@ -1097,11 +903,7 @@ function CountUp({ to, suffix = "", duration = 6000 }: { to: number; suffix?: st
 }
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
-<<<<<<< HEAD
-function HomePage({ setSection, onRegisterOpen }: { setSection: (s: Section) => void; onRegisterOpen: () => void }) {
-=======
-function HomePage({ setSection }: { setSection: (s: Section) => void }) {
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) => void; onRegisterClick: () => void }) {
   const aboutSectionRef = useRef<HTMLElement | null>(null);
   const stats: { to: number; suffix: string; label: string }[] = [
     { to: 1000, suffix: "+", label: "Expected Participants" },
@@ -1311,18 +1113,6 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* LEFT — Conference info */}
             <div className="max-w-2xl order-2 lg:order-1">
-<<<<<<< HEAD
-              <div className="flex items-center gap-3 mb-6">
-              </div>
-
-             
-
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed mb-4 max-w-xl">
-                The inaugural AIChE Student Regional Conference in the Gulf — bringing together the brightest minds in chemical engineering from across the GCC and beyond.
-              </p>
-
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-10 text-sm text-muted-foreground">
-=======
               {/* Hero title — SRC letters + host + year, locked up as a single entity */}
               <div className="mb-3 src-rise">
                 <div
@@ -1381,7 +1171,6 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
               </p>
 
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 text-sm text-muted-foreground">
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                 <span className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
                   <span className="font-semibold text-foreground">2026 · TBA</span>
@@ -1392,24 +1181,16 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
                 </span>
               </div>
 
-<<<<<<< HEAD
-              <div className="flex flex-wrap gap-3 mb-12">
-                <CTAButton primary onClick={onRegisterOpen}>
-=======
               <div className="flex flex-wrap gap-3 mb-10">
-                <CTAButton primary onClick={() => setSection("registration")}>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+                <CTAButton primary onClick={onRegisterClick}>
                   Register Now <ArrowRight className="w-4 h-4" />
                 </CTAButton>
                 <CTAButton onClick={scrollToAbout}>
                   Learn More <ChevronRight className="w-4 h-4" />
                 </CTAButton>
-<<<<<<< HEAD
-=======
                 <CTAButton onClick={() => setSection("partnership")}>
                   Become a Partner <ChevronRight className="w-4 h-4" />
                 </CTAButton>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
               </div>
             </div>
 
@@ -1628,11 +1409,7 @@ function HomePage({ setSection }: { setSection: (s: Section) => void }) {
             SRC 2026 is the first-ever AIChE Student Regional Conference hosted in the GCC. Don't miss your chance to compete, learn, and connect.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-<<<<<<< HEAD
-            <CTAButton primary onClick={onRegisterOpen}>Register Now <ArrowRight className="w-4 h-4" /></CTAButton>
-=======
-            <CTAButton primary onClick={() => setSection("registration")}>Register Now <ArrowRight className="w-4 h-4" /></CTAButton>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+            <CTAButton primary onClick={onRegisterClick}>Register Now <ArrowRight className="w-4 h-4" /></CTAButton>
             <CTAButton onClick={() => setSection("contact")}>Contact Us</CTAButton>
           </div>
         </div>
@@ -1729,242 +1506,79 @@ function AboutPage() {
   );
 }
 
-<<<<<<< HEAD
-// ─── Competitions Page (redesigned) ───────────────────────────────────────────
-function useReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(mq.matches);
-    update();
-    mq.addEventListener?.("change", update);
-    return () => mq.removeEventListener?.("change", update);
-  }, []);
-  return reduced;
-}
-
-type CompItem = {
-  icon: React.ReactNode;
-  title: string;
-  category: "Competition" | "Activity";
-  desc: string;
-  details: string[];
-  color: string;
-};
-
-function CompGlassCard({ item }: { item: CompItem }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
-
-  const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    const y = (e.clientY - r.top) / r.height;
-    const mx = (x * 100).toFixed(1) + "%";
-    const my = (y * 100).toFixed(1) + "%";
-    el.style.setProperty("--mx", mx);
-    el.style.setProperty("--my", my);
-    if (glowRef.current) {
-      glowRef.current.style.setProperty("--mx", mx);
-      glowRef.current.style.setProperty("--my", my);
-    }
-    if (!reduced) {
-      el.style.setProperty("--ry", `${((x - 0.5) * 10).toFixed(2)}deg`);
-      el.style.setProperty("--rx", `${(-(y - 0.5) * 10).toFixed(2)}deg`);
-    }
-  };
-
-  const handleEnter = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.setProperty("--active", "1");
-  };
-
-  const handleLeave = () => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.setProperty("--rx", "0deg");
-    el.style.setProperty("--ry", "0deg");
-    el.style.setProperty("--active", "0");
-  };
-
-  return (
-    <div className="cmp-perspective h-full">
-      <div
-        ref={ref}
-        onPointerMove={handleMove}
-        onPointerEnter={handleEnter}
-        onPointerLeave={handleLeave}
-        className="cmp-card group"
-        style={{"--accent": item.color, "--active": "0", "--rx": "0deg", "--ry": "0deg", "--mx": "50%", "--my": "50%"} as React.CSSProperties}
-      >
-        <div ref={glowRef} className="cmp-glow" style={{"--mx": "50%", "--my": "50%"} as React.CSSProperties} />
-        <div className="cmp-sheen" />
-        <div className="relative z-[2] flex h-full flex-col p-7">
-          <div className="mb-5 flex items-start justify-between">
-            <div
-              className="flex h-14 w-14 items-center justify-center rounded-xl border-2 backdrop-blur-sm"
-              style={{ color: item.color, background: `${item.color}1A`, borderColor: `${item.color}66` }}
-            >
-              {item.icon}
-            </div>
-            <span
-              className="rounded-full border px-3 py-1 font-mono text-[11px] font-semibold tracking-wide"
-              style={{ color: item.color, background: `${item.color}18`, borderColor: `${item.color}50` }}
-            >
-              {item.category}
-            </span>
-          </div>
-          <h3 className="font-display mb-3 text-xl font-bold text-white leading-tight">{item.title}</h3>
-          <p className="mb-6 text-sm leading-relaxed" style={{ color: "rgba(180,200,220,0.80)" }}>{item.desc}</p>
-          <ul className="mb-7 space-y-2.5">
-            {item.details.map((d) => (
-              <li key={d} className="flex items-center gap-2.5 text-sm" style={{ color: "rgba(160,185,210,0.75)" }}>
-                <CheckCircle className="h-4 w-4 flex-shrink-0" style={{ color: item.color }} />
-                {d}
-              </li>
-            ))}
-          </ul>
-          <button type="button" className="cmp-glass-btn mt-auto" style={{"--btn-color": item.color} as React.CSSProperties}>
-            View details <ArrowRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function CompetitionsPage() {
-  const competitions: CompItem[] = [
-=======
 // ─── Competitions Page ────────────────────────────────────────────────────────
 function CompetitionsPage() {
   const competitions = [
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     {
       icon: <FlaskConical className="w-7 h-7" />,
       title: "Chem-E-Car",
       category: "Competition",
-<<<<<<< HEAD
-      desc: "Design and build a car powered by a chemical reaction that travels a set distance and stops on cue.",
-      details: ["Team-based", "Design, build & present", "Chemical power & braking"],
-=======
       desc: "Teams design and build a car powered by a chemical energy source that can travel a specified distance and stop using a chemical stopping mechanism. One of AIChE's most iconic student challenges.",
       details: ["Team-based competition", "Design, build & present", "Chemical power & stopping mechanism"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Trophy className="w-7 h-7" />,
       title: "ChemE Jeopardy",
       category: "Competition",
-<<<<<<< HEAD
-      desc: "A fast-paced, Jeopardy-style trivia battle across the full breadth of chemical engineering.",
-      details: ["Team of 3–4", "Live Q&A format", "All ChE disciplines"],
-=======
       desc: "A fast-paced, Jeopardy-style trivia competition testing breadth of chemical engineering knowledge — from thermodynamics to reactor design to safety.",
       details: ["Team of 3-4 students", "Live Q&A format", "All ChE disciplines"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Presentation className="w-7 h-7" />,
-<<<<<<< HEAD
-      title: "Technical Presentation",
-      category: "Competition",
-      desc: "Students present original research to a panel of industry and academic judges.",
-      details: ["Individual", "Industry judges", "Research focus"],
-=======
       title: "Student Technical Presentation",
       category: "Competition",
       desc: "Individual students present original technical research or analysis to a panel of industry and academic judges. Builds critical presentation and communication skills.",
       details: ["Individual presentations", "Industry judges", "Research & analysis focus"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <FileText className="w-7 h-7" />,
-<<<<<<< HEAD
-      title: "Poster Competition",
-      category: "Competition",
-      desc: "Present research in a poster format, engaging judges and attendees in an open gallery.",
-      details: ["Research poster", "Judge engagement", "Open gallery"],
-=======
       title: "Undergraduate Poster Competition",
       category: "Competition",
       desc: "Students present their research and technical projects in a poster format, engaging directly with judges and attendees in a dynamic gallery setting.",
       details: ["Research poster", "Peer & judge engagement", "Open gallery format"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Zap className="w-7 h-7" />,
       title: "Youth Pulse",
       category: "Activity",
-<<<<<<< HEAD
-      desc: "Hands-on demos, mentoring, and career exposure for younger and prospective engineers.",
-      details: ["Mentorship", "Hands-on demos", "Career guidance"],
-=======
       desc: "An energetic program designed for younger engineering students and prospective engineers, featuring hands-on demos, mentoring sessions, and career exposure.",
       details: ["Mentorship sessions", "Hands-on demos", "Career guidance"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Wrench className="w-7 h-7" />,
       title: "Workshops",
       category: "Activity",
-<<<<<<< HEAD
-      desc: "Practical skills sessions led by industry experts — from process safety to AI in ChE.",
-      details: ["Industry-led", "Hands-on learning", "Multiple tracks"],
-=======
       desc: "Practical, skills-based sessions led by industry experts and faculty. Topics range from process safety to digital engineering tools and AI in chemical engineering.",
       details: ["Industry-led sessions", "Hands-on learning", "Multiple tracks"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <MessageSquare className="w-7 h-7" />,
       title: "Panels & Sessions",
       category: "Activity",
-<<<<<<< HEAD
-      desc: "Moderated panels with leaders from industry, academia, and startups on the future of energy.",
-      details: ["Expert panelists", "Q&A sessions", "Industry insight"],
-=======
       desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
       details: ["Expert panelists", "Q&A sessions", "Industry insights"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
     {
       icon: <Network className="w-7 h-7" />,
-<<<<<<< HEAD
-      title: "Networking",
-      category: "Activity",
-      desc: "Dedicated networking hours, a career fair, and structured engagement with employers.",
-      details: ["Career fair", "Company booths", "Structured mixers"],
-=======
       title: "Networking & Industry Engagement",
       category: "Activity",
       desc: "Dedicated networking hours, a career fair, and structured industry engagement activities connecting students directly with potential employers and mentors.",
       details: ["Career fair", "Company booths", "Structured networking"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: ORANGE,
     },
     {
       icon: <Lightbulb className="w-7 h-7" />,
       title: "Additional Programs",
       category: "Activity",
-<<<<<<< HEAD
-      desc: "Cultural tours, social events, an opening ceremony and a closing gala — the full experience.",
-      details: ["Opening ceremony", "Closing gala", "Cultural tours"],
-=======
       desc: "Cultural tours, social events, an opening ceremony, closing gala, and more — making SRC 2026 an unforgettable complete experience.",
       details: ["Opening ceremony", "Closing gala", "Cultural activities"],
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
       color: TEAL,
     },
   ];
@@ -1972,235 +1586,6 @@ function CompetitionsPage() {
   const [filter, setFilter] = useState<"All" | "Competition" | "Activity">("All");
   const filtered = competitions.filter((c) => filter === "All" || c.category === filter);
 
-<<<<<<< HEAD
-  const highlights = [
-    { icon: <Zap className="h-5 w-5" />, title: "Why Compete", color: TEAL, text: "Sharpen technical skills, compete at the highest level, and build professional networks that last a career." },
-    { icon: <Network className="h-5 w-5" />, title: "Who Can Join", color: ORANGE, text: "Undergraduate chemical engineering students from universities across the GCC and the broader region." },
-  ];
-
-  return (
-    <div className="relative overflow-hidden pb-32">
-      <style>{`
-        @keyframes srcFloat { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(0,-28px) scale(1.04);} }
-        @keyframes srcDrift { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(22px,18px) scale(1.08);} }
-        @keyframes srcGlowPulse { 0%,100%{opacity:.45;} 50%{opacity:.85;} }
-
-        .cmp-perspective { perspective: 1200px; }
-        .cmp-card {
-          position: relative; height: 100%; border-radius: 20px; overflow: hidden;
-          background: linear-gradient(155deg, rgba(22,36,56,0.75) 0%, rgba(11,20,35,0.65) 100%);
-          border: 1px solid rgba(255,255,255,0.08);
-          -webkit-backdrop-filter: blur(20px) saturate(140%);
-          backdrop-filter: blur(20px) saturate(140%);
-          box-shadow:
-            0 2px 0 0 rgba(255,255,255,0.06) inset,
-            0 -1px 0 0 rgba(0,0,0,0.4) inset,
-            0 24px 48px -20px rgba(0,0,0,0.85);
-          transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
-          transform-style: preserve-3d; will-change: transform;
-          transition:
-            transform 0.25s cubic-bezier(0.23, 1, 0.32, 1),
-            box-shadow 0.25s ease,
-            border-color 0.25s ease;
-          cursor: pointer;
-        }
-        .cmp-card:hover {
-          border-color: rgba(var(--accent-rgb, 232,124,42), 0.50);
-          box-shadow:
-            0 2px 0 0 rgba(255,255,255,0.10) inset,
-            0 -1px 0 0 rgba(0,0,0,0.5) inset,
-            0 32px 64px -24px rgba(0,0,0,0.90),
-            0 0 80px -30px rgba(var(--accent-rgb, 232,124,42), 0.55);
-        }
-        .cmp-glow {
-          position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
-          background: radial-gradient(
-            480px circle at var(--mx, 50%) var(--my, 50%),
-            rgba(var(--accent-rgb, 232,124,42), 0.22) 0%,
-            rgba(var(--accent-rgb, 232,124,42), 0.08) 35%,
-            transparent 65%
-          );
-          opacity: calc(var(--active, 0) * 1);
-          transition: opacity 0.2s ease;
-        }
-        .cmp-sheen {
-          position: absolute; inset: 0; z-index: 1; pointer-events: none; border-radius: inherit;
-          background: linear-gradient(
-            135deg,
-            rgba(255,255,255,0.00) 0%,
-            rgba(255,255,255,0.06) 40%,
-            rgba(255,255,255,0.12) 50%,
-            rgba(255,255,255,0.06) 60%,
-            rgba(255,255,255,0.00) 100%
-          );
-          opacity: calc(var(--active, 0) * 0.8);
-          transition: opacity 0.2s ease;
-        }
-        .cmp-glass-btn {
-          display: inline-flex; width: 100%; align-items: center; justify-content: center; gap: .5rem;
-          padding: .8rem 1.2rem; border-radius: 14px; font-weight: 700; font-size: .95rem;
-          color: rgba(255, 235, 210, 0.95);
-          background: linear-gradient(135deg, rgba(232,124,42,0.20), rgba(180,90,20,0.12));
-          border: 1px solid rgba(232,124,42,0.50);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.20),
-            inset 0 -1px 0 rgba(0,0,0,0.30),
-            0 6px 20px -8px rgba(232,124,42,0.50);
-          transition: transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-        }
-        .cmp-glass-btn:hover {
-          color: #fff;
-          background: linear-gradient(135deg, rgba(232,124,42,0.38), rgba(200,105,30,0.24));
-          border-color: rgba(232,124,42,0.80);
-          box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.28),
-            inset 0 -1px 0 rgba(0,0,0,0.35),
-            0 10px 28px -8px rgba(232,124,42,0.80);
-          transform: translateY(-1px);
-        }
-        .cmp-glass-btn:active { transform: scale(.97) translateY(0); }
-        .cmp-chip {
-          padding: .5rem 1.1rem; border-radius: 10px; border: 1px solid;
-          font-size: .875rem; font-weight: 600; transition: all .2s ease; cursor: pointer;
-        }
-        .cmp-chip:active { transform: scale(.97); }
-        @media (prefers-reduced-motion: reduce) {
-          .cmp-card { transform: none !important; transition: border-color .3s ease, box-shadow .3s ease; }
-          .cmp-glow, .cmp-sheen { display: none; }
-        }
-        @media (hover: none) {
-          .cmp-card { transform: none !important; }
-          .cmp-glow { opacity: 0.4 !important; }
-        }
-      
-        .cmp-gradient {
-          background: linear-gradient(100deg, #54cfe4 0%, #a6d2c1 26%, #ddd3bc 52%, #e9b277 76%, #E8842F 100%);
-          -webkit-background-clip: text; background-clip: text;
-          color: transparent; -webkit-text-fill-color: transparent;
-        }
-        .cmp-info {
-          position: relative; overflow: hidden; border-radius: 16px;
-          background: linear-gradient(160deg, rgba(20,32,50,0.55), rgba(13,24,40,0.42));
-          border: 1px solid rgba(232,124,42,0.16);
-          -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
-          transition: border-color .3s ease, box-shadow .3s ease, transform .3s ease;
-        }
-        .cmp-info:hover {
-          border-color: rgba(232,124,42,0.40);
-          box-shadow: 0 18px 40px -26px rgba(0,0,0,0.8), 0 0 50px -30px rgba(232,124,42,0.5), inset 0 1px 0 rgba(255,255,255,0.10);
-          transform: translateY(-2px);
-        }
-        .cmp-info-glow {
-          position: absolute; inset: 0; pointer-events: none;
-          background: radial-gradient(300px circle at 85% 12%, rgba(232,124,42,0.20), transparent 60%);
-        }
-`}</style>
-
-      {/* ── About-style molecule-network background (warmer, pointer-aware) ── */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          maskImage: "radial-gradient(ellipse 90% 75% at 50% 28%, black 30%, transparent 88%)",
-          WebkitMaskImage: "radial-gradient(ellipse 90% 75% at 50% 28%, black 30%, transparent 88%)",
-        }}
-      >
-        <MoleculeNetwork warmRatio={0.3} interactive opacity={0.5} />
-        <div
-          className="absolute -left-24 -top-24 h-[420px] w-[420px] rounded-full"
-          style={{ background: `radial-gradient(circle, ${TEAL}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "srcFloat 16s ease-in-out infinite, srcGlowPulse 10s ease-in-out infinite" }}
-        />
-        <div
-          className="absolute right-0 top-40 h-[480px] w-[480px] rounded-full"
-          style={{ background: `radial-gradient(circle, ${ORANGE}22 0%, transparent 65%)`, filter: "blur(80px)", animation: "srcDrift 20s ease-in-out infinite, srcGlowPulse 12s ease-in-out infinite" }}
-        />
-      </div>
-
-      {/* ── Hero ── */}
-      <section className="relative pt-32 pb-12">
-        <div className="relative mx-auto max-w-7xl px-6">
-          <div className="flex items-center gap-3">
-            <span className="h-px w-12" style={{ background: TEAL }} />
-            <span className="font-mono text-xs uppercase tracking-[0.25em]" style={{ color: TEAL }}>
-              What Awaits You
-            </span>
-          </div>
-
-          <h1 className="font-display mt-6 text-5xl font-black leading-[0.95] tracking-tight sm:text-6xl lg:text-7xl">
-            <span className="block text-white">Competitions &amp;</span>
-            <span className="cmp-gradient block">Activities</span>
-          </h1>
-
-          <div className="mt-12 grid items-start gap-10 lg:grid-cols-[1.25fr_0.85fr]">
-            {/* intro */}
-            <div className="relative pl-6">
-              <span
-                className="absolute bottom-1.5 left-0 top-1.5 w-[3px] rounded-full"
-                style={{ background: `linear-gradient(${TEAL}, ${ORANGE})` }}
-              />
-              <p className="text-xl leading-relaxed text-foreground sm:text-2xl">
-                SRC 2026 delivers a rich program of technical competitions, professional development, and networking &mdash; engineered to challenge and inspire chemical engineering students across the GCC.
-              </p>
-              <p className="mt-6 leading-relaxed text-muted-foreground">
-                From Chem-E-Car and ChemE Jeopardy to presentations, workshops, and a full slate of activities &mdash; there&rsquo;s a place for every engineer to compete, learn, and connect.
-              </p>
-            </div>
-
-            {/* highlight glass cards */}
-            <div className="space-y-5">
-              {highlights.map((h) => (
-                <div key={h.title} className="cmp-info">
-                  <div className="cmp-info-glow" />
-                  <div className="relative z-[2] p-6">
-                    <div className="mb-3 flex items-center gap-3">
-                      <div
-                        className="flex h-10 w-10 items-center justify-center rounded-lg border"
-                        style={{ color: h.color, background: `${h.color}1A`, borderColor: `${h.color}55` }}
-                      >
-                        {h.icon}
-                      </div>
-                      <h3 className="font-display text-lg font-bold text-white">{h.title}</h3>
-                    </div>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{h.text}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Filters + grid ── */}
-      <div className="relative mx-auto max-w-7xl px-6">
-        <div className="mt-2">
-          <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em]" style={{ color: TEAL }}>
-            Browse by type
-          </p>
-          <div className="flex flex-wrap gap-3">
-            {(["All", "Competition", "Activity"] as const).map((f) => {
-              const active = filter === f;
-              return (
-                <button
-                  key={f}
-                  onClick={() => setFilter(f)}
-                  className="cmp-chip"
-                  style={
-                    active
-                      ? { background: ORANGE, color: "#07111E", borderColor: ORANGE }
-                      : { background: `${ORANGE}14`, color: "var(--muted-foreground)", borderColor: `${ORANGE}3A` }
-                  }
-                >
-                  {f}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-10 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item) => (
-            <CompGlassCard key={item.title} item={item} />
-=======
   return (
     <div className="pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6">
@@ -2256,7 +1641,6 @@ function CompetitionsPage() {
                 </ul>
               </div>
             </InteractiveCard>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
           ))}
         </div>
       </div>
@@ -2264,506 +1648,6 @@ function CompetitionsPage() {
   );
 }
 
-<<<<<<< HEAD
-
-// ─── Registration Modal ───────────────────────────────────────────────────────
-
-type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;
-type CompetitionChoice = "chem-e-car" | "jeopardy" | "presentation" | "poster" | null;
-
-interface RegFormData {
-  // Participant
-  p_name: string; p_email: string; p_org: string; p_position: string; p_country: string;
-  // Team
-  t_competition: CompetitionChoice;
-  t_teamName: string; t_leaderName: string; t_leaderEmail: string;
-  t_university: string; t_country: string; t_members: string;
-  // Speaker
-  s_name: string; s_email: string; s_org: string; s_position: string; s_country: string; s_role: string;
-  // Volunteer
-  v_name: string; v_email: string; v_university: string; v_major: string; v_country: string;
-  // Partner
-  pr_company: string; pr_contact: string; pr_email: string; pr_position: string; pr_country: string; pr_interest: string;
-}
-
-const emptyForm: RegFormData = {
-  p_name: "", p_email: "", p_org: "", p_position: "", p_country: "",
-  t_competition: null, t_teamName: "", t_leaderName: "", t_leaderEmail: "", t_university: "", t_country: "", t_members: "",
-  s_name: "", s_email: "", s_org: "", s_position: "", s_country: "", s_role: "",
-  v_name: "", v_email: "", v_university: "", v_major: "", v_country: "",
-  pr_company: "", pr_contact: "", pr_email: "", pr_position: "", pr_country: "", pr_interest: "",
-};
-
-function RegInput({ label, value, onChange, type = "text", placeholder = "", required = true }: {
-  label: string; value: string; onChange: (v: string) => void;
-  type?: string; placeholder?: string; required?: boolean;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(160,185,210,0.70)" }}>
-        {label}{required && <span style={{ color: ORANGE }}>*</span>}
-      </label>
-      <input
-        type={type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-xl px-4 py-3 text-sm text-white outline-none transition-all"
-        style={{
-          background: "rgba(7,17,30,0.70)",
-          border: `1px solid rgba(12,191,206,0.20)`,
-          backdropFilter: "blur(8px)",
-        }}
-        onFocus={e => { e.target.style.borderColor = `${TEAL}80`; e.target.style.boxShadow = `0 0 0 3px ${TEAL}18`; }}
-        onBlur={e => { e.target.style.borderColor = "rgba(12,191,206,0.20)"; e.target.style.boxShadow = "none"; }}
-      />
-    </div>
-  );
-}
-
-function RegSelect({ label, value, onChange, options, required = true }: {
-  label: string; value: string; onChange: (v: string) => void;
-  options: { value: string; label: string }[]; required?: boolean;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "rgba(160,185,210,0.70)" }}>
-        {label}{required && <span style={{ color: ORANGE }}>*</span>}
-      </label>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        className="w-full rounded-xl px-4 py-3 text-sm text-white outline-none transition-all appearance-none"
-        style={{
-          background: "rgba(7,17,30,0.70)",
-          border: `1px solid rgba(12,191,206,0.20)`,
-          backdropFilter: "blur(8px)",
-        }}
-        onFocus={e => { e.target.style.borderColor = `${TEAL}80`; e.target.style.boxShadow = `0 0 0 3px ${TEAL}18`; }}
-        onBlur={e => { e.target.style.borderColor = "rgba(12,191,206,0.20)"; e.target.style.boxShadow = "none"; }}
-      >
-        <option value="" style={{ background: "#07111E" }}>Select…</option>
-        {options.map(o => <option key={o.value} value={o.value} style={{ background: "#07111E" }}>{o.label}</option>)}
-      </select>
-    </div>
-  );
-}
-
-function RegistrationModal({ onClose }: { onClose: () => void }) {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-  const [regType, setRegType] = useState<RegType>(null);
-  const [form, setForm] = useState<RegFormData>(emptyForm);
-  const [submitted, setSubmitted] = useState(false);
-  const overlayRef = useRef<HTMLDivElement>(null);
-
-  const set = (key: keyof RegFormData) => (val: string) =>
-    setForm(prev => ({ ...prev, [key]: val }));
-
-  // Close on overlay click
-  const handleOverlay = (e: React.MouseEvent) => {
-    if (e.target === overlayRef.current) onClose();
-  };
-
-  // Lock body scroll
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
-  }, []);
-
-  // Validation
-  const isStep2Valid = (): boolean => {
-    if (regType === "participant") return !!(form.p_name && form.p_email && form.p_org && form.p_position && form.p_country);
-    if (regType === "team") return !!(form.t_competition && form.t_teamName && form.t_leaderName && form.t_leaderEmail && form.t_university && form.t_country && form.t_members);
-    if (regType === "speaker") return !!(form.s_name && form.s_email && form.s_org && form.s_position && form.s_country && form.s_role);
-    if (regType === "volunteer") return !!(form.v_name && form.v_email && form.v_university && form.v_major && form.v_country);
-    if (regType === "partner") return !!(form.pr_company && form.pr_contact && form.pr_email && form.pr_position && form.pr_country && form.pr_interest);
-    return false;
-  };
-
-  const regTypeLabels: Record<NonNullable<RegType>, string> = {
-    participant: "Participant", team: "Competition Team",
-    speaker: "Speaker / Judge / Mentor", volunteer: "Volunteer", partner: "Partner / Sponsor",
-  };
-
-  const competitionLabels: Record<NonNullable<CompetitionChoice>, string> = {
-    "chem-e-car": "Chem-E-Car", jeopardy: "ChemE Jeopardy",
-    presentation: "Technical Presentation", poster: "Poster Competition",
-  };
-
-  const summaryRows = (): { label: string; value: string }[] => {
-    if (regType === "participant") return [
-      { label: "Type", value: "Participant" },
-      { label: "Full Name", value: form.p_name }, { label: "Email", value: form.p_email },
-      { label: "Organization", value: form.p_org }, { label: "Position", value: form.p_position },
-      { label: "Country", value: form.p_country },
-    ];
-    if (regType === "team") return [
-      { label: "Type", value: "Competition Team" },
-      { label: "Competition", value: competitionLabels[form.t_competition!] },
-      { label: "Team Name", value: form.t_teamName }, { label: "Team Leader", value: form.t_leaderName },
-      { label: "Leader Email", value: form.t_leaderEmail }, { label: "University", value: form.t_university },
-      { label: "Country", value: form.t_country }, { label: "Team Members", value: form.t_members },
-    ];
-    if (regType === "speaker") return [
-      { label: "Type", value: "Speaker / Judge / Mentor" },
-      { label: "Full Name", value: form.s_name }, { label: "Email", value: form.s_email },
-      { label: "Organization", value: form.s_org }, { label: "Position", value: form.s_position },
-      { label: "Country", value: form.s_country }, { label: "Role", value: form.s_role },
-    ];
-    if (regType === "volunteer") return [
-      { label: "Type", value: "Volunteer" },
-      { label: "Full Name", value: form.v_name }, { label: "Email", value: form.v_email },
-      { label: "University", value: form.v_university }, { label: "Major", value: form.v_major },
-      { label: "Country", value: form.v_country },
-    ];
-    if (regType === "partner") return [
-      { label: "Type", value: "Partner / Sponsor" },
-      { label: "Company", value: form.pr_company }, { label: "Contact Person", value: form.pr_contact },
-      { label: "Email", value: form.pr_email }, { label: "Position", value: form.pr_position },
-      { label: "Country", value: form.pr_country }, { label: "Interest", value: form.pr_interest },
-    ];
-    return [];
-  };
-
-  const steps = ["Select Type", "Fill Information", "Review & Submit"];
-
-  const competitions: { id: CompetitionChoice; icon: React.ReactNode; title: string; desc: string; color: string }[] = [
-    { id: "chem-e-car", icon: <FlaskConical className="w-6 h-6" />, title: "Chem-E-Car", desc: "Design & build a chemically-powered car", color: TEAL },
-    { id: "jeopardy", icon: <Trophy className="w-6 h-6" />, title: "ChemE Jeopardy", desc: "Fast-paced trivia battle", color: ORANGE },
-    { id: "presentation", icon: <Presentation className="w-6 h-6" />, title: "Technical Presentation", desc: "Present original research to judges", color: TEAL },
-    { id: "poster", icon: <FileText className="w-6 h-6" />, title: "Poster Competition", desc: "Present research in an open gallery", color: ORANGE },
-  ];
-
-  const typeCards: { id: RegType; icon: React.ReactNode; title: string; desc: string; color: string }[] = [
-    { id: "participant", icon: <Users className="w-7 h-7" />, title: "Participant", desc: "Attend sessions, workshops, panels & networking events.", color: TEAL },
-    { id: "team", icon: <Trophy className="w-7 h-7" />, title: "Competition Team", desc: "Register your team for Chem-E-Car, Jeopardy, and more.", color: ORANGE },
-    { id: "speaker", icon: <Mic2 className="w-7 h-7" />, title: "Speaker / Judge / Mentor", desc: "Share expertise as a speaker, judge, or career mentor.", color: TEAL },
-    { id: "volunteer", icon: <Heart className="w-7 h-7" />, title: "Volunteer", desc: "Help make SRC 2026 an unforgettable conference.", color: ORANGE },
-    { id: "partner", icon: <Building2 className="w-7 h-7" />, title: "Partner / Sponsor", desc: "Connect your organization with future engineers.", color: TEAL },
-  ];
-
-  if (submitted) {
-    return (
-      <div ref={overlayRef} onClick={handleOverlay}
-        className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-        style={{ background: "rgba(4,10,20,0.85)", backdropFilter: "blur(12px)" }}
-      >
-        <div className="relative w-full max-w-md rounded-3xl p-10 text-center"
-          style={{
-            background: "linear-gradient(155deg,rgba(18,32,52,0.96),rgba(9,18,34,0.98))",
-            border: `1px solid ${TEAL}35`,
-            boxShadow: `0 40px 100px -20px rgba(0,0,0,0.9), 0 0 80px -40px ${TEAL}40`,
-          }}>
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center"
-            style={{ background: `${TEAL}20`, border: `2px solid ${TEAL}60` }}>
-            <CheckCircle className="w-10 h-10" style={{ color: TEAL }} />
-          </div>
-          <h2 className="font-display text-2xl font-bold text-white mb-3">Registration Submitted!</h2>
-          <p className="text-muted-foreground mb-8 leading-relaxed">
-            Thank you for registering for SRC 2026. We'll be in touch shortly with confirmation details.
-          </p>
-          <button onClick={onClose}
-            className="w-full py-3 rounded-xl font-bold text-sm transition-all hover:opacity-90"
-            style={{ background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }}>
-            Close
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div ref={overlayRef} onClick={handleOverlay}
-      className="fixed inset-0 z-[200] flex items-start justify-center overflow-y-auto py-6 px-4"
-      style={{ background: "rgba(4,10,20,0.88)", backdropFilter: "blur(14px)" }}
-    >
-      <style>{`
-        @keyframes regModalIn {
-          from { opacity: 0; transform: translateY(28px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .reg-modal { animation: regModalIn 0.35s cubic-bezier(.16,.84,.44,1) both; }
-        .reg-step-fade { animation: regModalIn 0.25s cubic-bezier(.16,.84,.44,1) both; }
-        .reg-type-card {
-          cursor: pointer; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08);
-          background: linear-gradient(155deg, rgba(20,34,54,0.80), rgba(10,20,38,0.70));
-          backdrop-filter: blur(16px);
-          transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .reg-type-card:hover {
-          transform: translateY(-3px);
-          border-color: rgba(12,191,206,0.45);
-          box-shadow: 0 16px 40px -16px rgba(0,0,0,0.7), 0 0 40px -20px rgba(12,191,206,0.35);
-        }
-        .reg-type-card.selected {
-          border-color: rgba(12,191,206,0.70) !important;
-          box-shadow: 0 0 0 2px rgba(12,191,206,0.25), 0 16px 40px -16px rgba(0,0,0,0.7) !important;
-        }
-        .reg-comp-card {
-          cursor: pointer; border-radius: 14px; border: 1px solid rgba(255,255,255,0.07);
-          background: linear-gradient(155deg, rgba(18,30,50,0.80), rgba(9,18,34,0.70));
-          transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .reg-comp-card:hover { transform: translateY(-2px); }
-        .reg-comp-card.selected {
-          border-color: rgba(232,124,42,0.65) !important;
-          box-shadow: 0 0 0 2px rgba(232,124,42,0.20), 0 12px 32px -12px rgba(0,0,0,0.6) !important;
-        }
-        .reg-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .reg-submit-btn:not(:disabled):hover { opacity: 0.92; transform: translateY(-1px); }
-      `}</style>
-
-      <div className="reg-modal relative w-full max-w-2xl my-auto rounded-3xl overflow-hidden"
-        style={{
-          background: "linear-gradient(155deg,rgba(14,26,44,0.97),rgba(7,15,28,0.99))",
-          border: `1px solid rgba(12,191,206,0.18)`,
-          boxShadow: "0 50px 120px -30px rgba(0,0,0,0.95), 0 0 100px -50px rgba(12,191,206,0.25)",
-        }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-8 pt-7 pb-5"
-          style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-          <div>
-            <h2 className="font-display text-xl font-bold text-white leading-tight">Register for SRC 2026</h2>
-            <p className="text-xs mt-0.5" style={{ color: "rgba(140,170,200,0.70)" }}>AIChE Student Regional Conference · KFUPM, Dhahran</p>
-          </div>
-          <button onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center rounded-full transition-all hover:bg-white/10"
-            style={{ color: "rgba(160,185,210,0.70)" }}>
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Progress bar */}
-        <div className="px-8 pt-5 pb-4">
-          <div className="flex items-center gap-0">
-            {steps.map((label, i) => {
-              const idx = i + 1;
-              const done = step > idx;
-              const active = step === idx;
-              return (
-                <div key={label} className="flex items-center" style={{ flex: i < steps.length - 1 ? "1" : "0" }}>
-                  <div className="flex flex-col items-center gap-1.5 min-w-0">
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-all"
-                      style={{
-                        background: done ? TEAL : active ? `${TEAL}22` : "rgba(255,255,255,0.07)",
-                        border: done ? "none" : active ? `2px solid ${TEAL}` : "2px solid rgba(255,255,255,0.14)",
-                        color: done ? "#07111E" : active ? TEAL : "rgba(160,185,210,0.50)",
-                        boxShadow: active ? `0 0 14px ${TEAL}55` : "none",
-                      }}>
-                      {done ? <CheckCircle className="w-3.5 h-3.5" /> : idx}
-                    </div>
-                    <span className="text-[10px] font-semibold tracking-wide text-center leading-tight whitespace-nowrap"
-                      style={{ color: active ? TEAL : done ? "rgba(160,200,210,0.80)" : "rgba(120,150,175,0.50)" }}>
-                      {label}
-                    </span>
-                  </div>
-                  {i < steps.length - 1 && (
-                    <div className="flex-1 h-px mx-3 mb-4 transition-all"
-                      style={{ background: done ? `linear-gradient(90deg, ${TEAL}, ${TEAL}88)` : "rgba(255,255,255,0.10)" }} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="px-8 pb-8">
-
-          {/* ── STEP 1 ── */}
-          {step === 1 && (
-            <div className="reg-step-fade">
-              <h3 className="font-display text-lg font-bold text-white mb-5">How would you like to register?</h3>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {typeCards.map(card => (
-                  <div key={card.id!}
-                    className={`reg-type-card p-5 flex items-start gap-4`}
-                    onClick={() => { setRegType(card.id); setStep(2); }}
-                  >
-                    <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                      style={{ background: `${card.color}1A`, border: `1px solid ${card.color}45`, color: card.color }}>
-                      {card.icon}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-display font-bold text-white text-sm leading-tight mb-1">{card.title}</p>
-                      <p className="text-xs leading-relaxed" style={{ color: "rgba(140,170,200,0.70)" }}>{card.desc}</p>
-                    </div>
-                    <ArrowRight className="w-4 h-4 flex-shrink-0 mt-1" style={{ color: "rgba(120,150,180,0.40)" }} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 2 ── */}
-          {step === 2 && regType && (
-            <div className="reg-step-fade">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: `${TEAL}1A`, border: `1px solid ${TEAL}45`, color: TEAL }}>
-                  {typeCards.find(c => c.id === regType)?.icon}
-                </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: "rgba(120,160,180,0.60)" }}>Registering as</p>
-                  <h3 className="font-display font-bold text-white text-base leading-tight">{regTypeLabels[regType]}</h3>
-                </div>
-              </div>
-
-              {/* Participant */}
-              {regType === "participant" && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <RegInput label="Full Name" value={form.p_name} onChange={set("p_name")} placeholder="e.g. Ahmed Al-Rashidi" />
-                  <RegInput label="Email Address" type="email" value={form.p_email} onChange={set("p_email")} placeholder="you@university.edu" />
-                  <RegInput label="Organization / University" value={form.p_org} onChange={set("p_org")} placeholder="e.g. KFUPM" />
-                  <RegInput label="Position / Job Title" value={form.p_position} onChange={set("p_position")} placeholder="e.g. Undergraduate Student" />
-                  <div className="sm:col-span-2">
-                    <RegInput label="Country" value={form.p_country} onChange={set("p_country")} placeholder="e.g. Saudi Arabia" />
-                  </div>
-                </div>
-              )}
-
-              {/* Competition Team */}
-              {regType === "team" && (
-                <div>
-                  <p className="text-sm font-semibold text-white mb-4">Which competition would you like to register for?</p>
-                  <div className="grid grid-cols-2 gap-3 mb-6">
-                    {competitions.map(c => (
-                      <div key={c.id!}
-                        className={`reg-comp-card p-4 flex items-center gap-3 ${form.t_competition === c.id ? "selected" : ""}`}
-                        style={form.t_competition === c.id ? { borderColor: `${c.color}65`, boxShadow: `0 0 0 2px ${c.color}20` } : {}}
-                        onClick={() => set("t_competition")(c.id!)}
-                      >
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                          style={{ background: `${c.color}1A`, border: `1px solid ${c.color}45`, color: c.color }}>
-                          {c.icon}
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-white leading-tight">{c.title}</p>
-                          <p className="text-[11px] mt-0.5" style={{ color: "rgba(130,160,185,0.65)" }}>{c.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  {form.t_competition && (
-                    <div className="grid sm:grid-cols-2 gap-4 reg-step-fade">
-                      <RegInput label="Team Name" value={form.t_teamName} onChange={set("t_teamName")} placeholder="e.g. Alpha Chem" />
-                      <RegInput label="Team Leader Name" value={form.t_leaderName} onChange={set("t_leaderName")} placeholder="e.g. Sara Al-Otaibi" />
-                      <RegInput label="Team Leader Email" type="email" value={form.t_leaderEmail} onChange={set("t_leaderEmail")} placeholder="leader@university.edu" />
-                      <RegInput label="University" value={form.t_university} onChange={set("t_university")} placeholder="e.g. KFUPM" />
-                      <RegInput label="Country" value={form.t_country} onChange={set("t_country")} placeholder="e.g. Saudi Arabia" />
-                      <RegSelect label="Number of Team Members" value={form.t_members} onChange={set("t_members")}
-                        options={["1","2","3","4","5","6","7","8","9","10"].map(n => ({ value: n, label: n }))} />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Speaker / Judge / Mentor */}
-              {regType === "speaker" && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <RegInput label="Full Name" value={form.s_name} onChange={set("s_name")} placeholder="e.g. Dr. Khalid Al-Mansour" />
-                  <RegInput label="Email" type="email" value={form.s_email} onChange={set("s_email")} placeholder="you@organization.com" />
-                  <RegInput label="Organization" value={form.s_org} onChange={set("s_org")} placeholder="e.g. Saudi Aramco" />
-                  <RegInput label="Position" value={form.s_position} onChange={set("s_position")} placeholder="e.g. Senior Engineer" />
-                  <RegInput label="Country" value={form.s_country} onChange={set("s_country")} placeholder="e.g. Saudi Arabia" />
-                  <RegSelect label="Role" value={form.s_role} onChange={set("s_role")}
-                    options={[{ value: "Speaker", label: "Speaker" }, { value: "Judge", label: "Judge" }, { value: "Mentor", label: "Mentor" }]} />
-                </div>
-              )}
-
-              {/* Volunteer */}
-              {regType === "volunteer" && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <RegInput label="Full Name" value={form.v_name} onChange={set("v_name")} placeholder="e.g. Nora Al-Harbi" />
-                  <RegInput label="Email" type="email" value={form.v_email} onChange={set("v_email")} placeholder="you@university.edu" />
-                  <RegInput label="University" value={form.v_university} onChange={set("v_university")} placeholder="e.g. KFUPM" />
-                  <RegInput label="Major" value={form.v_major} onChange={set("v_major")} placeholder="e.g. Chemical Engineering" />
-                  <div className="sm:col-span-2">
-                    <RegInput label="Country" value={form.v_country} onChange={set("v_country")} placeholder="e.g. Saudi Arabia" />
-                  </div>
-                </div>
-              )}
-
-              {/* Partner */}
-              {regType === "partner" && (
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <RegInput label="Company Name" value={form.pr_company} onChange={set("pr_company")} placeholder="e.g. Saudi Aramco" />
-                  <RegInput label="Contact Person" value={form.pr_contact} onChange={set("pr_contact")} placeholder="e.g. Mohammed Al-Ghamdi" />
-                  <RegInput label="Email" type="email" value={form.pr_email} onChange={set("pr_email")} placeholder="contact@company.com" />
-                  <RegInput label="Position" value={form.pr_position} onChange={set("pr_position")} placeholder="e.g. CSR Manager" />
-                  <RegInput label="Country" value={form.pr_country} onChange={set("pr_country")} placeholder="e.g. Saudi Arabia" />
-                  <RegInput label="Partnership Interest" value={form.pr_interest} onChange={set("pr_interest")} placeholder="e.g. Gold Sponsor, Booth" />
-                </div>
-              )}
-
-              {/* Step 2 actions */}
-              <div className="flex items-center justify-between mt-8 pt-5" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
-                <button onClick={() => setStep(1)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-white/5"
-                  style={{ color: "rgba(140,170,200,0.80)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                  <ChevronRight className="w-4 h-4 rotate-180" /> Back
-                </button>
-                <button
-                  onClick={() => { if (isStep2Valid()) setStep(3); }}
-                  disabled={!isStep2Valid()}
-                  className="reg-submit-btn flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold transition-all"
-                  style={{ background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }}>
-                  Review <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 3 ── */}
-          {step === 3 && (
-            <div className="reg-step-fade">
-              <h3 className="font-display text-lg font-bold text-white mb-5">Review your information</h3>
-              <div className="rounded-2xl overflow-hidden mb-6"
-                style={{ border: "1px solid rgba(12,191,206,0.18)", background: "rgba(7,17,30,0.60)" }}>
-                {summaryRows().map((row, i) => (
-                  <div key={row.label}
-                    className="flex items-start justify-between px-5 py-3.5 gap-4"
-                    style={{
-                      borderBottom: i < summaryRows().length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                      background: i === 0 ? `${TEAL}08` : "transparent",
-                    }}>
-                    <span className="text-xs font-semibold uppercase tracking-wider flex-shrink-0"
-                      style={{ color: "rgba(120,160,185,0.65)", minWidth: "110px" }}>{row.label}</span>
-                    <span className="text-sm text-right font-medium"
-                      style={{ color: i === 0 ? TEAL : "rgba(210,225,235,0.90)" }}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="rounded-xl p-4 mb-6"
-                style={{ background: `${ORANGE}0C`, border: `1px solid ${ORANGE}28` }}>
-                <p className="text-xs leading-relaxed" style={{ color: "rgba(200,160,110,0.85)" }}>
-                  By submitting, you confirm that all information is accurate. The SRC 2026 team will contact you at the provided email address.
-                </p>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <button onClick={() => setStep(2)}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all hover:bg-white/5"
-                  style={{ color: "rgba(140,170,200,0.80)", border: "1px solid rgba(255,255,255,0.10)" }}>
-                  <ChevronRight className="w-4 h-4 rotate-180" /> Back
-                </button>
-                <button onClick={() => setSubmitted(true)}
-                  className="reg-submit-btn flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold transition-all"
-                  style={{ background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }}>
-                  Submit Registration <CheckCircle className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Registration Page (kept for footer links) ────────────────────────────────
-function RegistrationPage() {
-=======
 // ─── Registration Page ────────────────────────────────────────────────────────
 function RegistrationPage() {
   const tracks = [
@@ -2774,7 +1658,6 @@ function RegistrationPage() {
     { icon: <Building2 className="w-6 h-6" />, title: "Partner Interest Form", desc: "Explore partnership and sponsorship opportunities to connect your organization with the next generation of engineers.", badge: "Coming Soon", color: TEAL },
   ];
 
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   return (
     <div className="pt-24 pb-20">
       <div className="max-w-7xl mx-auto px-6">
@@ -2784,14 +1667,6 @@ function RegistrationPage() {
         <p className="text-muted-foreground max-w-2xl mb-12 text-lg leading-relaxed">
           Multiple pathways to participate in SRC 2026. Choose the track that fits your role.
         </p>
-<<<<<<< HEAD
-        <div className="rounded-xl p-10 border text-center" style={{ background: `${TEAL}08`, borderColor: `${TEAL}25` }}>
-          <h3 className="font-display text-2xl font-bold text-white mb-3">Register Now</h3>
-          <p className="text-muted-foreground mb-6 max-w-md mx-auto">Click the "Register Now" button in the top navigation bar to open the registration form.</p>
-          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <Mail className="w-4 h-4" style={{ color: TEAL }} />
-            <span>src2026@kfupm.edu.sa</span>
-=======
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {tracks.map((track) => (
@@ -2826,7 +1701,6 @@ function RegistrationPage() {
               <Phone className="w-4 h-4" style={{ color: TEAL }} />
               <span>+966 13 860 0000</span>
             </div>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
           </div>
         </div>
       </div>
@@ -3737,11 +2611,7 @@ function MediaPage() {
                 { label: "Brand Kit / Logos", icon: <Layers className="w-4 h-4" /> },
                 { label: "Press Kit", icon: <FileText className="w-4 h-4" /> },
               ].map((item) => (
-<<<<<<< HEAD
-                <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-lg border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-=======
                 <button key={item.label} className="w-full flex items-center justify-between p-4 rounded-xl border text-sm font-medium text-foreground hover:border-[#0CBFCE]/40 hover:text-white transition-all" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   <span className="flex items-center gap-2">{item.icon}{item.label}</span>
                   <ComingSoonBadge />
                 </button>
@@ -3990,11 +2860,7 @@ function ContactPage() {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
-<<<<<<< HEAD
-                <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
-=======
                 <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   {s.icon}
                 </button>
               ))}
@@ -4062,10 +2928,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     { label: "About", section: "about" },
     { label: "Competitions", section: "competitions" },
     { label: "Program", section: "program" },
-<<<<<<< HEAD
-=======
     { label: "Registration", section: "registration" },
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     { label: "Teams", section: "teams" },
     { label: "Logistics", section: "logistics" },
     { label: "Partnership", section: "partnership" },
@@ -4093,11 +2956,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
                 { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
                 { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
               ].map((s, i) => (
-<<<<<<< HEAD
-                <button key={i} className="w-9 h-9 rounded-lg flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
-=======
                 <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
                   {s.icon}
                 </button>
               ))}
@@ -4154,13 +3013,536 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
   );
 }
 
+// ─── Registration Modal ───────────────────────────────────────────────────────
+type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;
+type Competition = "chem-e-car" | "cheme-jeopardy" | "technical-presentation" | "poster-competition" | null;
+
+const REG_TYPES = [
+  {
+    id: "participant" as const,
+    icon: <Users className="w-7 h-7" />,
+    title: "Participant",
+    desc: "Attend sessions, workshops, panels, and networking events as an individual.",
+    color: TEAL,
+  },
+  {
+    id: "team" as const,
+    icon: <Trophy className="w-7 h-7" />,
+    title: "Competition Team",
+    desc: "Register your university team for one of our flagship competitions.",
+    color: ORANGE,
+  },
+  {
+    id: "speaker" as const,
+    icon: <Mic2 className="w-7 h-7" />,
+    title: "Speaker / Judge / Mentor",
+    desc: "Share your expertise as a speaker, competition judge, or career mentor.",
+    color: TEAL,
+  },
+  {
+    id: "volunteer" as const,
+    icon: <Heart className="w-7 h-7" />,
+    title: "Volunteer",
+    desc: "Join the SRC 2026 team and help make this conference a success.",
+    color: ORANGE,
+  },
+  {
+    id: "partner" as const,
+    icon: <Building2 className="w-7 h-7" />,
+    title: "Partner / Sponsor",
+    desc: "Explore partnership and sponsorship opportunities for your organization.",
+    color: TEAL,
+  },
+];
+
+const COMPETITIONS = [
+  {
+    id: "chem-e-car" as const,
+    icon: <FlaskConical className="w-6 h-6" />,
+    title: "Chem-E-Car",
+    desc: "Design a car powered by a chemical energy source.",
+    color: TEAL,
+  },
+  {
+    id: "cheme-jeopardy" as const,
+    icon: <Trophy className="w-6 h-6" />,
+    title: "ChemE Jeopardy",
+    desc: "Fast-paced trivia on chemical engineering topics.",
+    color: ORANGE,
+  },
+  {
+    id: "technical-presentation" as const,
+    icon: <Presentation className="w-6 h-6" />,
+    title: "Technical Presentation",
+    desc: "Present original technical research to industry judges.",
+    color: TEAL,
+  },
+  {
+    id: "poster-competition" as const,
+    icon: <FileText className="w-6 h-6" />,
+    title: "Poster Competition",
+    desc: "Present research in a dynamic poster gallery setting.",
+    color: ORANGE,
+  },
+];
+
+const STEP_LABELS = ["Select Type", "Fill Information", "Review & Submit"];
+
+function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [regType, setRegType] = useState<RegType>(null);
+  const [competition, setCompetition] = useState<Competition>(null);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  // Reset on close
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setStep(0);
+        setRegType(null);
+        setCompetition(null);
+        setFormData({});
+        setSubmitted(false);
+      }, 300);
+    }
+  }, [open]);
+
+  // Close on escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
+
+  const setField = useCallback((key: string, value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  }, []);
+
+  const handleTypeSelect = (type: RegType) => {
+    setRegType(type);
+    setStep(1);
+  };
+
+  const goBack = () => {
+    if (step === 2) { setStep(1); return; }
+    if (step === 1) {
+      if (regType === "team" && competition) { setCompetition(null); return; }
+      setStep(0); setRegType(null);
+    }
+  };
+
+  const handleSubmit = () => setSubmitted(true);
+
+  const getFields = (): { key: string; label: string; type?: string; required?: boolean; options?: string[] }[] => {
+    switch (regType) {
+      case "participant": return [
+        { key: "fullName", label: "Full Name", required: true },
+        { key: "email", label: "Email Address", type: "email", required: true },
+        { key: "organization", label: "Organization / Company / University", required: true },
+        { key: "position", label: "Position / Job Title", required: true },
+        { key: "country", label: "Country", required: true },
+      ];
+      case "team": return [
+        { key: "teamName", label: "Team Name", required: true },
+        { key: "leaderName", label: "Team Leader Name", required: true },
+        { key: "leaderEmail", label: "Team Leader Email", type: "email", required: true },
+        { key: "university", label: "University", required: true },
+        { key: "country", label: "Country", required: true },
+        { key: "memberCount", label: "Number of Team Members", type: "number", required: true },
+      ];
+      case "speaker": return [
+        { key: "fullName", label: "Full Name", required: true },
+        { key: "email", label: "Email", type: "email", required: true },
+        { key: "organization", label: "Organization", required: true },
+        { key: "position", label: "Position", required: true },
+        { key: "country", label: "Country", required: true },
+        { key: "role", label: "Role", options: ["Speaker", "Judge", "Mentor"], required: true },
+      ];
+      case "volunteer": return [
+        { key: "fullName", label: "Full Name", required: true },
+        { key: "email", label: "Email", type: "email", required: true },
+        { key: "university", label: "University", required: true },
+        { key: "major", label: "Major", required: true },
+        { key: "country", label: "Country", required: true },
+      ];
+      case "partner": return [
+        { key: "companyName", label: "Company Name", required: true },
+        { key: "contactPerson", label: "Contact Person", required: true },
+        { key: "email", label: "Email", type: "email", required: true },
+        { key: "position", label: "Position", required: true },
+        { key: "country", label: "Country", required: true },
+        { key: "partnershipInterest", label: "Partnership Interest", required: true },
+      ];
+      default: return [];
+    }
+  };
+
+  const isFormValid = () => {
+    if (regType === "team" && !competition) return false;
+    const fields = getFields();
+    return fields.every(f => !f.required || (formData[f.key] && formData[f.key].trim() !== ""));
+  };
+
+  const getRegTypeLabel = () => REG_TYPES.find(r => r.id === regType)?.title ?? "";
+  const getCompetitionLabel = () => COMPETITIONS.find(c => c.id === competition)?.title ?? "";
+
+  if (!open) return null;
+
+  return (
+    <div
+      ref={overlayRef}
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      style={{
+        background: "rgba(4, 10, 18, 0.85)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+        animation: "regOverlayIn 0.25s ease forwards",
+      }}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+    >
+      <style>{`
+        @keyframes regOverlayIn { from { opacity: 0 } to { opacity: 1 } }
+        @keyframes regModalIn { from { opacity: 0; transform: translateY(24px) scale(0.97) } to { opacity: 1; transform: translateY(0) scale(1) } }
+        @keyframes regStepIn { from { opacity: 0; transform: translateX(16px) } to { opacity: 1; transform: translateX(0) } }
+        .reg-modal { animation: regModalIn 0.3s cubic-bezier(.16,.84,.44,1) forwards; }
+        .reg-step { animation: regStepIn 0.3s cubic-bezier(.16,.84,.44,1) forwards; }
+        .reg-input {
+          width: 100%;
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid rgba(12, 191, 206, 0.2);
+          background: rgba(7, 17, 30, 0.6);
+          color: #E8EDF5;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.2s;
+          font-family: inherit;
+        }
+        .reg-input:focus { border-color: #0CBFCE; box-shadow: 0 0 0 3px rgba(12,191,206,0.12); }
+        .reg-select {
+          width: 100%;
+          padding: 10px 14px;
+          border-radius: 10px;
+          border: 1px solid rgba(12, 191, 206, 0.2);
+          background: rgba(7, 17, 30, 0.6);
+          color: #E8EDF5;
+          font-size: 14px;
+          outline: none;
+          transition: border-color 0.2s;
+          appearance: none;
+          font-family: inherit;
+          cursor: pointer;
+        }
+        .reg-select:focus { border-color: #0CBFCE; box-shadow: 0 0 0 3px rgba(12,191,206,0.12); }
+        .reg-select option { background: #0D1E30; color: #E8EDF5; }
+        .reg-card-type {
+          display: flex;
+          align-items: flex-start;
+          gap: 14px;
+          padding: 16px;
+          border-radius: 14px;
+          border: 1px solid rgba(12, 191, 206, 0.18);
+          background: rgba(13, 30, 48, 0.5);
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: left;
+          width: 100%;
+        }
+        .reg-card-type:hover {
+          border-color: rgba(12, 191, 206, 0.5);
+          background: rgba(12, 191, 206, 0.07);
+          transform: translateY(-1px);
+        }
+        .reg-card-comp {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 14px;
+          border-radius: 12px;
+          border: 1px solid rgba(12, 191, 206, 0.18);
+          background: rgba(13, 30, 48, 0.5);
+          cursor: pointer;
+          transition: all 0.2s;
+          text-align: left;
+          width: 100%;
+        }
+        .reg-card-comp:hover {
+          border-color: rgba(12, 191, 206, 0.5);
+          background: rgba(12, 191, 206, 0.07);
+          transform: translateY(-1px);
+        }
+        .reg-progress-step {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 12px; font-weight: 600;
+        }
+        .reg-progress-dot {
+          width: 28px; height: 28px;
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 12px; font-weight: 700;
+          flex-shrink: 0;
+          transition: all 0.3s;
+        }
+        .reg-progress-line {
+          flex: 1; height: 1px;
+          transition: background 0.3s;
+        }
+        .reg-review-row {
+          display: flex;
+          justify-content: space-between;
+          padding: 9px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          font-size: 14px;
+          gap: 12px;
+        }
+        .reg-review-row:last-child { border-bottom: none; }
+      `}</style>
+
+      <div
+        className="reg-modal relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden"
+        style={{
+          background: "rgba(9, 20, 34, 0.95)",
+          border: `1px solid ${TEAL}30`,
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          boxShadow: `0 30px 80px -20px rgba(0,0,0,0.8), 0 0 0 1px ${TEAL}15, inset 0 1px 0 rgba(255,255,255,0.06)`,
+        }}
+      >
+        {/* Ambient glow top-right */}
+        <div className="absolute top-0 right-0 w-64 h-64 pointer-events-none" style={{ background: `radial-gradient(circle at 80% 0%, ${TEAL}15 0%, transparent 60%)`, borderRadius: "0 1rem 0 0" }} />
+
+        {/* Header */}
+        <div className="relative z-10 flex items-center justify-between px-6 pt-5 pb-4 flex-shrink-0">
+          <div>
+            <p className="text-xs font-mono tracking-[0.2em] uppercase mb-0.5" style={{ color: TEAL }}>SRC 2026</p>
+            <h2 className="font-display text-xl font-bold text-white">
+              {submitted ? "Registration Submitted" : step === 0 ? "Register" : step === 1 ? getRegTypeLabel() : "Review & Submit"}
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-white transition-colors"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Progress bar */}
+        {!submitted && (
+          <div className="relative z-10 px-6 pb-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              {STEP_LABELS.map((label, i) => (
+                <div key={label} className="flex items-center gap-2 flex-1 last:flex-none">
+                  <div className="reg-progress-step">
+                    <div
+                      className="reg-progress-dot"
+                      style={
+                        i < step
+                          ? { background: TEAL, color: "#07111E" }
+                          : i === step
+                          ? { background: `${TEAL}20`, border: `2px solid ${TEAL}`, color: TEAL }
+                          : { background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)", color: "var(--muted-foreground)" }
+                      }
+                    >
+                      {i < step ? <CheckCircle className="w-3.5 h-3.5" /> : i + 1}
+                    </div>
+                    <span className="hidden sm:block text-xs" style={{ color: i <= step ? TEAL : "var(--muted-foreground)" }}>{label}</span>
+                  </div>
+                  {i < STEP_LABELS.length - 1 && (
+                    <div className="reg-progress-line flex-1" style={{ background: i < step ? TEAL : "rgba(255,255,255,0.1)" }} />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Divider */}
+        <div className="flex-shrink-0 mx-6" style={{ height: "1px", background: "rgba(255,255,255,0.06)" }} />
+
+        {/* Body */}
+        <div className="relative z-10 flex-1 overflow-y-auto px-6 py-5">
+
+          {/* SUCCESS */}
+          {submitted && (
+            <div className="reg-step text-center py-8">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: `${TEAL}15`, border: `2px solid ${TEAL}40` }}>
+                <CheckCircle className="w-8 h-8" style={{ color: TEAL }} />
+              </div>
+              <h3 className="font-display text-2xl font-bold text-white mb-3">You're registered!</h3>
+              <p className="text-muted-foreground max-w-sm mx-auto mb-6 text-sm leading-relaxed">
+                Your registration as a <span className="text-white font-semibold">{getRegTypeLabel()}</span> has been submitted. We'll be in touch at your provided email address.
+              </p>
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: `${TEAL}10`, border: `1px solid ${TEAL}25`, color: TEAL }}>
+                <Mail className="w-4 h-4" /> Confirmation sent to {formData.email || formData.leaderEmail}
+              </div>
+              <div className="mt-8">
+                <CTAButton primary onClick={onClose}>Close</CTAButton>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 0 — TYPE SELECTION */}
+          {!submitted && step === 0 && (
+            <div className="reg-step space-y-2.5">
+              <p className="text-muted-foreground text-sm mb-4">How would you like to participate in SRC 2026?</p>
+              {REG_TYPES.map((type) => (
+                <button key={type.id} className="reg-card-type" onClick={() => handleTypeSelect(type.id)}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${type.color}15`, color: type.color }}>
+                    {type.icon}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-bold text-white text-sm mb-0.5">{type.title}</div>
+                    <div className="text-xs text-muted-foreground leading-relaxed">{type.desc}</div>
+                  </div>
+                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* STEP 1 — FORM */}
+          {!submitted && step === 1 && (
+            <div className="reg-step">
+              {/* Team: competition picker first */}
+              {regType === "team" && !competition && (
+                <div>
+                  <p className="text-muted-foreground text-sm mb-4">Which competition would you like to register for?</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {COMPETITIONS.map((comp) => (
+                      <button key={comp.id} className="reg-card-comp" onClick={() => setCompetition(comp.id)}>
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${comp.color}15`, color: comp.color }}>
+                          {comp.icon}
+                        </div>
+                        <div>
+                          <div className="font-display font-bold text-white text-sm">{comp.title}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{comp.desc}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Form fields */}
+              {(regType !== "team" || competition) && (
+                <div>
+                  {regType === "team" && competition && (
+                    <div className="flex items-center gap-2 mb-5 px-3 py-2 rounded-lg" style={{ background: `${ORANGE}12`, border: `1px solid ${ORANGE}30` }}>
+                      <Trophy className="w-4 h-4 flex-shrink-0" style={{ color: ORANGE }} />
+                      <span className="text-sm font-semibold" style={{ color: ORANGE }}>{getCompetitionLabel()}</span>
+                      <button onClick={() => setCompetition(null)} className="ml-auto text-xs text-muted-foreground hover:text-white transition-colors">Change</button>
+                    </div>
+                  )}
+                  <div className="grid gap-4">
+                    {getFields().map((field) => (
+                      <div key={field.key}>
+                        <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                          {field.label}{field.required && <span style={{ color: TEAL }}> *</span>}
+                        </label>
+                        {field.options ? (
+                          <select
+                            className="reg-select"
+                            value={formData[field.key] ?? ""}
+                            onChange={e => setField(field.key, e.target.value)}
+                          >
+                            <option value="">Select {field.label}</option>
+                            {field.options.map(o => <option key={o} value={o}>{o}</option>)}
+                          </select>
+                        ) : (
+                          <input
+                            className="reg-input"
+                            type={field.type ?? "text"}
+                            value={formData[field.key] ?? ""}
+                            onChange={e => setField(field.key, e.target.value)}
+                            placeholder={field.label}
+                            min={field.type === "number" ? "1" : undefined}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* STEP 2 — REVIEW */}
+          {!submitted && step === 2 && (
+            <div className="reg-step">
+              <div className="rounded-xl p-5 mb-5" style={{ background: "rgba(12,191,206,0.05)", border: `1px solid ${TEAL}20` }}>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${TEAL}15`, color: TEAL }}>
+                    {REG_TYPES.find(r => r.id === regType)?.icon}
+                  </div>
+                  <div>
+                    <div className="font-display font-bold text-white text-sm">{getRegTypeLabel()}</div>
+                    {regType === "team" && competition && (
+                      <div className="text-xs" style={{ color: ORANGE }}>{getCompetitionLabel()}</div>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  {getFields().map(field => (
+                    formData[field.key] ? (
+                      <div key={field.key} className="reg-review-row">
+                        <span className="text-muted-foreground">{field.label}</span>
+                        <span className="text-white font-medium text-right">{formData[field.key]}</span>
+                      </div>
+                    ) : null
+                  ))}
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center">Please review your information before submitting.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        {!submitted && step > 0 && (
+          <div className="relative z-10 flex-shrink-0 px-6 py-4 flex items-center justify-between gap-3" style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <button
+              onClick={goBack}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-muted-foreground hover:text-white transition-colors"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+            >
+              <ChevronRight className="w-4 h-4 rotate-180" /> Back
+            </button>
+
+            {step === 1 && (regType !== "team" || competition) && (
+              <CTAButton primary onClick={() => setStep(2)} className={isFormValid() ? "" : "opacity-40 pointer-events-none"}>
+                Review <ChevronRight className="w-4 h-4" />
+              </CTAButton>
+            )}
+            {step === 2 && (
+              <CTAButton primary onClick={handleSubmit}>
+                Submit Registration <ArrowRight className="w-4 h-4" />
+              </CTAButton>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [section, setSection] = useState<Section>("home");
-<<<<<<< HEAD
   const [regModalOpen, setRegModalOpen] = useState(false);
-=======
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
   const mainRef = useRef<HTMLDivElement>(null);
 
   // Scroll to top on section change
@@ -4168,16 +3550,8 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [section]);
 
-<<<<<<< HEAD
-  const openRegModal = () => setRegModalOpen(true);
-  const closeRegModal = () => setRegModalOpen(false);
-
   const pages: Record<Section, React.ReactNode> = {
-    home: <HomePage setSection={setSection} onRegisterOpen={openRegModal} />,
-=======
-  const pages: Record<Section, React.ReactNode> = {
-    home: <HomePage setSection={setSection} />,
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+    home: <HomePage setSection={setSection} onRegisterClick={() => setRegModalOpen(true)} />,
     about: <AboutPage />,
     competitions: <CompetitionsPage />,
     registration: <RegistrationPage />,
@@ -4223,22 +3597,15 @@ export default function App() {
 }
       `}</style>
 
-<<<<<<< HEAD
-      <Navbar active={section} setSection={setSection} onRegisterOpen={openRegModal} />
-=======
-      <Navbar active={section} setSection={setSection} />
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
+      <Navbar active={section} setSection={setSection} onRegisterClick={() => setRegModalOpen(true)} />
+
+      <RegistrationModal open={regModalOpen} onClose={() => setRegModalOpen(false)} />
 
       <main>
         {pages[section]}
       </main>
 
       <Footer setSection={setSection} />
-<<<<<<< HEAD
-
-      {regModalOpen && <RegistrationModal onClose={closeRegModal} />}
-=======
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
     </div>
   );
 }

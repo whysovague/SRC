@@ -179,8 +179,6 @@
     line-height: 1.5;
   }
 }
-<<<<<<< HEAD
-=======
 
 /* ─── CTA button — modern shine sweep, lift, arrow nudge ──────────────────── */
 .src-cta {
@@ -261,4 +259,3 @@
   .src-cta:hover { transform: none; }
   .src-cta:hover .src-cta-shine { transform: translateX(-110%); }
 }
->>>>>>> ac44b4cd1b29e8ed9e3835a04bd5a799c6b038df
