@@ -2243,63 +2243,117 @@ function PartnershipPage() {
     },
   ];
 
-  return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionTag>Grow Together</SectionTag>
-        <SectionTitle>Partnership & Sponsorship</SectionTitle>
-        <Divider />
+  const benefits = [
+    { icon: <Users className="w-5 h-5" />, title: "Talent Access", color: TEAL, text: "Direct connection with 1,000+ top chemical engineering students from the GCC's leading universities." },
+    { icon: <Star className="w-5 h-5" />, title: "Brand Visibility", color: ORANGE, text: "Prominent placement in all conference materials, digital channels, and event signage." },
+    { icon: <Heart className="w-5 h-5" />, title: "CSR Impact", color: TEAL, text: "Invest in the future of STEM education and the region's next generation of engineers." },
+    { icon: <Network className="w-5 h-5" />, title: "Industry Engagement", color: ORANGE, text: "Position your company as a leader in shaping the engineering landscape of the GCC." },
+  ];
 
-        <div className="grid md:grid-cols-2 gap-12 mb-16">
+  return (
+    <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
+      {/* Scoped animations (match Logistics / FAQ) */}
+      <style>{`
+        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
+        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
+        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
+        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
+      `}</style>
+
+      {/* Molecule network background + glow orbs + faint grid */}
+      <MoleculeNetwork />
+      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
+      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
+        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+        backgroundSize: "72px 72px",
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+      }} />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+        {/* Header — line eyebrow + two-line gradient title (matches Logistics / FAQ) */}
+        <div className="faq-pop">
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Grow Together</span>
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="text-white">Partnership &amp;</span>
+            <br />
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Sponsorship</span>
+          </h2>
+          <Divider />
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 mt-4 items-start">
+          {/* LEFT — intro + benefit cards (Mission/Vision card treatment) */}
           <div>
-            <p className="text-muted-foreground leading-relaxed text-lg mb-6">
+            <p className="faq-pop text-muted-foreground leading-relaxed text-lg mb-8" style={{ animationDelay: "120ms" }}>
               SRC 2026 offers unparalleled access to the GCC's top undergraduate engineering talent. Partner with us to build your brand, recruit future leaders, and demonstrate commitment to engineering education.
             </p>
-            <div className="space-y-4">
-              {[
-                { icon: <Users />, title: "Talent Access", text: "Direct connection with 1,000+ top chemical engineering students from the GCC's leading universities." },
-                { icon: <Star />, title: "Brand Visibility", text: "Prominent placement in all conference materials, digital channels, and event signage." },
-                { icon: <Heart />, title: "CSR Impact", text: "Invest in the future of STEM education and the region's next generation of engineers." },
-                { icon: <Network />, title: "Industry Engagement", text: "Position your company as a leader in shaping the engineering landscape of the GCC." },
-              ].map((item) => (
-                <div key={item.title} className="flex gap-4 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                  <span style={{ color: TEAL }} className="mt-0.5 flex-shrink-0">{item.icon}</span>
-                  <div>
-                    <p className="font-semibold text-white text-sm mb-1">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.text}</p>
+            <div className="faq-pop grid sm:grid-cols-2 gap-6" style={{ animationDelay: "200ms" }}>
+              {benefits.map((item) => (
+                <InteractiveCard
+                  key={item.title}
+                  accent={item.color}
+                  className="group relative rounded-2xl p-6 overflow-hidden transition-colors duration-300"
+                  style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${item.color}30` }}
+                >
+                  <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
+                    style={{ background: `radial-gradient(circle, ${item.color}40 0%, transparent 70%)`, filter: "blur(28px)" }} />
+                  <div className="relative flex items-center gap-3 mb-4">
+                    <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ background: `${item.color}18`, color: item.color }}>
+                      {item.icon}
+                    </div>
+                    <span className="font-display text-lg font-extrabold text-white">{item.title}</span>
                   </div>
-                </div>
+                  <p className="relative text-sm text-muted-foreground leading-relaxed">{item.text}</p>
+                </InteractiveCard>
               ))}
             </div>
           </div>
 
+          {/* RIGHT — tiers (Mission/Vision card treatment) + plain CTA */}
           <div>
-            <h3 className="font-display text-xl font-bold text-white mb-6">Partnership Tiers</h3>
-            <div className="space-y-4">
+            <h3 className="faq-pop font-display text-xl font-bold text-white mb-6" style={{ animationDelay: "160ms" }}>Partnership Tiers</h3>
+            <div className="faq-pop space-y-6" style={{ animationDelay: "240ms" }}>
               {tiers.map((tier) => (
-                <div key={tier.name} className="rounded-xl border p-5" style={{ background: tier.featured ? `${TEAL}08` : "var(--card)", borderColor: tier.featured ? `${TEAL}40` : "var(--border)" }}>
-                  <div className="flex items-center justify-between mb-3">
+                <InteractiveCard
+                  key={tier.name}
+                  accent={tier.color}
+                  className="group relative rounded-2xl p-6 overflow-hidden transition-colors duration-300"
+                  style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${tier.color}30` }}
+                >
+                  <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
+                    style={{ background: `radial-gradient(circle, ${tier.color}40 0%, transparent 70%)`, filter: "blur(28px)" }} />
+                  <div className="relative flex items-center justify-between mb-4">
                     <span className="font-display text-lg font-extrabold" style={{ color: tier.color }}>{tier.name}</span>
                     {tier.featured && <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: TEAL, background: `${TEAL}15`, border: `1px solid ${TEAL}40` }}>Most Popular</span>}
                   </div>
-                  <ul className="space-y-1">
+                  <ul className="relative space-y-1.5">
                     {tier.perks.map((p) => (
                       <li key={p} className="flex items-center gap-2 text-xs text-muted-foreground">
                         <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: tier.color }} /> {p}
                       </li>
                     ))}
                   </ul>
-                </div>
+                </InteractiveCard>
               ))}
             </div>
 
-            <div className="mt-6 space-y-3">
-              <p className="text-sm text-muted-foreground">Also available: Academic, Service & Custom partnerships.</p>
-              <div className="flex flex-wrap gap-3">
+            {/* CTA / contact — plain content, NOT in a card */}
+            <div className="faq-pop mt-8" style={{ animationDelay: "320ms" }}>
+              <p className="text-sm text-muted-foreground mb-4">Also available: Academic, Service &amp; Custom partnerships.</p>
+              <div className="flex flex-wrap gap-3 mb-5">
                 <CTAButton primary>Request Partnership Proposal <ArrowRight className="w-4 h-4" /></CTAButton>
                 <CTAButton>Book a Discussion</CTAButton>
               </div>
-              <div className="pt-2 space-y-1">
+              <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="w-4 h-4" style={{ color: TEAL }} /> partners.src2026@kfupm.edu.sa
                 </div>
@@ -2634,7 +2688,7 @@ function MediaPage() {
 }
 
 // ─── FAQ Page ───────────────────────────────────────────────────────────────
-function FAQPage() {
+function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
   const [open, setOpen] = useState<number | null>(null);
 
   const faqs = [
@@ -2773,19 +2827,37 @@ function FAQPage() {
           })}
         </div>
 
-        {/* Hyperlink section optimized down to text-sm scale footprint */}
+        {/* More questions → jump straight to the Contact message form */}
         <div
-          className="faq-pop mt-10 flex flex-col items-end text-right"
-          style={{ animationDelay: `${140 + faqs.length * 70 + 80}ms` }}
+          className="faq-pop mt-12 rounded-2xl p-8 text-center relative overflow-hidden"
+          style={{
+            background: "rgba(13,30,48,0.55)",
+            border: `1px solid ${ORANGE}30`,
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+            animationDelay: `${140 + faqs.length * 70 + 80}ms`,
+          }}
         >
-          <a
-            href={askMailto}
-            className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80 no-underline"
-            style={{ color: ORANGE }}
-          >
-            Still have a question?
-            <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          <div className="absolute inset-x-0 -top-16 h-40 pointer-events-none" style={{
+            background: `radial-gradient(60% 80% at 50% 0%, ${ORANGE}40 0%, transparent 70%)`,
+            filter: "blur(12px)",
+          }} />
+          <div className="relative">
+            <HelpCircle className="w-8 h-8 mx-auto mb-3" style={{ color: ORANGE }} />
+            <h3 className="font-display text-2xl font-bold text-white mb-2">Do you have more questions?</h3>
+            <p className="text-muted-foreground text-sm mb-6 max-w-md mx-auto">
+              Can't find what you're looking for? Send us a message and our team will get back to you.
+            </p>
+            <CTAButton primary onClick={goToContactForm}>
+              Send us a Message <ArrowRight className="w-4 h-4" />
+            </CTAButton>
+            <div className="mt-4">
+              <a href={askMailto} className="text-xs text-muted-foreground hover:text-white transition-colors no-underline">
+                or email us directly
+              </a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -2793,14 +2865,34 @@ function FAQPage() {
 }
 
 // ─── Contact Page ─────────────────────────────────────────────────────────────
-function ContactPage() {
+function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolean; onFocusHandled?: () => void }) {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [highlight, setHighlight] = useState(false);
+  const formRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSent(true);
   };
+
+  // Arriving from the FAQ "more questions" CTA: glide down to the message form
+  // and flash a highlight so the Send Message box is obvious.
+  useEffect(() => {
+    if (!focusForm) return;
+    const t = setTimeout(() => {
+      const el = formRef.current;
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top, behavior: "smooth" });
+        setHighlight(true);
+        setTimeout(() => setHighlight(false), 1600);
+      }
+      onFocusHandled?.();
+    }, 120);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusForm]);
 
   const contacts = [
     { label: "General Inquiries", email: "src2026@kfupm.edu.sa", icon: <Mail /> },
@@ -2868,7 +2960,16 @@ function ContactPage() {
           </div>
 
           {/* Contact form */}
-          <div className="rounded-xl border p-8" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
+          <div
+            ref={formRef}
+            className="rounded-xl border p-8 transition-all duration-500"
+            style={{
+              background: "var(--card)",
+              borderColor: highlight ? TEAL : "var(--border)",
+              boxShadow: highlight ? `0 0 0 3px ${TEAL}33, 0 18px 50px -16px ${TEAL}55` : "none",
+              scrollMarginTop: "100px",
+            }}
+          >
             {sent ? (
               <div className="text-center py-8">
                 <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: TEAL }} />
@@ -3539,11 +3640,81 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
   );
 }
 
+// ─── Floating "Do you need help?" button ─────────────────────────────────────
+// Fixed bottom-right helper that jumps to the FAQ page. Collapsed to a glass
+// circle; expands to reveal its label on hover (label always shown on touch).
+function HelpButton({ active, onClick }: { active: Section; onClick: () => void }) {
+  // Redundant on the pages it points at — hide there.
+  if (active === "faq") return null;
+
+  return (
+    <>
+      <style>{`
+        @keyframes srcHelpIn {
+          from { opacity: 0; transform: translateY(20px) scale(.9); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes srcHelpPulse {
+          0%   { box-shadow: 0 0 0 0 ${TEAL}55; }
+          70%  { box-shadow: 0 0 0 14px ${TEAL}00; }
+          100% { box-shadow: 0 0 0 0 ${TEAL}00; }
+        }
+        .src-help { animation: srcHelpIn .5s cubic-bezier(.16,.84,.44,1) both; }
+        .src-help-core { animation: srcHelpPulse 2.6s ease-out infinite; }
+        .src-help .src-help-label {
+          max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
+          transition: max-width .4s cubic-bezier(.16,.84,.44,1), opacity .3s ease, margin-left .35s ease;
+        }
+        .src-help:hover .src-help-label,
+        .src-help:focus-visible .src-help-label { max-width: 220px; opacity: 1; margin-left: 8px; }
+        @media (hover: none) {
+          .src-help .src-help-label { max-width: 220px; opacity: 1; margin-left: 8px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .src-help, .src-help-core { animation: none; }
+          .src-help .src-help-label { transition: none; }
+        }
+      `}</style>
+
+      <button
+        onClick={onClick}
+        aria-label="Do you need help?"
+        className="src-help fixed bottom-6 right-6 z-[120] flex items-center rounded-full pointer-events-auto"
+        style={{
+          padding: "8px",
+          background: "rgba(7,17,30,0.72)",
+          backdropFilter: "blur(14px) saturate(160%)",
+          WebkitBackdropFilter: "blur(14px) saturate(160%)",
+          border: `1px solid ${TEAL}45`,
+          boxShadow: `0 12px 36px -10px rgba(0,0,0,0.6), 0 0 22px -6px ${TEAL}66`,
+        }}
+      >
+        <span
+          className="src-help-core flex items-center justify-center rounded-full flex-shrink-0"
+          style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }}
+        >
+          <HelpCircle className="w-5 h-5" />
+        </span>
+        <span className="src-help-label text-sm font-semibold" style={{ color: "#fff" }}>
+          Do you need help?
+        </span>
+      </button>
+    </>
+  );
+}
+
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [section, setSection] = useState<Section>("home");
   const [regModalOpen, setRegModalOpen] = useState(false);
+  const [contactFocus, setContactFocus] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
+
+  // FAQ "more questions" → Contact page, then scroll to the message form.
+  const goToContactForm = () => {
+    setContactFocus(true);
+    setSection("contact");
+  };
 
   // Scroll to top on section change
   useEffect(() => {
@@ -3563,8 +3734,8 @@ export default function App() {
     speakers: <SpeakersPage />,
     organizing: <OrganizingPage />,
     media: <MediaPage />,
-    faq: <FAQPage />,
-    contact: <ContactPage />,
+    faq: <FAQPage goToContactForm={goToContactForm} />,
+    contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
   };
 
   return (
@@ -3595,9 +3766,66 @@ export default function App() {
 @media (prefers-reduced-motion: reduce) {
   .src-reveal { opacity: 1; transform: none; transition: none; }
 }
+
+/* InteractiveCard — mouse-tracked 3D tilt + radial glow */
+.src-icard {
+  position: relative;
+  isolation: isolate;
+  transform-style: preserve-3d;
+  transform:
+    perspective(1100px)
+    rotateX(var(--rx, 0deg))
+    rotateY(var(--ry, 0deg))
+    translateZ(0);
+  transition: transform .45s cubic-bezier(.22,.61,.36,1),
+              border-color .3s ease,
+              box-shadow .3s ease;
+  will-change: transform;
+}
+.src-icard:hover {
+  box-shadow:
+    0 18px 50px -22px color-mix(in srgb, var(--accent, #0CBFCE) 55%, transparent),
+    0 4px 14px -6px rgba(0,0,0,0.5);
+}
+.src-icard-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: calc(var(--active, 0) * 1);
+  transition: opacity .35s ease;
+  background: radial-gradient(
+    var(--glow-size, 360px) circle
+    at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--accent, #0CBFCE) 28%, transparent) 0%,
+    color-mix(in srgb, var(--accent, #0CBFCE) 10%, transparent) 28%,
+    transparent 60%
+  );
+  mix-blend-mode: screen;
+  z-index: -1;
+}
+.src-icard-border {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: calc(var(--active, 0) * 1);
+  transition: opacity .35s ease;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #0CBFCE) 35%, transparent);
+  z-index: 0;
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .src-icard {
+    transform: none !important;
+    transition: border-color .3s ease;
+  }
+  .src-icard-glow, .src-icard-border { display: none; }
+}
       `}</style>
 
       <Navbar active={section} setSection={setSection} onRegisterClick={() => setRegModalOpen(true)} />
+
+      <HelpButton active={section} onClick={() => setSection("faq")} />
 
       <RegistrationModal open={regModalOpen} onClose={() => setRegModalOpen(false)} />
 
