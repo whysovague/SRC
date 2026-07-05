@@ -487,26 +487,22 @@ function SRCLogo({ size = 64, yOffset = 1 }: { size?: number; yOffset?: number }
 const navItems: { label: string; section: Section }[] = [
   { label: "Home", section: "home" },
   { label: "Competitions", section: "competitions" },
-  { label: "Registration", section: "registration" },
   { label: "Logistics", section: "logistics" },
   { label: "Partnership", section: "partnership" },
   { label: "Contact", section: "contact" },
+  { label: "Organizing Team", section: "organizing" },
+  { label: "FAQ", section: "faq" },
 ];
 
 function Navbar({ active, setSection, onRegisterClick }: { active: Section; setSection: (s: Section) => void; onRegisterClick: () => void }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
+
   const navRef = useRef<HTMLDivElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
 
-  const mainNav = navItems.slice(0, 6);
-  const moreNav: { label: string; section: Section }[] = [
-    { label: "Organizing Team", section: "organizing" },
-    { label: "Media", section: "media" },
-    { label: "FAQ", section: "faq" },
-  ];
-
+  const mainNav = navItems;
+  
   const updateHover = (key: string) => {
     const el = itemRefs.current[key];
     const parent = navRef.current;
@@ -594,39 +590,7 @@ function Navbar({ active, setSection, onRegisterClick }: { active: Section; setS
               </button>
             ))}
 
-            {/* More dropdown */}
-            <div className="relative z-10">
-              <button
-                ref={(el) => { itemRefs.current["__more"] = el; }}
-                onMouseEnter={() => updateHover("__more")}
-                onFocus={() => updateHover("__more")}
-                onClick={() => setMoreOpen(!moreOpen)}
-                className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-white rounded-full transition-colors flex items-center gap-1"
-              >
-                More <ChevronDown className="w-3 h-3" />
-              </button>
-              {moreOpen && (
-                <div
-                  className="absolute top-full right-0 mt-3 w-48 rounded-2xl overflow-hidden shadow-2xl z-20"
-                  style={{
-                    background: "rgba(13,30,48,0.85)",
-                    backdropFilter: "blur(18px) saturate(160%)",
-                    WebkitBackdropFilter: "blur(18px) saturate(160%)",
-                    border: `1px solid ${TEAL}25`,
-                  }}
-                >
-                  {moreNav.map((item) => (
-                    <button
-                      key={item.section}
-                      onClick={() => { setSection(item.section); setMoreOpen(false); }}
-                      className="w-full text-left px-4 py-2.5 text-sm text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            
             </div>
 
             <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
@@ -662,7 +626,7 @@ function Navbar({ active, setSection, onRegisterClick }: { active: Section; setS
             style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
           />
           <div className="relative z-10">
-            {[...navItems, ...moreNav].map((item) => (
+            {navItems.map((item) => (
               <button
                 key={item.section}
                 onClick={() => { setSection(item.section); setMobileOpen(false); }}
@@ -2876,8 +2840,6 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
     setSent(true);
   };
 
-  // Arriving from the FAQ "more questions" CTA: glide down to the message form
-  // and flash a highlight so the Send Message box is obvious.
   useEffect(() => {
     if (!focusForm) return;
     const t = setTimeout(() => {
@@ -2894,134 +2856,188 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusForm]);
 
-  const contacts = [
-    { label: "General Inquiries", email: "src2026@kfupm.edu.sa", icon: <Mail /> },
-    { label: "Partnership & Sponsorship", email: "partners.src2026@kfupm.edu.sa", icon: <Building2 /> },
-    { label: "Team Registration", email: "teams.src2026@kfupm.edu.sa", icon: <Users /> },
-    { label: "Logistics & Accommodation", email: "logistics.src2026@kfupm.edu.sa", icon: <MapPin /> },
-    { label: "Media & Press", email: "media.src2026@kfupm.edu.sa", icon: <FileText /> },
-  ];
-
   return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionTag>Get In Touch</SectionTag>
-        <SectionTitle>Contact Us</SectionTitle>
-        <Divider />
+    <div
+      className="relative overflow-hidden pt-24 pb-28"
+      style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}
+    >
+      <style>{`
+        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
+        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
+        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
+        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
 
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Contact info */}
-          <div>
-            <p className="text-muted-foreground leading-relaxed mb-8 text-lg">
-              Our team is here to help. Whether you have questions about registration, partnerships, logistics, or the program — reach out and we'll get back to you promptly.
-            </p>
+        .contact-input {
+          width: 100%;
+          background: transparent;
+          border: none;
+          border-bottom: 1px solid rgba(255,255,255,0.12);
+          color: #E8EDF5;
+          font-size: 16px;
+          padding: 10px 0 12px;
+          outline: none;
+          transition: border-color 0.3s;
+          font-family: inherit;
+        }
+        .contact-input::placeholder { color: rgba(255,255,255,0.25); }
+        .contact-input:focus { border-bottom-color: ${TEAL}; }
+        .contact-input.highlight-focus { border-bottom-color: ${TEAL}; box-shadow: 0 2px 0 0 ${TEAL}55; }
+        textarea.contact-input { resize: none; }
+      `}</style>
 
-            <div className="space-y-3 mb-8">
-              {contacts.map((c) => (
-                <div key={c.label} className="flex items-center gap-4 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                  <span style={{ color: TEAL }} className="flex-shrink-0">{c.icon}</span>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{c.label}</p>
-                    <a href={`mailto:${c.email}`} className="text-sm font-medium hover:underline" style={{ color: TEAL }}>{c.email}</a>
-                  </div>
-                </div>
-              ))}
-            </div>
+      {/* Background — matches FAQ/Logistics/Partnership exactly */}
+      <MoleculeNetwork />
+      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
+      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
+        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+        backgroundSize: "72px 72px",
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+      }} />
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                <Phone className="w-4 h-4 flex-shrink-0" style={{ color: TEAL }} />
-                <div>
-                  <p className="text-xs text-muted-foreground">Phone</p>
-                  <p className="text-sm font-medium text-white">+966 13 860 0000</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-                <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: TEAL }} />
-                <div>
-                  <p className="text-xs text-muted-foreground">Address</p>
-                  <p className="text-sm font-medium text-white">KFUPM, Dhahran 31261,<br />Eastern Province, Saudi Arabia</p>
-                </div>
-              </div>
-            </div>
+      <div className="relative max-w-2xl mx-auto px-6">
 
-            <div className="mt-6 flex gap-3">
-              {[
-                { icon: <Instagram className="w-4 h-4" />, color: "#E1306C" },
-                { icon: <Twitter className="w-4 h-4" />, color: "#1DA1F2" },
-                { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
-                { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
-              ].map((s, i) => (
-                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "var(--card)", borderColor: "var(--border)", color: s.color }}>
-                  {s.icon}
-                </button>
-              ))}
-            </div>
+        {/* Header — same eyebrow + gradient title as other pages */}
+        <div className="faq-pop mb-12">
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Get In Touch</span>
           </div>
+          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="text-white">Say</span>
+            <br />
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Hello.</span>
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed mt-4 max-w-lg">
+            Whether you have questions about registration, partnerships, logistics, or the program — our team will get back to you promptly.
+          </p>
+        </div>
 
-          {/* Contact form */}
-          <div
-            ref={formRef}
-            className="rounded-xl border p-8 transition-all duration-500"
-            style={{
-              background: "var(--card)",
-              borderColor: highlight ? TEAL : "var(--border)",
-              boxShadow: highlight ? `0 0 0 3px ${TEAL}33, 0 18px 50px -16px ${TEAL}55` : "none",
-              scrollMarginTop: "100px",
-            }}
-          >
-            {sent ? (
-              <div className="text-center py-8">
-                <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: TEAL }} />
-                <h3 className="font-display text-2xl font-bold text-white mb-2">Message Sent!</h3>
-                <p className="text-muted-foreground">Thank you for reaching out. We'll get back to you within 48 hours.</p>
-                <button className="mt-6 text-sm underline" style={{ color: TEAL }} onClick={() => setSent(false)}>Send another message</button>
+        {/* Form — floats directly on the dark background, no card wrapper */}
+        <div
+          ref={formRef}
+          className="faq-pop"
+          style={{
+            animationDelay: "120ms",
+            scrollMarginTop: "100px",
+            outline: highlight ? `2px solid ${TEAL}55` : "none",
+            borderRadius: 8,
+            transition: "outline 0.4s ease",
+          }}
+        >
+          {sent ? (
+            <div className="text-center py-16">
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
+                style={{ background: `${TEAL}15`, border: `2px solid ${TEAL}40` }}
+              >
+                <CheckCircle className="w-8 h-8" style={{ color: TEAL }} />
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <h3 className="font-display text-xl font-bold text-white mb-2">Send a Message</h3>
-                {[
-                  { label: "Your Name", key: "name", type: "text", placeholder: "Ahmed Al-Rashidi" },
-                  { label: "Email Address", key: "email", type: "email", placeholder: "ahmed@university.edu" },
-                  { label: "Subject", key: "subject", type: "text", placeholder: "Partnership Inquiry" },
-                ].map((field) => (
-                  <div key={field.key}>
-                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">{field.label}</label>
+              <h3 className="font-display text-3xl font-bold text-white mb-3">Message Sent.</h3>
+              <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                Thank you for reaching out. We'll get back to you within 48 hours.
+              </p>
+              <button
+                className="text-sm font-medium transition-opacity hover:opacity-70"
+                style={{ color: TEAL }}
+                onClick={() => setSent(false)}
+              >
+                Send another message →
+              </button>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              {/* Field rows — underline style, no boxes */}
+              <div className="space-y-10">
+                <div className="grid sm:grid-cols-2 gap-10">
+                  <div>
+                    <label className="block text-xs font-mono tracking-[0.2em] uppercase mb-3" style={{ color: `${TEAL}99` }}>
+                      Your Name
+                    </label>
                     <input
-                      type={field.type}
-                      placeholder={field.placeholder}
-                      value={form[field.key as keyof typeof form]}
-                      onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                      type="text"
+                      placeholder="Ahmed Al-Rashidi"
+                      value={form.name}
+                      onChange={e => setForm({ ...form, name: e.target.value })}
                       required
-                      className="w-full px-4 py-2.5 rounded-lg text-sm outline-none focus:border-[#0CBFCE]/60 transition-colors"
-                      style={{ background: "var(--input-background)", border: `1px solid var(--border)`, color: "var(--foreground)" }}
+                      className={`contact-input${highlight ? " highlight-focus" : ""}`}
                     />
                   </div>
-                ))}
+                  <div>
+                    <label className="block text-xs font-mono tracking-[0.2em] uppercase mb-3" style={{ color: `${TEAL}99` }}>
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      placeholder="ahmed@university.edu"
+                      value={form.email}
+                      onChange={e => setForm({ ...form, email: e.target.value })}
+                      required
+                      className="contact-input"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block text-xs font-semibold text-muted-foreground mb-1.5 uppercase tracking-wide">Message</label>
-                  <textarea
-                    rows={4}
-                    placeholder="Tell us how we can help..."
-                    value={form.message}
-                    onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  <label className="block text-xs font-mono tracking-[0.2em] uppercase mb-3" style={{ color: `${TEAL}99` }}>
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Partnership Inquiry"
+                    value={form.subject}
+                    onChange={e => setForm({ ...form, subject: e.target.value })}
                     required
-                    className="w-full px-4 py-2.5 rounded-lg text-sm resize-none outline-none focus:border-[#0CBFCE]/60 transition-colors"
-                    style={{ background: "var(--input-background)", border: `1px solid var(--border)`, color: "var(--foreground)" }}
+                    className="contact-input"
                   />
                 </div>
-                <CTAButton primary className="w-full justify-center">
+
+                <div>
+                  <label className="block text-xs font-mono tracking-[0.2em] uppercase mb-3" style={{ color: `${TEAL}99` }}>
+                    Message
+                  </label>
+                  <textarea
+                    rows={5}
+                    placeholder="Tell us how we can help..."
+                    value={form.message}
+                    onChange={e => setForm({ ...form, message: e.target.value })}
+                    required
+                    className="contact-input"
+                  />
+                </div>
+              </div>
+
+              {/* Divider + submit row */}
+              <div
+                className="mt-10 pt-8 flex items-center justify-between gap-4 flex-wrap"
+                style={{ borderTop: `1px solid rgba(255,255,255,0.07)` }}
+              >
+                <p className="text-xs text-muted-foreground">
+                  Or email us directly at{" "}
+                  <a
+                    href="mailto:src2026@kfupm.edu.sa"
+                    className="transition-opacity hover:opacity-70"
+                    style={{ color: TEAL }}
+                  >
+                    src2026@kfupm.edu.sa
+                  </a>
+                </p>
+                <CTAButton primary>
                   Send Message <ArrowRight className="w-4 h-4" />
                 </CTAButton>
-              </form>
-            )}
-          </div>
+              </div>
+            </form>
+          )}
         </div>
       </div>
     </div>
   );
 }
-
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer({ setSection }: { setSection: (s: Section) => void }) {
   const links: { label: string; section: Section }[] = [
@@ -3044,61 +3060,73 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
   return (
     <footer className="border-t" style={{ background: "#050D18", borderColor: `${TEAL}15` }}>
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
-          <div className="md:col-span-2">
+        <div className="flex justify-start mb-12">
+          <div className="max-w-lg ml-6">
             <SRCLogo size={70} />
             <p className="text-muted-foreground text-sm mt-4 mb-6 max-w-sm leading-relaxed">
               The first AIChE Student Regional Conference in the GCC — bringing together the brightest chemical engineering minds across the region.
             </p>
-            <div className="flex gap-3">
-              {[
-                { icon: <Instagram className="w-4 h-4" />, color: "#E1306C" },
-                { icon: <Twitter className="w-4 h-4" />, color: "#1DA1F2" },
-                { icon: <Linkedin className="w-4 h-4" />, color: "#0A66C2" },
-                { icon: <Youtube className="w-4 h-4" />, color: "#FF0000" },
-              ].map((s, i) => (
-                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors" style={{ background: "#0D1E30", borderColor: `${TEAL}20`, color: s.color }}>
-                  {s.icon}
-                </button>
-              ))}
-            </div>
+            <div className="flex justify-start gap-3">
+  {[
+    {
+      icon: <Instagram className="w-4 h-4" />,
+      color: "#E1306C",
+      href: "https://www.instagram.com/kfupm_aiche/",
+    },
+    {
+      icon: <Twitter className="w-4 h-4" />,
+      color: "#1DA1F2",
+      href: "https://x.com/KFUPMAIChE?lang=ar",
+    },
+    {
+      icon: <Linkedin className="w-4 h-4" />,
+      color: "#0A66C2",
+      href: "https://sa.linkedin.com/company/kfupm-aiche",
+    },
+    {
+      icon: <Youtube className="w-4 h-4" />,
+      color: "#FF0000",
+      href: "https://www.youtube.com/@aiche-bitspilanidubaicampu5841",
+    },
+  ].map((s, i) => (
+    <a
+      key={i}
+      href={s.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors"
+      style={{
+        background: "#0D1E30",
+        borderColor: `${TEAL}20`,
+        color: s.color,
+      }}
+    >
+      {s.icon}
+    </a>
+  ))}
+</div>
+
+<div className="space-y-2 mt-6">
+  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <Mail className="w-4 h-4" style={{ color: TEAL }} />
+    src2026@kfupm.edu.sa
+  </div>
+
+  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <MapPin className="w-4 h-4" style={{ color: TEAL }} />
+    KFUPM, Dhahran, Saudi Arabia
+  </div>
+
+  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <Phone className="w-4 h-4" style={{ color: TEAL }} />
+    +966 13 860 0000
+  </div>
+</div>
           </div>
 
-          <div>
-            <h4 className="font-semibold text-white text-sm mb-4 uppercase tracking-wider">Navigation</h4>
-            <ul className="space-y-2">
-              {links.slice(0, 7).map((l) => (
-                <li key={l.section}>
-                  <button onClick={() => setSection(l.section)} className="text-sm text-muted-foreground hover:text-white transition-colors">
-                    {l.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          
 
-          <div>
-            <h4 className="font-semibold text-white text-sm mb-4 uppercase tracking-wider">More</h4>
-            <ul className="space-y-2 mb-6">
-              {links.slice(7).map((l) => (
-                <li key={l.section}>
-                  <button onClick={() => setSection(l.section)} className="text-sm text-muted-foreground hover:text-white transition-colors">
-                    {l.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Mail className="w-3 h-3" style={{ color: TEAL }} />
-                src2026@kfupm.edu.sa
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MapPin className="w-3 h-3" style={{ color: TEAL }} />
-                KFUPM, Dhahran, Saudi Arabia
-              </div>
-            </div>
-          </div>
+          
         </div>
 
         <div className="border-t pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: `${TEAL}15` }}>
