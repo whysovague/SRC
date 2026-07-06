@@ -26,12 +26,9 @@ const PALETTE_ORANGE = "#e47d1b";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function SectionTag({ children }: { children: React.ReactNode }) {
   return (
-    <span
-      className="inline-block text-xs font-mono tracking-[0.2em] uppercase mb-4 px-3 py-1 rounded-sm border"
-      style={{ color: TEAL, borderColor: `${TEAL}40`, background: `${TEAL}10` }}
-    >
-      {children}
-    </span>
+    <div className="mb-4">
+      <GradientEyebrow>{children}</GradientEyebrow>
+    </div>
   );
 }
 
@@ -80,11 +77,36 @@ function CTAButton({ children, primary, ghost, onClick, className = "" }: {
 }
 
 // Section-header eyebrow with a gradient-bordered pill (blue → orange).
-// Used at the top of each home-page section in place of the bare label.
+// Used at the top of each page section. Styled inline so it renders
+// identically on every page — not just where a scoped <style> tag lives.
 function GradientEyebrow({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <span className={`src-eyebrow ${className}`}>
-      <span className="src-eyebrow-inner">{children}</span>
+    <span
+      className={className}
+      style={{
+        display: "inline-block",
+        padding: "1.5px",
+        borderRadius: 9999,
+        background: `linear-gradient(135deg, ${PALETTE_BLUE} 0%, ${PALETTE_ORANGE} 100%)`,
+        boxShadow: `0 0 18px -8px ${PALETTE_BLUE}66, 0 0 18px -8px ${PALETTE_ORANGE}66`,
+      }}
+    >
+      <span
+        style={{
+          display: "inline-block",
+          padding: "6px 14px",
+          borderRadius: "inherit",
+          background: "#07111E",
+          fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
+          fontSize: 11,
+          fontWeight: 600,
+          letterSpacing: "0.28em",
+          textTransform: "uppercase",
+          color: "rgba(255,255,255,0.92)",
+        }}
+      >
+        {children}
+      </span>
     </span>
   );
 }
@@ -1021,27 +1043,6 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
             transition: border-color .3s ease;
           }
           .src-icard-glow, .src-icard-border { display: none; }
-        }
-
-        /* Section eyebrow — gradient-bordered pill */
-        .src-eyebrow {
-          display: inline-block;
-          padding: 1.5px;
-          border-radius: 9999px;
-          background: linear-gradient(135deg, ${PALETTE_BLUE} 0%, ${PALETTE_ORANGE} 100%);
-          box-shadow: 0 0 18px -8px ${PALETTE_BLUE}66, 0 0 18px -8px ${PALETTE_ORANGE}66;
-        }
-        .src-eyebrow-inner {
-          display: inline-block;
-          padding: 6px 14px;
-          border-radius: inherit;
-          background: #07111E;
-          font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-          font-size: 11px;
-          font-weight: 600;
-          letter-spacing: 0.28em;
-          text-transform: uppercase;
-          color: rgba(255,255,255,0.92);
         }
       `}</style>
 
@@ -2084,9 +2085,8 @@ function LogisticsPage() {
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Title — screenshot style: line + eyebrow, white + gradient over two lines */}
         <div className="faq-pop">
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Logistics</span>
+          <div className="mb-7">
+            <GradientEyebrow>Logistics</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Venue &amp;</span>
@@ -2242,9 +2242,8 @@ function PartnershipPage() {
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Header — line eyebrow + two-line gradient title (matches Logistics / FAQ) */}
         <div className="faq-pop">
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Grow Together</span>
+          <div className="mb-7">
+            <GradientEyebrow>Grow Together</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Partnership &amp;</span>
@@ -2697,9 +2696,8 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
       <div className="relative max-w-7xl mx-auto px-6">
         {/* Header — eyebrow line + gradient title (matches Logistics) */}
         <div className="faq-pop" style={{ animationDelay: "0ms" }}>
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Got Questions?</span>
+          <div className="mb-7">
+            <GradientEyebrow>Got Questions?</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Frequently Asked</span>
@@ -2904,9 +2902,8 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
 
         {/* Header — same eyebrow + gradient title as other pages */}
         <div className="faq-pop mb-12">
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Get In Touch</span>
+          <div className="mb-7">
+            <GradientEyebrow>Get In Touch</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Say</span>
