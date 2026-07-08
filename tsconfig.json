@@ -14,9 +14,9 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["SRC/*"]
     },
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["SRC"]
 }
