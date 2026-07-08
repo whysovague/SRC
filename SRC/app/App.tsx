@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import srcTealSvg from "@/assets/src_teal.svg";
 import srcLettersSvg from "@/assets/src_letters.svg";
+import { submitRegistration } from "./lib/firebase";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -3220,6 +3221,8 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
   const [competition, setCompetition] = useState<Competition>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when open
@@ -3241,6 +3244,8 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
         setCompetition(null);
         setFormData({});
         setSubmitted(false);
+        setSubmitting(false);
+        setSubmitError(null);
       }, 300);
     }
   }, [open]);
@@ -3269,7 +3274,23 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
     }
   };
 
-  const handleSubmit = () => setSubmitted(true);
+  const handleSubmit = async () => {
+    if (!regType || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await submitRegistration({
+        type: regType,
+        competition: regType === "team" ? competition : null,
+        data: formData,
+      });
+      setSubmitted(true);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const getFields = (): { key: string; label: string; type?: string; required?: boolean; options?: string[] }[] => {
     switch (regType) {
@@ -3654,9 +3675,18 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
               </CTAButton>
             )}
             {step === 2 && (
-              <CTAButton primary onClick={handleSubmit}>
-                Submit Registration <ArrowRight className="w-4 h-4" />
-              </CTAButton>
+              <div className="flex flex-col items-end gap-2">
+                {submitError && (
+                  <p className="text-xs text-right" style={{ color: "#ff8a8a" }}>{submitError}</p>
+                )}
+                <CTAButton
+                  primary
+                  onClick={handleSubmit}
+                  className={submitting ? "opacity-60 pointer-events-none" : ""}
+                >
+                  {submitting ? "Submitting…" : "Submit Registration"} <ArrowRight className="w-4 h-4" />
+                </CTAButton>
+              </div>
             )}
           </div>
         )}
