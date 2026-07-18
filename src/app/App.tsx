@@ -1679,7 +1679,7 @@ function TimelineSection() {
     {
       date: "Q1 2026",
       event: "Registration Opens",
-      desc: "Team and individual registration officially opens for all GCC universities.",
+      desc: "Team and individual registration officially opens for all universities.",
       status: "upcoming" as const,
     },
     {
@@ -2907,9 +2907,9 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
             <GradientEyebrow>Get In Touch</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
-            <span className="text-white">Say</span>
+            <span className="text-white">Get In</span>
             <br />
-            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Hello.</span>
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Touch.</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed mt-4 max-w-lg">
             Whether you have questions about registration, partnerships, logistics, or the program — our team will get back to you promptly.
@@ -3013,18 +3013,7 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
               {/* Divider + submit row */}
               <div
                 className="mt-10 pt-8 flex items-center justify-between gap-4 flex-wrap"
-                style={{ borderTop: `1px solid rgba(255,255,255,0.07)` }}
               >
-                <p className="text-xs text-muted-foreground">
-                  Or email us directly at{" "}
-                  <a
-                    href="mailto:src2026@kfupm.edu.sa"
-                    className="transition-opacity hover:opacity-70"
-                    style={{ color: TEAL }}
-                  >
-                    src2026@kfupm.edu.sa
-                  </a>
-                </p>
                 <CTAButton primary>
                   Send Message <ArrowRight className="w-4 h-4" />
                 </CTAButton>
@@ -3084,7 +3073,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     {
       icon: <Youtube className="w-4 h-4" />,
       color: "#FF0000",
-      href: "https://www.youtube.com/@aiche-bitspilanidubaicampu5841",
+      href: "https://www.youtube.com/@KFUPMAIChE",
     },
   ].map((s, i) => (
     <a
@@ -3107,7 +3096,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
 <div className="space-y-2 mt-6">
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
     <Mail className="w-4 h-4" style={{ color: TEAL }} />
-    src2026@kfupm.edu.sa
+    aiche@kfupm.edu.sa
   </div>
 
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -3115,10 +3104,6 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     KFUPM, Dhahran, Saudi Arabia
   </div>
 
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <Phone className="w-4 h-4" style={{ color: TEAL }} />
-    +966 13 860 0000
-  </div>
 </div>
           </div>
 
