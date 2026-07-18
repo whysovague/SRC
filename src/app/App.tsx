@@ -1305,7 +1305,8 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
 
       <TimelineSection />
 
-{/* SPONSORS & SPEAKERS */}
+{/* SPONSORS & SPEAKERS — hidden for now */}
+      {false && (
       <section className="relative overflow-hidden py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
         <MoleculeNetwork />
         {/* Ambient background — faint grid + stage glows */}
@@ -1364,7 +1365,8 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
           </Marquee>
         </div>
       </section>
-      
+      )}
+
       {/* CTA band */}
       <section className="py-16" style={{ background: `linear-gradient(135deg, ${TEAL}15 0%, ${ORANGE}10 100%)`, borderTop: `1px solid ${TEAL}25`, borderBottom: `1px solid ${TEAL}25` }}>
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -1677,42 +1679,46 @@ function RegistrationPage() {
 function TimelineSection() {
   const milestones = [
     {
-      date: "Q1 2026",
-      event: "Registration Opens",
-      desc: "Team and individual registration officially opens for all universities.",
+      date: "11/4/2026",
+      event: "Competition Registrations Open",
+      desc: "Registrations open for Chem-E-Car and Chem-E-Jeopardy.",
       status: "upcoming" as const,
     },
     {
-      date: "Q1 2026",
-      event: "Team Registration Deadline",
-      desc: "Final deadline for teams to confirm their participation.",
+      date: "8/6/2026",
+      event: "Chem-E-Car Registration Deadline",
+      desc: "Final deadline for teams to register for the Chem-E-Car competition.",
       status: "upcoming" as const,
     },
     {
-      date: "Q2 2026",
-      event: "Abstract Submission Deadline",
-      desc: "Technical presentation abstracts must be submitted for review.",
+      date: "31/7/2026",
+      event: "Other Competitions Registration Deadline",
+      desc: "ChemE Jeopardy, Technical Presentation, and Poster Competition registration closes.",
       status: "upcoming" as const,
     },
     {
-      date: "Q2 2026",
-      event: "Poster Submission Deadline",
-      desc: "Research posters due for the Poster Competition.",
+      date: "16/8/2026",
+      event: "Visitor Registration Opens",
+      desc: "General visitor registration goes live.",
       status: "upcoming" as const,
     },
     {
-      date: "TBA",
-      event: "SRC 2026 Conference",
-      desc: "The main event — three days of competitions, technical sessions, and networking.",
+      date: "31/8/2026",
+      event: "SRC Day 1",
+      desc: "Agenda coming soon.",
       status: "main" as const,
-      schedule: [
-        "Opening Ceremony",
-        "Chem-E-Car Competition",
-        "Technical Sessions",
-        "Workshops",
-        "Networking Events",
-        "Closing Gala",
-      ],
+    },
+    {
+      date: "1/9/2026",
+      event: "SRC Day 2",
+      desc: "Agenda coming soon.",
+      status: "upcoming" as const,
+    },
+    {
+      date: "2/9/2026",
+      event: "SRC Day 3",
+      desc: "Agenda coming soon.",
+      status: "upcoming" as const,
     },
   ];
 
@@ -1880,26 +1886,6 @@ function TimelineSection() {
                       </div>
                       <h4 className="font-display font-bold text-white text-lg mb-1">{m.event}</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">{m.desc}</p>
-
-                      {m.schedule && (
-                        <div
-                          className={`make-mt-4 pt-4 border-t space-y-2 ${alignLeft ? "md:text-right" : ""}`}
-                          style={{ borderColor: "var(--border)" }}
-                        >
-                          {m.schedule.map((item) => (
-                            <div
-                              key={item}
-                              className={`flex items-center gap-2 text-sm text-muted-foreground ${
-                                alignLeft ? "md:flex-row-reverse" : ""
-                              }`}
-                            >
-                              <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: TEAL }} />
-                              <span>{item}</span>
-                              <ComingSoonBadge />
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </InteractiveCard>
                     </div>
                   </div>
@@ -2462,12 +2448,12 @@ function OrganizingPage() {
         { name: "Saba Aljohani", role: "Web Development Leader" },
         { name: "Zainab Alkhater", role: "Physical Marketing Leader" },
         { name: "Dali Alanzi", role: "Social Media Leader" },
-        { name: "Fatemah Alshawaf", role: "Design Leader" },
+        { name: "Alaa Alsadiq", role: "Design Leader" },
+        { name: "Mohammed Almahasnah", role: "Sr. Consultant" },
+        { name: "Fatimah Almakinah", role: "Sr. Consultant" },
         { name: "Zainab Aldukhi", role: "Consultant" },
         { name: "Ahmad Albalawi", role: "Consultant" },
         { name: "Alaa Alsaad", role: "Marketing Consultant" },
-        { name: "Mohammed Almahasnah", role: "Sr. Consultant" },
-        { name: "Fatimah Almakinah", role: "Sr. Consultant" },
         { name: "Asseel Alzahrani", role: "Sponsorship Consultant" },
         { name: "Abdullah Alomar", role: "Technical Program Consultant" },
         { name: "Meshal Alrefaei", role: "Sponsorship Consultant" },
