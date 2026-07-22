@@ -27,9 +27,12 @@ const PALETTE_ORANGE = "#e47d1b";
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function SectionTag({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-4">
-      <GradientEyebrow>{children}</GradientEyebrow>
-    </div>
+    <span
+      className="inline-block text-xs font-mono tracking-[0.2em] uppercase mb-4 px-3 py-1 rounded-sm border"
+      style={{ color: TEAL, borderColor: `${TEAL}40`, background: `${TEAL}10` }}
+    >
+      {children}
+    </span>
   );
 }
 
@@ -513,7 +516,7 @@ const navItems: { label: string; section: Section }[] = [
   { label: "Logistics", section: "logistics" },
   { label: "Partnership", section: "partnership" },
   { label: "Contact", section: "contact" },
-  { label: "Organizing Team", section: "organizing" },
+  //{ label: "Organizing Team", section: "organizing" },
   { label: "FAQ", section: "faq" },
 ];
 
@@ -1045,6 +1048,27 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
           }
           .src-icard-glow, .src-icard-border { display: none; }
         }
+
+          /* Section eyebrow — gradient-bordered pill */
+        .src-eyebrow {
+          display: inline-block;
+          padding: 1.5px;
+          border-radius: 9999px;
+          background: linear-gradient(135deg, ${PALETTE_BLUE} 0%, ${PALETTE_ORANGE} 100%);
+          box-shadow: 0 0 18px -8px ${PALETTE_BLUE}66, 0 0 18px -8px ${PALETTE_ORANGE}66;
+        }
+        .src-eyebrow-inner {
+          display: inline-block;
+          padding: 6px 14px;
+          border-radius: inherit;
+          background: #07111E;
+          font-family: "Inter", sans-serif;
+          font-size: 11px;
+          font-weight: 1000;
+          letter-spacing: 0.28em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.92);
+        }
       `}</style>
 
       {/* Shared homepage background — molecule network + glow orbs + faint grid */}
@@ -1170,10 +1194,34 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
           <div className="mt-5 md:mt-5 grid grid-cols-2 md:grid-cols-4 gap-6 text-center justify-items-center max-w-4xl mx-auto">
             {stats.map((s) => (
               <div key={s.label} className="p-4 w-full">
-                <div className="font-display text-2xl md:text-3xl font-black mb-1" style={{ color: TEAL }}>
-                  <CountUp to={s.to} suffix={s.suffix} />
-                </div>
-                <div className="text-xs text-muted-foreground">{s.label}</div>
+                <div className="relative mb-2">
+  {/* Glow */}
+  <div
+    className="absolute inset-0 flex justify-center items-center
+               font-display text-5xl md:text-6xl font-black
+               blur-xl opacity-50 pointer-events-none select-none"
+    style={{ color: TEAL }}
+  >
+    <CountUp to={s.to} suffix={s.suffix} />
+  </div>
+
+  {/* Main Number */}
+  <div
+    className="relative font-display text-5xl md:text-5xl font-black
+               tracking-tight"
+    style={{
+      color: "#fff",
+      textShadow: `
+        0 0 10px ${TEAL},
+        0 0 2px ${TEAL},
+        0 0 3px ${TEAL}
+      `,
+    }}
+  >
+    <CountUp to={s.to} suffix={s.suffix} />
+  </div>
+</div>
+                <div className="text-sm md:text-base text-muted-foreground mt-2">{s.label}</div>
               </div>
             ))}
           </div>
@@ -1211,7 +1259,7 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
               </div>
  
               <p className="text-muted-foreground leading-relaxed text-lg mb-6">
-                SRC 2026 at KFUPM marks a historic milestone — it is the{" "}
+                SRC 2026 at KFUPM marks a historic milestone, it is the{" "}
                 <span style={{ color: TEAL }} className="font-semibold">first time this conference is held in the Gulf Cooperation Council (GCC)</span>, bringing the AIChE tradition of academic excellence to the heart of the Arab world's energy and engineering hub.
               </p>
               <p className="text-muted-foreground leading-relaxed text-lg">
@@ -1246,8 +1294,8 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
           {/* Mission / Vision */}
           <div className="grid md:grid-cols-2 gap-6 mt-20 src-rise-3">
             {[
-              { label: "Mission", icon: <Target className="w-5 h-5" />, color: TEAL, text: "To provide an exceptional platform that empowers chemical engineering students across the GCC to showcase their talents, engage with industry, and develop as global engineering leaders — while establishing a sustainable regional AIChE tradition." },
-              { label: "Vision", icon: <Eye className="w-5 h-5" />, color: ORANGE, text: "To be the premier student engineering conference in the Middle East, recognized for its academic rigor, cultural richness, and its role in shaping the next generation of engineers who will drive the region's industrial transformation." },
+              { label: "Mission", icon: <Target className="w-5 h-5" />, color: TEAL, text: "Connecting industry with future engineers through innovation and collaboration." },
+              { label: "Vision", icon: <Eye className="w-5 h-5" />, color: ORANGE, text: "Developing the GCC's next generation of engineering talent." },
             ].map((mv) => (
               <InteractiveCard
                 key={mv.label}
@@ -1411,7 +1459,7 @@ function AboutPage() {
                 The <span className="text-white font-semibold">Student Regional Conference (SRC)</span> is an AIChE flagship event that gathers undergraduate chemical engineering students from universities across a geographic region for competitions, technical presentations, workshops, and professional development.
               </p>
               <p className="text-muted-foreground leading-relaxed mb-6">
-                SRC 2026 at KFUPM marks a historic milestone — it is the <span style={{ color: TEAL }} className="font-semibold">first time this conference is held in the Gulf Cooperation Council (GCC)</span>, bringing the AIChE tradition of academic excellence to the heart of the Arab world's energy and engineering hub.
+                SRC 2026 at KFUPM marks a historic milestone it is the <span style={{ color: TEAL }} className="font-semibold">first time this conference is held in the Gulf Cooperation Council (GCC)</span>, bringing the AIChE tradition of academic excellence to the heart of the Arab world's energy and engineering hub.
               </p>
               <p className="text-muted-foreground leading-relaxed">
                 Hosted by King Fahd University of Petroleum & Minerals (KFUPM) in Dhahran, Saudi Arabia, this conference will attract students, faculty advisors, and industry professionals from across the GCC and the broader Middle East region.
@@ -1437,7 +1485,7 @@ function AboutPage() {
         {/* Mission / Vision */}
         <div className="grid md:grid-cols-2 gap-6 mb-16">
           {[
-            { label: "Mission", icon: <Target />, text: "To provide an exceptional platform that empowers chemical engineering students across the GCC to showcase their talents, engage with industry, and develop as global engineering leaders — while establishing a sustainable regional AIChE tradition.", color: TEAL },
+            { label: "Mission", icon: <Target />, text: "To provide an exceptional platform that empowers chemical engineering students across the GCC to showcase their talents, engage with industry, and develop as global engineering leaders while establishing a sustainable regional AIChE tradition.", color: TEAL },
             { label: "Vision", icon: <Eye />, text: "To be the premier student engineering conference in the Middle East, recognized for its academic rigor, cultural richness, and its role in shaping the next generation of engineers who will drive the region's industrial transformation.", color: ORANGE },
           ].map((mv) => (
             <div key={mv.label} className="rounded-xl p-8 border" style={{ background: "var(--card)", borderColor: `${mv.color}30` }}>
@@ -1489,7 +1537,7 @@ function CompetitionsPage() {
       icon: <Trophy className="w-7 h-7" />,
       title: "ChemE Jeopardy",
       category: "Competition",
-      desc: "A fast-paced, Jeopardy-style trivia competition testing breadth of chemical engineering knowledge — from thermodynamics to reactor design to safety.",
+      desc: "A fast-paced, Jeopardy-style trivia competition testing breadth of chemical engineering knowledge from thermodynamics to reactor design to safety.",
       details: ["Team of 3-4 students", "Live Q&A format", "All ChE disciplines"],
       color: ORANGE,
     },
@@ -1545,7 +1593,7 @@ function CompetitionsPage() {
       icon: <Lightbulb className="w-7 h-7" />,
       title: "Additional Programs",
       category: "Activity",
-      desc: "Cultural tours, social events, an opening ceremony, closing gala, and more — making SRC 2026 an unforgettable complete experience.",
+      desc: "Cultural tours, social events, an opening ceremony, closing gala, and more. Making SRC 2026 an unforgettable complete experience.",
       details: ["Opening ceremony", "Closing gala", "Cultural activities"],
       color: TEAL,
     },
@@ -1555,24 +1603,61 @@ function CompetitionsPage() {
   const filtered = competitions.filter((c) => filter === "All" || c.category === filter);
 
   return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionTag>What Awaits You</SectionTag>
-        <SectionTitle>Competitions & Activities</SectionTitle>
-        <Divider />
-        <p className="text-muted-foreground max-w-2xl mb-10 text-lg leading-relaxed">
-          SRC 2026 features a rich program of technical competitions, professional development sessions, and networking activities designed to challenge and inspire.
-        </p>
+    <div
+      className="relative overflow-hidden pt-24 pb-28"
+      style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}
+    >
+      <style>{`
+        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
+        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
+        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
+        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
+        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
+      `}</style>
 
-        <div className="flex gap-2 mb-10">
+      {/* Background — identical to FAQ/Logistics/Partnership/Contact */}
+      <MoleculeNetwork />
+      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
+      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
+        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
+      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
+        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
+        backgroundSize: "72px 72px",
+        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
+      }} />
+
+      <div className="relative max-w-7xl mx-auto px-6">
+
+        {/* Header — same eyebrow + gradient title pattern */}
+        <div className="faq-pop">
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>What Awaits You</span>
+          </div>
+          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
+            <span className="text-white">Competitions &</span>
+            <br />
+            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Activities</span>
+          </h2>
+          <Divider />
+          <p className="text-muted-foreground max-w-2xl mb-10 text-lg leading-relaxed">
+            SRC 2026 features a rich program of technical competitions, professional development sessions, and networking activities designed to challenge and inspire.
+          </p>
+        </div>
+
+        {/* Filter pills */}
+        <div className="faq-pop flex gap-2 mb-12" style={{ animationDelay: "80ms" }}>
           {(["All", "Competition", "Activity"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className="px-4 py-2 rounded text-sm font-semibold transition-all"
+              className="px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200"
               style={filter === f
-                ? { background: TEAL, color: "#07111E" }
-                : { background: `${TEAL}10`, color: "var(--muted-foreground)", border: `1px solid ${TEAL}25` }
+                ? { background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }
+                : { background: "rgba(13,30,48,0.55)", color: "var(--muted-foreground)", border: `1px solid ${TEAL}25`, backdropFilter: "blur(8px)" }
               }
             >
               {f}
@@ -1580,42 +1665,43 @@ function CompetitionsPage() {
           ))}
         </div>
 
+        {/* Cards grid */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((item) => (
-            <InteractiveCard
-              key={item.title}
-              accent={item.color}
-              className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300"
-              style={{ background: "var(--card)", borderColor: "var(--border)" }}
-            >
-              <div className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
-                    {item.icon}
+          {filtered.map((item, i) => (
+            <RevealOnScroll key={item.title} delay={(i % 3) * 100}>
+              <InteractiveCard
+                accent={item.color}
+                className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300 h-full"
+                style={{ background: "var(--card)", borderColor: "var(--border)" }}
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
+                      {item.icon}
+                    </div>
+                    <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color === TEAL ? TEAL : ORANGE, background: `${item.color}12`, border: `1px solid ${item.color}30` }}>
+                      {item.category}
+                    </span>
                   </div>
-                  <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color === TEAL ? TEAL : ORANGE, background: `${item.color}12`, border: `1px solid ${item.color}30` }}>
-                    {item.category}
-                  </span>
+                  <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
+                  <ul className="space-y-1">
+                    {item.details.map((d) => (
+                      <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
+                        {d}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-                <ul className="space-y-1">
-                  {item.details.map((d) => (
-                    <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
-                      {d}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </InteractiveCard>
+              </InteractiveCard>
+            </RevealOnScroll>
           ))}
         </div>
       </div>
     </div>
   );
 }
-
 // ─── Registration Page ────────────────────────────────────────────────────────
 function RegistrationPage() {
   const tracks = [
@@ -2660,8 +2746,10 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
   const askMailto = `mailto:src2026@kfupm.edu.sa?subject=${encodeURIComponent("Question about SRC 2026")}`;
 
   return (
-    <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
-      {/* Scoped animations */}
+    <div
+      className="relative overflow-hidden pt-24 pb-28"
+      style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}
+    >
       <style>{`
         @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
         @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
@@ -2684,10 +2772,12 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
       }} />
 
       <div className="relative max-w-7xl mx-auto px-6">
-        {/* Header — eyebrow line + gradient title (matches Logistics) */}
-        <div className="faq-pop" style={{ animationDelay: "0ms" }}>
-          <div className="mb-7">
-            <GradientEyebrow>Got Questions?</GradientEyebrow>
+
+        {/* Header */}
+        <div className="faq-pop">
+          <div className="flex items-center gap-3 mb-7">
+            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
+            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Got Questions?</span>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Frequently Asked</span>
@@ -2697,14 +2787,14 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
           <Divider />
         </div>
 
-        {/* Question Cards Stack */}
+        {/* FAQ items */}
         <div className="space-y-3 mt-4">
           {faqs.map((faq, i) => {
             const isOpen = open === i;
             return (
               <div
                 key={i}
-                className="faq-pop relative rounded-xl overflow-hidden transition-all duration-300"
+                className="faq-pop relative rounded-xl overflow-hidden"
                 style={{
                   background: "rgba(13,30,48,0.55)",
                   border: `1px solid ${isOpen ? `${ORANGE}75` : `${ORANGE}22`}`,
@@ -2713,73 +2803,72 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
                   boxShadow: isOpen
                     ? `0 20px 50px -16px ${ORANGE}40, inset 0 1px 0 rgba(255,255,255,0.06)`
                     : "inset 0 1px 0 rgba(255,255,255,0.04)",
+                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
                   animationDelay: `${140 + i * 70}ms`,
                 }}
               >
-                {/* Thick reflection cut with a finely lowered stable opacity */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{
-                    background: "linear-gradient(115deg, transparent 6%, rgba(255,255,255,0.0) 9%, rgba(255,255,255,0.08) 13%, rgba(255,255,255,0.13) 16%, rgba(255,255,255,0.0) 21%, transparent 26%)",
-                  }}
-                />
-
-                {/* Internal static ambient background orange glow */}
-                <div
-                  className="absolute right-0 top-0 w-80 h-full pointer-events-none"
-                  style={{
-                    background: `radial-gradient(circle at 80% 30%, ${ORANGE}1E 0%, ${ORANGE}08 50%, transparent 100%)`,
-                  }}
-                />
-
-                {/* Main top edge active flash overflow backdrop glow */}
-                <div
-                  className="absolute inset-x-0 -top-16 h-48 pointer-events-none transition-opacity duration-300"
+                <div className="absolute inset-0 pointer-events-none" style={{
+                  background: "linear-gradient(115deg, transparent 6%, rgba(255,255,255,0.0) 9%, rgba(255,255,255,0.08) 13%, rgba(255,255,255,0.13) 16%, rgba(255,255,255,0.0) 21%, transparent 26%)",
+                }} />
+                <div className="absolute right-0 top-0 w-80 h-full pointer-events-none" style={{
+                  background: `radial-gradient(circle at 80% 30%, ${ORANGE}1E 0%, ${ORANGE}08 50%, transparent 100%)`,
+                }} />
+                <div className="absolute inset-x-0 -top-16 h-48 pointer-events-none"
                   style={{
                     background: `radial-gradient(60% 80% at 50% 0%, ${ORANGE}5C 0%, ${ORANGE}26 38%, transparent 72%)`,
                     filter: "blur(10px)",
                     opacity: isOpen ? 0.95 : 0.7,
+                    transition: "opacity 0.3s ease",
                     zIndex: 0,
-                  }}
-                />
-
-                {/* Orange status indicator bar on the top edge right side */}
-                <div 
-                  className="absolute top-0 right-14 w-12 h-1 rounded-b-md transition-all duration-300 pointer-events-none"
-                  style={{ 
+                  }} />
+                <div className="absolute top-0 right-14 w-12 h-1 rounded-b-md pointer-events-none"
+                  style={{
                     background: isOpen ? ORANGE : `${ORANGE}25`,
-                    boxShadow: isOpen ? `0 1px 10px ${ORANGE}` : "none"
-                  }} 
-                />
+                    boxShadow: isOpen ? `0 1px 10px ${ORANGE}` : "none",
+                    transition: "background 0.3s ease, box-shadow 0.3s ease",
+                  }} />
 
-                {/* Question Trigger Row */}
+                {/* Question */}
                 <button
                   className="relative z-10 w-full flex items-center justify-between p-5 text-left focus:outline-none"
                   onClick={() => setOpen(isOpen ? null : i)}
                 >
-                  <span className="font-semibold text-white text-sm pr-4 tracking-wide">
-                    {faq.q}
-                  </span>
-                  <span style={{ color: ORANGE }} className="flex-shrink-0">
-                    {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  <span className="font-semibold text-white text-sm pr-4 tracking-wide">{faq.q}</span>
+                  <span
+                    className="flex-shrink-0"
+                    style={{
+                      color: ORANGE,
+                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                      transition: "transform 0.5s cubic-bezier(.16,.84,.44,1)",
+                    }}
+                  >
+                    <ChevronDown className="w-4 h-4" />
                   </span>
                 </button>
 
-                {/* Answer Area */}
-                {isOpen && (
-                  <div
-                    className="relative z-10 px-5 pb-5 text-sm text-muted-foreground leading-relaxed border-t"
-                    style={{ borderColor: `${ORANGE}26` }}
-                  >
-                    <div className="pt-4 text-foreground/85 font-normal">{faq.a}</div>
+                {/* Answer — grid-template-rows dropdown */}
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateRows: isOpen ? "1fr" : "0fr",
+                    transition: "grid-template-rows 0.55s cubic-bezier(.16,.84,.44,1)",
+                  }}
+                >
+                  <div style={{ overflow: "hidden" }}>
+                    <div
+                      className="relative z-10 px-5 pb-5 text-sm leading-relaxed border-t"
+                      style={{ borderColor: `${ORANGE}26`, color: "var(--muted-foreground)" }}
+                    >
+                      <div className="pt-4">{faq.a}</div>
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             );
           })}
         </div>
 
-        {/* More questions → jump straight to the Contact message form */}
+        {/* More questions CTA */}
         <div
           className="faq-pop mt-12 rounded-2xl p-8 text-center relative overflow-hidden"
           style={{
@@ -2811,11 +2900,11 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
 }
-
 // ─── Contact Page ─────────────────────────────────────────────────────────────
 function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolean; onFocusHandled?: () => void }) {
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
@@ -3063,7 +3152,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     {
       icon: <Youtube className="w-4 h-4" />,
       color: "#FF0000",
-      href: "https://www.youtube.com/@KFUPMAIChE",
+      href: "https://youtube.com/@kfupmaiche?si=FpLHkciIUcAnlXAZ",
     },
   ].map((s, i) => (
     <a
@@ -3086,12 +3175,17 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
 <div className="space-y-2 mt-6">
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
     <Mail className="w-4 h-4" style={{ color: TEAL }} />
-    aiche@kfupm.edu.sa
+    src2026@kfupm.edu.sa
   </div>
 
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
     <MapPin className="w-4 h-4" style={{ color: TEAL }} />
     KFUPM, Dhahran, Saudi Arabia
+  </div>
+  
+  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+    <Phone className="w-4 h-4" style={{ color: TEAL }} />
+    +966 13 860 0000
   </div>
 
 </div>
