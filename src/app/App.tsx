@@ -2019,7 +2019,7 @@ function TeamsPage() {
 }
 
 // ─── Logistics ────────────────────────────────────────────────────────────────
-function LogisticsPage() {
+function LogisticsPage({ goToContact }: { goToContact: () => void }) {
   const faqs = [
     { q: "How do I get to KFUPM?", a: "KFUPM is located in Dhahran, Eastern Province, Saudi Arabia. The nearest airport is King Fahd International Airport (DMM) in Dammam, approximately 30 minutes away by road." },
     { q: "Are there on-campus accommodation options?", a: "Visiting delegations may be eligible for on-campus guest housing. Details will be confirmed closer to the conference date. Several hotels are available near the KFUPM campus." },
@@ -2105,34 +2105,12 @@ function LogisticsPage() {
             <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
               <Building2 className="w-5 h-5" style={{ color: ORANGE }} /> Accommodation
             </h3>
-            <div className="space-y-3">
-              {hotels.map((hotel) => (
-                <div key={hotel.name} className="rounded-lg p-4 text-sm" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${ORANGE}18` }}>
-                  <span className="font-medium text-white">{hotel.name}</span>
-                  <p className="text-muted-foreground text-xs mt-0.5">{hotel.note}</p>
-                </div>
-              ))}
-            </div>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              On-campus accommodation will be provided for competition participants. Details will be shared with registered teams closer to the event.
+            </p>
           </GlassCard>
 
-          {/* Travel Information */}
-          <GlassCard className="p-6" delay={260}>
-            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
-              <Globe className="w-5 h-5" style={{ color: ORANGE }} /> Travel Information
-            </h3>
-            <div className="space-y-3">
-              {travel.map((item) => (
-                <div key={item.label} className="flex items-start gap-4 rounded-lg p-4" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${ORANGE}18` }}>
-                  <span style={{ color: TEAL }} className="mt-0.5 flex-shrink-0">{item.icon}</span>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
-                    <p className="text-sm font-medium text-white">{item.value}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </GlassCard>
-
+      
           {/* FAQs for Visitors */}
           <GlassCard className="p-6" delay={330}>
             <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
@@ -2161,12 +2139,12 @@ function LogisticsPage() {
           </GlassCard>
         </div>
 
-        {/* Still have a question? — opens the logistics inbox (FAQ-style link) */}
+        {/* Still have a question? — jumps to the Contact page message form */}
         <div className="faq-pop mt-10 flex flex-col items-start text-left">
-          <a href={logisticsMailto} className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80 no-underline" style={{ color: ORANGE }}>
+          <button onClick={goToContact} className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80" style={{ color: ORANGE }}>
             Still have a question?
             <ArrowRight className="w-3.5 h-3.5" />
-          </a>
+          </button>
         </div>
       </div>
     </div>
@@ -2268,44 +2246,31 @@ function PartnershipPage() {
             </div>
           </div>
 
-          {/* RIGHT — tiers (Mission/Vision card treatment) + plain CTA */}
+          {/* RIGHT — unified partnership statement + plain CTA */}
           <div>
-            <h3 className="faq-pop font-display text-xl font-bold text-white mb-6" style={{ animationDelay: "160ms" }}>Partnership Tiers</h3>
-            <div className="faq-pop space-y-6" style={{ animationDelay: "240ms" }}>
-              {tiers.map((tier) => (
-                <InteractiveCard
-                  key={tier.name}
-                  accent={tier.color}
-                  className="group relative rounded-2xl p-6 overflow-hidden transition-colors duration-300"
-                  style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${tier.color}30` }}
-                >
-                  <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
-                    style={{ background: `radial-gradient(circle, ${tier.color}40 0%, transparent 70%)`, filter: "blur(28px)" }} />
-                  <div className="relative flex items-center justify-between mb-4">
-                    <span className="font-display text-lg font-extrabold" style={{ color: tier.color }}>{tier.name}</span>
-                    {tier.featured && <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: TEAL, background: `${TEAL}15`, border: `1px solid ${TEAL}40` }}>Most Popular</span>}
-                  </div>
-                  <ul className="relative space-y-1.5">
-                    {tier.perks.map((p) => (
-                      <li key={p} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: tier.color }} /> {p}
-                      </li>
-                    ))}
-                  </ul>
-                </InteractiveCard>
-              ))}
+            <h3 className="faq-pop font-display text-xl font-bold text-white mb-6" style={{ animationDelay: "160ms" }}>Partnership Packages</h3>
+            <div className="faq-pop" style={{ animationDelay: "240ms" }}>
+              <InteractiveCard
+                accent={TEAL}
+                className="group relative rounded-2xl p-8 overflow-hidden transition-colors duration-300"
+                style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${TEAL}30` }}
+              >
+                <div className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
+                  style={{ background: `radial-gradient(circle, ${TEAL}40 0%, transparent 70%)`, filter: "blur(28px)" }} />
+                <p className="relative text-muted-foreground leading-relaxed">
+                  SRC 2026 offers a range of sponsorship and partnership packages designed to fit organizations of every size and goal — from brand visibility and on-site activation to direct engagement with the region's top engineering talent. Request our sponsorship proposal for the full breakdown of tiers, benefits, and custom options.
+                </p>
+              </InteractiveCard>
             </div>
 
             {/* CTA / contact — plain content, NOT in a card */}
             <div className="faq-pop mt-8" style={{ animationDelay: "320ms" }}>
-              <p className="text-sm text-muted-foreground mb-4">Also available: Academic, Service &amp; Custom partnerships.</p>
               <div className="flex flex-wrap gap-3 mb-5">
                 <CTAButton primary>Request Partnership Proposal <ArrowRight className="w-4 h-4" /></CTAButton>
-                <CTAButton>Book a Discussion</CTAButton>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" style={{ color: TEAL }} /> partners.src2026@kfupm.edu.sa
+                  <Mail className="w-4 h-4" style={{ color: TEAL }} /> aiche@kfupm.edu.sa
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="w-4 h-4" style={{ color: TEAL }} /> +966 13 860 0000
@@ -2682,11 +2647,10 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
 
   const faqs = [
     { q: "Who can attend SRC 2026?", a: "SRC 2026 is open to undergraduate students in chemical engineering or related disciplines, faculty advisors, industry professionals, and anyone interested in engineering education. Some events may require a registered student affiliation." },
-    { q: "How can teams register for competitions?", a: "Team registration will open in Q1 2026. Teams must represent a university with an active AIChE student chapter. Visit the Registration page for the link when available, or contact teams.src2026@kfupm.edu.sa." },
+    { q: "How can teams register for competitions?", a: "Registration is done entirely through this website. Click \"Register Now\", choose \"Competition Participant\", then pick your competition and complete the form online. Teams should represent a university with an active AIChE student chapter." },
     { q: "What competitions are offered?", a: "SRC 2026 features: Chem-E-Car, ChemE Jeopardy, Student Technical Presentation Competition, and Undergraduate Student Poster Competition. See the Competitions page for full details." },
     { q: "Are there hotel or accommodation options?", a: "Yes. On-campus guest housing may be available for visiting teams. Several hotels are located within 5-20 minutes of KFUPM campus including Dhahran Palace Hotel, JW Marriott Dammam, and Le Méridien Al Khobar." },
-    { q: "How can companies partner with SRC 2026?", a: "Visit the Partnership page to review sponsorship tiers (Standard, Strategic, Premier) and special partnership categories. Send an inquiry to partners.src2026@kfupm.edu.sa or request a proposal online." },
-    { q: "Who should sponsors contact?", a: "For all sponsorship and partnership inquiries: partners.src2026@kfupm.edu.sa | +966 13 860 0000. Our partnership team will respond within 2 business days." },
+    { q: "How can companies partner with or sponsor SRC 2026?", a: "Visit the Partnership page to explore our sponsorship and partnership packages, then request a proposal online or email aiche@kfupm.edu.sa. Our partnership team will get back to you." },
     { q: "Where is the conference held?", a: "At King Fahd University of Petroleum & Minerals (KFUPM), Dhahran, Eastern Province, Saudi Arabia — near Dammam and Al Khobar in the Eastern Province." },
     { q: "What are the important dates?", a: "Registration opens in Q1 2026. Competition deadlines, submission dates, and the conference schedule will be announced on the Program page and our social media channels. Sign up for notifications at src2026@kfupm.edu.sa." },
     { q: "Is SRC 2026 only for Saudi students?", a: "No. International teams from GCC countries and beyond are warmly welcomed. We encourage participation from any university with an AIChE student chapter." },
@@ -2949,8 +2913,9 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
             animationDelay: "120ms",
             scrollMarginTop: "100px",
             outline: highlight ? `2px solid ${TEAL}55` : "none",
+            outlineOffset: highlight ? "22px" : "0px",
             borderRadius: 8,
-            transition: "outline 0.4s ease",
+            transition: "outline 0.4s ease, outline-offset 0.4s ease",
           }}
         >
           {sent ? (
@@ -3158,37 +3123,16 @@ const REG_TYPES = [
   {
     id: "participant" as const,
     icon: <Users className="w-7 h-7" />,
-    title: "Participant",
-    desc: "Attend sessions, workshops, panels, and networking events as an individual.",
+    title: "Visitor",
+    desc: "Attend sessions, workshops, panels, and networking events.",
     color: TEAL,
   },
   {
     id: "team" as const,
     icon: <Trophy className="w-7 h-7" />,
-    title: "Competition Team",
-    desc: "Register your university team for one of our flagship competitions.",
+    title: "Competition Participant",
+    desc: "Register to compete in one of our flagship competitions.",
     color: ORANGE,
-  },
-  {
-    id: "speaker" as const,
-    icon: <Mic2 className="w-7 h-7" />,
-    title: "Speaker / Judge / Mentor",
-    desc: "Share your expertise as a speaker, competition judge, or career mentor.",
-    color: TEAL,
-  },
-  {
-    id: "volunteer" as const,
-    icon: <Heart className="w-7 h-7" />,
-    title: "Volunteer",
-    desc: "Join the SRC 2026 team and help make this conference a success.",
-    color: ORANGE,
-  },
-  {
-    id: "partner" as const,
-    icon: <Building2 className="w-7 h-7" />,
-    title: "Partner / Sponsor",
-    desc: "Explore partnership and sponsorship opportunities for your organization.",
-    color: TEAL,
   },
 ];
 
@@ -3222,6 +3166,14 @@ const COMPETITIONS = [
     color: ORANGE,
   },
 ];
+
+// Competitions with a maximum team size. ⚠️ TBD — replace the placeholder numbers.
+const TEAM_COMPETITIONS: Record<string, { maxMembers: number }> = {
+  "chem-e-car": { maxMembers: 8 },      // TBD — update when confirmed
+  "cheme-jeopardy": { maxMembers: 4 },  // TBD — update when confirmed
+};
+// Individual competitions — one participant, no team fields.
+const INDIVIDUAL_COMPETITIONS = ["technical-presentation", "poster-competition"];
 
 const STEP_LABELS = ["Select Type", "Fill Information", "Review & Submit"];
 
@@ -3302,7 +3254,7 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
     }
   };
 
-  const getFields = (): { key: string; label: string; type?: string; required?: boolean; options?: string[] }[] => {
+  const getFields = (): { key: string; label: string; type?: string; required?: boolean; options?: string[]; max?: number }[] => {
     switch (regType) {
       case "participant": return [
         { key: "fullName", label: "Full Name", required: true },
@@ -3311,14 +3263,27 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
         { key: "position", label: "Position / Job Title", required: true },
         { key: "country", label: "Country", required: true },
       ];
-      case "team": return [
-        { key: "teamName", label: "Team Name", required: true },
-        { key: "leaderName", label: "Team Leader Name", required: true },
-        { key: "leaderEmail", label: "Team Leader Email", type: "email", required: true },
-        { key: "university", label: "University", required: true },
-        { key: "country", label: "Country", required: true },
-        { key: "memberCount", label: "Number of Team Members", type: "number", required: true },
-      ];
+      case "team": {
+        // Individual competitions — one participant's details (unified with the Visitor form).
+        if (competition && INDIVIDUAL_COMPETITIONS.includes(competition)) {
+          return [
+            { key: "fullName", label: "Full Name", required: true },
+            { key: "email", label: "Email Address", type: "email", required: true },
+            { key: "university", label: "University", required: true },
+            { key: "country", label: "Country", required: true },
+          ];
+        }
+        // Team competitions — team + leader details, capped by max members.
+        const max = competition ? TEAM_COMPETITIONS[competition]?.maxMembers : undefined;
+        return [
+          { key: "teamName", label: "Team Name", required: true },
+          { key: "fullName", label: "Team Leader Name", required: true },
+          { key: "email", label: "Team Leader Email", type: "email", required: true },
+          { key: "university", label: "University", required: true },
+          { key: "country", label: "Country", required: true },
+          { key: "memberCount", label: max ? `Number of Team Members (max ${max})` : "Number of Team Members", type: "number", required: true, max },
+        ];
+      }
       case "speaker": return [
         { key: "fullName", label: "Full Name", required: true },
         { key: "email", label: "Email", type: "email", required: true },
@@ -3349,7 +3314,17 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
   const isFormValid = () => {
     if (regType === "team" && !competition) return false;
     const fields = getFields();
-    return fields.every(f => !f.required || (formData[f.key] && formData[f.key].trim() !== ""));
+    for (const f of fields) {
+      const val = (formData[f.key] ?? "").trim();
+      if (f.required && !val) return false;
+      if (val && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return false;
+      if (val && f.type === "number") {
+        const n = Number(val);
+        if (Number.isNaN(n) || n < 1) return false;
+        if (f.max && n > f.max) return false;
+      }
+    }
+    return true;
   };
 
   const getRegTypeLabel = () => REG_TYPES.find(r => r.id === regType)?.title ?? "";
@@ -3422,6 +3397,7 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
           background: rgba(12, 191, 206, 0.07);
           transform: translateY(-1px);
         }
+        .reg-card-type-lg { flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px 20px; }
         .reg-card-comp {
           display: flex;
           align-items: flex-start;
@@ -3541,7 +3517,8 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
               </div>
               <h3 className="font-display text-2xl font-bold text-white mb-3">You're registered!</h3>
               <p className="text-muted-foreground max-w-sm mx-auto mb-6 text-sm leading-relaxed">
-                Your registration as a <span className="text-white font-semibold">{getRegTypeLabel()}</span> has been submitted. We'll be in touch at your provided email address.
+                Your registration as a <span className="text-white font-semibold">{getRegTypeLabel()}</span>
+                {regType === "team" && competition && <> for <span className="text-white font-semibold">{getCompetitionLabel()}</span></>} has been submitted. We'll be in touch at your provided email address.
               </p>
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: `${TEAL}10`, border: `1px solid ${TEAL}25`, color: TEAL }}>
                 <Mail className="w-4 h-4" /> Confirmation sent to {formData.email || formData.leaderEmail}
@@ -3554,20 +3531,21 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
 
           {/* STEP 0 — TYPE SELECTION */}
           {!submitted && step === 0 && (
-            <div className="reg-step space-y-2.5">
+            <div className="reg-step">
               <p className="text-muted-foreground text-sm mb-4">How would you like to participate in SRC 2026?</p>
-              {REG_TYPES.map((type) => (
-                <button key={type.id} className="reg-card-type" onClick={() => handleTypeSelect(type.id)}>
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${type.color}15`, color: type.color }}>
-                    {type.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-display font-bold text-white text-sm mb-0.5">{type.title}</div>
-                    <div className="text-xs text-muted-foreground leading-relaxed">{type.desc}</div>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 mt-1" />
-                </button>
-              ))}
+              <div className="grid sm:grid-cols-2 gap-4">
+                {REG_TYPES.map((type) => (
+                  <button key={type.id} className="reg-card-type reg-card-type-lg" onClick={() => handleTypeSelect(type.id)}>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${type.color}15`, color: type.color }}>
+                      {type.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display font-bold text-white text-base mb-1">{type.title}</div>
+                      <div className="text-xs text-muted-foreground leading-relaxed">{type.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -3620,14 +3598,24 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
                             {field.options.map(o => <option key={o} value={o}>{o}</option>)}
                           </select>
                         ) : (
-                          <input
-                            className="reg-input"
-                            type={field.type ?? "text"}
-                            value={formData[field.key] ?? ""}
-                            onChange={e => setField(field.key, e.target.value)}
-                            placeholder={field.label}
-                            min={field.type === "number" ? "1" : undefined}
-                          />
+                          <>
+                            <input
+                              className="reg-input"
+                              type={field.type ?? "text"}
+                              value={formData[field.key] ?? ""}
+                              onChange={e => setField(field.key, e.target.value)}
+                              placeholder={field.label}
+                              min={field.type === "number" ? "1" : undefined}
+                              max={field.type === "number" ? field.max : undefined}
+                            />
+                            {field.type === "email" && (formData[field.key] ?? "").trim() !== "" &&
+                              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((formData[field.key] ?? "").trim()) && (
+                                <p className="text-xs mt-1.5" style={{ color: "#ff8a8a" }}>Please enter a valid email address.</p>
+                            )}
+                            {field.type === "number" && field.max && Number(formData[field.key]) > field.max && (
+                                <p className="text-xs mt-1.5" style={{ color: "#ff8a8a" }}>Maximum {field.max} members for this competition.</p>
+                            )}
+                          </>
                         )}
                       </div>
                     ))}
@@ -3793,7 +3781,7 @@ export default function App() {
     registration: <RegistrationPage />,
     program: <ProgramPage />,
     teams: <TeamsPage />,
-    logistics: <LogisticsPage />,
+    logistics: <LogisticsPage goToContact={goToContactForm} />,
     partnership: <PartnershipPage />,
     sponsors: <SponsorsPage />,
     speakers: <SpeakersPage />,
