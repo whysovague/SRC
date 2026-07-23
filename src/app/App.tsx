@@ -3237,13 +3237,15 @@ const COMPETITIONS = [
     title: "Chem-E-Car",
     desc: "Design a car powered by a chemical energy source.",
     color: TEAL,
+    formUrl: "", // Add external link if needed later
   },
   {
     id: "cheme-jeopardy" as const,
     icon: <Trophy className="w-6 h-6" />,
     title: "ChemE Jeopardy",
-    desc: "Fast-paced trivia on chemical engineering topics.",
+    desc: "Fast-paced trivia on chemical engineering topics (Teams of 4).",
     color: ORANGE,
+    formUrl: "https://forms.gle/J1iAXjN98r2nNoxy6",
   },
   {
     id: "technical-presentation" as const,
@@ -3251,6 +3253,7 @@ const COMPETITIONS = [
     title: "Technical Presentation",
     desc: "Present original technical research to industry judges.",
     color: TEAL,
+    formUrl: "https://forms.gle/W1LP6t2KiHFNSJ6y9",
   },
   {
     id: "poster-competition" as const,
@@ -3258,16 +3261,15 @@ const COMPETITIONS = [
     title: "Poster Competition",
     desc: "Present research in a dynamic poster gallery setting.",
     color: ORANGE,
+    formUrl: "https://forms.gle/vGEnWBdgs3p6mRfg7",
   },
 ];
 
-// Competitions with a maximum team size. ⚠️ TBD — replace the placeholder numbers.
-const TEAM_COMPETITIONS: Record<string, { maxMembers: number }> = {
-  "chem-e-car": { maxMembers: 8 },      // TBD — update when confirmed
-  "cheme-jeopardy": { maxMembers: 4 },  // TBD — update when confirmed
+const TEAM_COMPETITIONS: Record<string, { exactMembers?: number }> = {
+  "chem-e-car": {},
+  "cheme-jeopardy": { exactMembers: 4 },
 };
-// Individual competitions — one participant, no team fields.
-const INDIVIDUAL_COMPETITIONS = ["technical-presentation", "poster-competition"];
+const INDIVIDUAL_COMPETITIONS = ["technical-presentation"];
 
 const STEP_LABELS = ["Select Type", "Fill Information", "Review & Submit"];
 
@@ -3331,22 +3333,24 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
   };
 
   const handleSubmit = async () => {
-    if (!regType || submitting) return;
-    setSubmitting(true);
-    setSubmitError(null);
-    try {
-      await submitRegistration({
-        type: regType,
-        competition: regType === "team" ? competition : null,
-        data: formData,
-      });
-      setSubmitted(true);
-    } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : "Submission failed. Please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  if (!regType || submitting) return;
+  setSubmitting(true);
+  setSubmitError(null);
+  
+  try {
+    await submitRegistration({
+      type: regType,
+      competition: regType === "team" ? competition : null,
+      data: formData,
+    });
+    setSubmitted(true);
+  } catch (e: any) {
+    console.error("Firestore submit error:", e);
+    setSubmitError(e?.message || "Submission failed. Please check your connection and try again.");
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   const getFields = (): { key: string; label: string; type?: string; required?: boolean; options?: string[]; max?: number }[] => {
     switch (regType) {
@@ -3358,24 +3362,53 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
         { key: "country", label: "Country", required: true },
       ];
       case "team": {
-        // Individual competitions — one participant's details (unified with the Visitor form).
-        if (competition && INDIVIDUAL_COMPETITIONS.includes(competition)) {
+        if (competition === "technical-presentation") {
           return [
-            { key: "fullName", label: "Full Name", required: true },
-            { key: "email", label: "Email Address", type: "email", required: true },
-            { key: "university", label: "University", required: true },
-            { key: "country", label: "Country", required: true },
+            { key: "university", label: "University Name", required: true },
+            { key: "fullName", label: "Presenter Name", required: true },
+            { key: "email", label: "Presenter Email", type: "email", required: true },
+            { key: "phone", label: "Presenter Phone Number", required: true },
+            { key: "major", label: "Major", required: true },
+            { key: "topic", label: "General Presentation Topic", required: true },
+            { key: "aicheConfirm", label: "I confirm I am an active AIChE Student Member", type: "checkbox", required: true },
           ];
         }
-        // Team competitions — team + leader details, capped by max members.
-        const max = competition ? TEAM_COMPETITIONS[competition]?.maxMembers : undefined;
+
+        if (competition === "poster-competition") {
+          return [
+            { key: "university", label: "University Name", required: true },
+            { key: "fullName", label: "Lead Participant Name", required: true },
+            { key: "email", label: "Lead Participant Email", type: "email", required: true },
+            { key: "phone", label: "Lead Participant Phone Number", required: true },
+            { key: "major", label: "Major", required: true },
+            { key: "topic", label: "General Research Topic (e.g. Water Treatment, Renewable Energy)", required: true },
+            { key: "coAuthors", label: "Co-Authors / Additional Team Members (Names & Majors)", type: "textarea", required: false },
+            { key: "aicheConfirm", label: "I confirm all participants are active AIChE Student Members", type: "checkbox", required: true },
+          ];
+        }
+
+        if (competition === "cheme-jeopardy") {
+          return [
+            { key: "university", label: "University Name", required: true },
+            { key: "fullName", label: "Team Captain Name", required: true },
+            { key: "email", label: "Team Captain Email", type: "email", required: true },
+            { key: "phone", label: "Team Captain Phone Number", required: true },
+            { key: "member1", label: "Member 1 Name & Major (Captain)", required: true },
+            { key: "member2", label: "Member 2 Name & Major", required: true },
+            { key: "member3", label: "Member 3 Name & Major", required: true },
+            { key: "member4", label: "Member 4 Name & Major", required: true },
+            { key: "aicheConfirm", label: "I confirm all 4 members are active AIChE Student Members", type: "checkbox", required: true },
+          ];
+        }
+
+        // Fallback for Chem-E-Car
         return [
-          { key: "teamName", label: "Team Name", required: true },
+          { key: "university", label: "University Name", required: true },
           { key: "fullName", label: "Team Leader Name", required: true },
           { key: "email", label: "Team Leader Email", type: "email", required: true },
-          { key: "university", label: "University", required: true },
-          { key: "country", label: "Country", required: true },
-          { key: "memberCount", label: max ? `Number of Team Members (max ${max})` : "Number of Team Members", type: "number", required: true, max },
+          { key: "phone", label: "Phone Number", required: true },
+          { key: "teamName", label: "Team Name", required: true },
+          { key: "aicheConfirm", label: "I confirm all team members are active AIChE Student Members", type: "checkbox", required: true },
         ];
       }
       case "speaker": return [
@@ -3411,12 +3444,8 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
     for (const f of fields) {
       const val = (formData[f.key] ?? "").trim();
       if (f.required && !val) return false;
+      if (f.type === "checkbox" && f.required && val !== "true") return false;
       if (val && f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return false;
-      if (val && f.type === "number") {
-        const n = Number(val);
-        if (Number.isNaN(n) || n < 1) return false;
-        if (f.max && n > f.max) return false;
-      }
     }
     return true;
   };
@@ -3679,10 +3708,30 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
                   <div className="grid gap-4">
                     {getFields().map((field) => (
                       <div key={field.key}>
-                        <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
-                          {field.label}{field.required && <span style={{ color: TEAL }}> *</span>}
-                        </label>
-                        {field.options ? (
+                        {field.type !== "checkbox" && (
+                          <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                            {field.label}{field.required && <span style={{ color: TEAL }}> *</span>}
+                          </label>
+                        )}
+                        {field.type === "checkbox" ? (
+                          <label className="flex items-center gap-3 cursor-pointer mt-1">
+                            <input
+                              type="checkbox"
+                              checked={formData[field.key] === "true"}
+                              onChange={e => setField(field.key, e.target.checked ? "true" : "")}
+                              className="w-4 h-4 rounded accent-[#0CBFCE] cursor-pointer"
+                            />
+                            <span className="text-xs text-white leading-tight">{field.label}</span>
+                          </label>
+                        ) : field.type === "textarea" ? (
+                          <textarea
+                            className="reg-input"
+                            rows={3}
+                            value={formData[field.key] ?? ""}
+                            onChange={e => setField(field.key, e.target.value)}
+                            placeholder={field.label}
+                          />
+                        ) : field.options ? (
                           <select
                             className="reg-select"
                             value={formData[field.key] ?? ""}
@@ -3699,15 +3748,10 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
                               value={formData[field.key] ?? ""}
                               onChange={e => setField(field.key, e.target.value)}
                               placeholder={field.label}
-                              min={field.type === "number" ? "1" : undefined}
-                              max={field.type === "number" ? field.max : undefined}
                             />
                             {field.type === "email" && (formData[field.key] ?? "").trim() !== "" &&
                               !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((formData[field.key] ?? "").trim()) && (
                                 <p className="text-xs mt-1.5" style={{ color: "#ff8a8a" }}>Please enter a valid email address.</p>
-                            )}
-                            {field.type === "number" && field.max && Number(formData[field.key]) > field.max && (
-                                <p className="text-xs mt-1.5" style={{ color: "#ff8a8a" }}>Maximum {field.max} members for this competition.</p>
                             )}
                           </>
                         )}
