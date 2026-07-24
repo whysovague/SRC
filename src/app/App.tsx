@@ -1163,7 +1163,7 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mb-8 text-sm text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" style={{ color: ORANGE }} />
-                  <span className="font-semibold text-foreground">2026 · TBA</span>
+                  <span className="font-semibold text-foreground">2026 · Aug 31st - Sep 2nd</span>
                 </span>
                 <span className="flex items-center gap-2">
                   <MapPin className="w-4 h-4" style={{ color: ORANGE }} />
@@ -1258,19 +1258,13 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
                 </p>
               </div>
  
-              <p className="text-muted-foreground leading-relaxed text-lg mb-6">
-                SRC 2026 at KFUPM marks a historic milestone, it is the{" "}
-                <span style={{ color: TEAL }} className="font-semibold">first time this conference is held in the Gulf Cooperation Council (GCC)</span>, bringing the AIChE tradition of academic excellence to the heart of the Arab world's energy and engineering hub.
-              </p>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                Hosted by King Fahd University of Petroleum &amp; Minerals (KFUPM) in Dhahran, Saudi Arabia, this conference will attract students, faculty advisors, and industry professionals from across the GCC and the broader Middle East region.
-              </p>
+              
             </div>
  
             <div className="lg:col-span-5 space-y-5 src-rise-2">
               {[
-                { title: "Why SRC Matters", icon: <Zap className="w-5 h-5" />, accent: TEAL, text: "SRC creates a platform where students sharpen technical skills, compete at a high level, and build professional networks that last a career. It bridges academic learning with real-world engineering challenges." },
-                { title: "Why KFUPM?", icon: <Building2 className="w-5 h-5" />, accent: ORANGE, text: "KFUPM is the premier engineering and science university in the GCC, located at the epicenter of the global energy industry. Its world-class facilities, faculty, and industry connections make it the ideal host for a landmark event." },
+                { title: "Why SRC Matters", icon: <Zap className="w-5 h-5" />, accent: TEAL, text: "SRC 2026 at KFUPM marks a historic milestone, it is the first time this conference is held in the Gulf Cooperation Council (GCC), bringing the AIChE tradition of academic excellence to the heart of the Arab world's energy and engineering hub." },
+                { title: "Why KFUPM?", icon: <Building2 className="w-5 h-5" />, accent: ORANGE, text: "Hosted by King Fahd University of Petroleum & Minerals (KFUPM) in Dhahran, Saudi Arabia, this conference will attract students, faculty advisors, and industry professionals from across the GCC and the broader Middle East region." },
               ].map((item) => (
                 <InteractiveCard
                   key={item.title}
