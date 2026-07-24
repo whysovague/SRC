@@ -10,6 +10,8 @@ import {
 import srcTealSvg from "@/assets/src_teal.svg";
 import srcLettersSvg from "@/assets/src_letters.svg";
 import { submitRegistration } from "./lib/firebase";
+import kfupmLogoImg from "@/assets/kfupm-logo-png_seeklogo-643173.png";
+import aicheLogoImg from "@/assets/Copy of small logo WBG.png";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -1110,26 +1112,16 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
                   aria-label="SRC · AIChE · 2026"
                   className="flex items-stretch gap-4 md:gap-5"
                 >
-                  {/* SRC letters from the logo, painted with the palette blend */}
-                  <div
-                    className="shrink-0"
-                    style={{
-                      width: "min(46%, 260px)",
-                      aspectRatio: "402 / 312.75",
-                      background:
-                        "linear-gradient(45deg, #4c90c1 10%, #ffffff 0%, #e47d1b 10%, #0f3d6a 100%)",
-                      WebkitMaskImage: `url(${srcLettersSvg})`,
-                      maskImage: `url(${srcLettersSvg})`,
-                      WebkitMaskRepeat: "no-repeat",
-                      maskRepeat: "no-repeat",
-                      WebkitMaskPosition: "left center",
-                      maskPosition: "left center",
-                      WebkitMaskSize: "contain",
-                      maskSize: "contain",
-                    }}
+                  {/* AIChE Chapter Logo */}
+                  <img
+                    src={aicheLogoImg}
+                    alt="KFUPM-AIChE Students Chapter"
+                    className="shrink-0 object-contain"
+                    style={{ width: "min(46%, 160px)" }}
                   />
+                  
 
-                  {/* Divider line — palette-tinted, ties the lockup together */}
+                  {/* Divider line */}
                   <div
                     className="w-px self-stretch my-2"
                     style={{
@@ -1137,22 +1129,18 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
                         "linear-gradient(180deg, transparent 0%, #4c90c1 35%, #e47d1b 75%, transparent 100%)",
                     }}
                   />
+                  {/* KFUPM Logo */}
+                  <img
+                    src={kfupmLogoImg}
+                    alt="KFUPM"
+                    className="shrink-0 object-contain"
+                    style={{
+                      width: "min(46%, 200px)",
+                      filter: "brightness(0) invert(1)",
+                    }}
+                  />
 
-                  {/* Org + year — stacked, same display weight as the letters */}
-                  <div className="flex flex-col justify-center min-w-0">
-                    <span
-                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight"
-                      style={{ color: "#4c90c1" }}
-                    >
-                      AIChE
-                    </span>
-                    <span
-                      className="font-display font-black leading-[0.95] text-3xl md:text-5xl tracking-tight mt-1"
-                      style={{ color: "#e47d1b" }}
-                    >
-                      2026
-                    </span>
-                  </div>
+                  
                 </div>
               </div>
 
