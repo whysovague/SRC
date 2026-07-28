@@ -11,7 +11,7 @@ import srcTealSvg from "@/assets/src_teal.svg";
 import srcLettersSvg from "@/assets/src_letters.svg";
 import { submitRegistration } from "./lib/firebase";
 import kfupmLogoImg from "@/assets/kfupm-logo-png_seeklogo-643173.png";
-import aicheLogoImg from "@/assets/Copy of small logo WBG.png";
+import aicheLogoImg from "@/assets/aichelogo.png";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
@@ -623,7 +623,7 @@ function Navbar({ active, setSection, onRegisterClick }: { active: Section; setS
             
             </div>
 
-            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto">
+            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto mr-2">
               <CTAButton primary onClick={onRegisterClick}>Register Now</CTAButton>
             </div>
 
@@ -1617,9 +1617,8 @@ function CompetitionsPage() {
 
         {/* Header — same eyebrow + gradient title pattern */}
         <div className="faq-pop">
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>What Awaits You</span>
+          <div className="mb-7">
+            <GradientEyebrow>What Awaits You</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Competitions &</span>
@@ -2153,10 +2152,8 @@ function AgendaComingSoon() {
 
         {/* Header */}
         <div className="faq-pop text-center">
-          <div className="flex items-center justify-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Aug 31 – Sep 2, 2026</span>
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, ${ORANGE}, transparent)` }} />
+          <div className="mb-7">
+            <GradientEyebrow>August 31 – Sep 2</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Event </span>
@@ -3345,9 +3342,8 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
 
         {/* Header */}
         <div className="faq-pop">
-          <div className="flex items-center gap-3 mb-7">
-            <span className="w-10 h-px" style={{ background: `linear-gradient(90deg, transparent, ${TEAL})` }} />
-            <span className="text-xs font-mono tracking-[0.32em] uppercase" style={{ color: TEAL }}>Got Questions?</span>
+         <div className="mb-7">
+            <GradientEyebrow>Got Questions?</GradientEyebrow>
           </div>
           <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
             <span className="text-white">Frequently Asked</span>
@@ -3745,7 +3741,7 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
 <div className="space-y-2 mt-6">
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
     <Mail className="w-4 h-4" style={{ color: TEAL }} />
-    src2026@kfupm.edu.sa
+    aiche@kfupm.edu.sa
   </div>
 
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
