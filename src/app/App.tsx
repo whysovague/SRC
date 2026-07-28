@@ -1863,8 +1863,8 @@ function TimelineSection() {
 
                   {/* Content card */}
                   <div
-                    className={`ml-10 md:ml-0 md:w-1/2 ${
-                      alignLeft ? "md:text-right md:pr-14" : "md:pl-14"
+                    className={`ml-10 md:ml-0 md:w-1/2 text-left ${
+                      alignLeft ? "md:pr-14" : "md:pl-14"
                     }`}
                   >
                     <div
