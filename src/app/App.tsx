@@ -15,9 +15,9 @@ import aicheLogoImg from "@/assets/aichelogo.png";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type Section =
-  | "home" | "about" | "competitions" | "registration" | "program"
+  | "home" | "about" | "competitions" | "registration"
   | "agenda"
-  | "teams" | "logistics" | "partnership" | "sponsors" | "speakers"
+  | "teams" | "partnership"
   | "organizing" | "media" | "faq" | "contact";
 
 // ─── Brand constants ──────────────────────────────────────────────────────────
@@ -517,7 +517,6 @@ const navItems: { label: string; section: Section }[] = [
   { label: "Home", section: "home" },
   { label: "Competitions", section: "competitions" },
   { label: "Agenda", section: "agenda" },
-  { label: "Logistics", section: "logistics" },
   { label: "Partnership", section: "partnership" },
   { label: "Contact", section: "contact" },
   //{ label: "Organizing Team", section: "organizing" },
@@ -1337,68 +1336,6 @@ function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) =>
 
       <TimelineSection />
 
-{/* SPONSORS & SPEAKERS — hidden for now */}
-      {false && (
-      <section className="relative overflow-hidden py-24 border-t" style={{ borderColor: `${TEAL}15` }}>
-        <MoleculeNetwork />
-        {/* Ambient background — faint grid + stage glows */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `linear-gradient(rgba(12,191,206,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.03) 1px, transparent 1px)`,
-          backgroundSize: "72px 72px",
-          maskImage: "radial-gradient(ellipse 80% 60% at 50% 50%, black 25%, transparent 85%)",
-          WebkitMaskImage: "radial-gradient(ellipse 80% 60% at 50% 50%, black 25%, transparent 85%)",
-        }} />
-        <div className="absolute left-1/2 top-[30%] -translate-x-1/2 -translate-y-1/2 w-[70%] h-40 rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(ellipse, ${TEAL}22 0%, transparent 70%)`, filter: "blur(55px)", animation: "srcGlowPulse 9s ease-in-out infinite" }} />
-        <div className="absolute left-1/2 bottom-[22%] -translate-x-1/2 w-[70%] h-40 rounded-full pointer-events-none"
-          style={{ background: `radial-gradient(ellipse, ${ORANGE}1C 0%, transparent 70%)`, filter: "blur(60px)", animation: "srcGlowPulse 11s ease-in-out infinite" }} />
-        <div className="relative max-w-7xl mx-auto">
-          {/* Sponsors */}
-          <div className="px-6 flex items-end justify-between mb-8">
-            <div>
-              <div className="mb-3"><GradientEyebrow>Our Supporters</GradientEyebrow></div>
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Sponsors &amp; Partners</h2>
-            </div>
-            <button onClick={() => setSection("sponsors")} className="inline-flex items-center gap-1 hover:gap-2 text-sm font-semibold transition-all" style={{ color: TEAL }}>
-              See More <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <Marquee>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="w-44 h-24 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "rgba(13,30,48,0.5)", border: `1px solid ${TEAL}22` }}>
-                <span className="text-xs font-mono tracking-wide" style={{ color: `${TEAL}88` }}>Logo soon</span>
-              </div>
-            ))}
-          </Marquee>
-
-          {/* Speakers */}
-          <div className="px-6 flex items-end justify-between mb-8 mt-16">
-            <div>
-              <div className="mb-3"><GradientEyebrow>Meet The Experts</GradientEyebrow></div>
-              <h2 className="font-display text-3xl md:text-4xl font-extrabold text-white">Speakers &amp; Judges</h2>
-            </div>
-            <button onClick={() => setSection("speakers")} className="inline-flex items-center gap-1 hover:gap-2 text-sm font-semibold transition-all" style={{ color: ORANGE }}>
-              See More <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-          <Marquee reverse>
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="w-40 shrink-0 rounded-xl p-5 flex flex-col items-center text-center"
-                style={{ background: "rgba(13,30,48,0.5)", border: `1px solid ${ORANGE}22` }}>
-                <div className="w-16 h-16 rounded-full mb-3 flex items-center justify-center"
-                  style={{ background: `${ORANGE}12`, border: `1px solid ${ORANGE}30`, color: `${ORANGE}99` }}>
-                  <Users className="w-6 h-6" />
-                </div>
-                <div className="h-2.5 w-20 rounded-full mb-2" style={{ background: `${TEAL}22` }} />
-                <div className="h-2 w-14 rounded-full" style={{ background: `${TEAL}15` }} />
-              </div>
-            ))}
-          </Marquee>
-        </div>
-      </section>
-      )}
-
       {/* CTA band */}
       <section className="py-16" style={{ background: `linear-gradient(135deg, ${TEAL}15 0%, ${ORANGE}10 100%)`, borderTop: `1px solid ${TEAL}25`, borderBottom: `1px solid ${TEAL}25` }}>
         <div className="max-w-4xl mx-auto px-6 text-center">
@@ -1733,10 +1670,6 @@ function RegistrationPage() {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Mail className="w-4 h-4" style={{ color: TEAL }} />
               <span>src2026@kfupm.edu.sa</span>
-            </div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Phone className="w-4 h-4" style={{ color: TEAL }} />
-              <span>+966 13 860 0000</span>
             </div>
           </div>
         </div>
@@ -2551,75 +2484,6 @@ function AgendaPage() {
   );
 }
 
-//TODO Delete PROGRAM PAGE!!!!!!
-// ─── Program & Schedule ───────────────────────────────────────────────────────
-function ProgramPage() {
-  const importantDates = [
-    { date: "Q1 2026", event: "Registration Opens", status: "upcoming" },
-    { date: "Q1 2026", event: "Team Registration Deadline", status: "upcoming" },
-    { date: "Q2 2026", event: "Abstract Submission Deadline", status: "upcoming" },
-    { date: "Q2 2026", event: "Poster Submission Deadline", status: "upcoming" },
-    { date: "TBA", event: "SRC 2026 Conference", status: "main" },
-  ];
-
-  return (
-    <div className="pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-6">
-        <SectionTag>Agenda</SectionTag>
-        <SectionTitle>Program & Schedule</SectionTitle>
-        <Divider />
-
-        <div className="grid md:grid-cols-2 gap-8 mb-16">
-          {/* Important Dates */}
-          <div>
-            <h3 className="font-display text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Calendar className="w-5 h-5" style={{ color: TEAL }} /> Important Dates
-            </h3>
-            <div className="space-y-3">
-              {importantDates.map((item, i) => (
-                <div key={i} className="flex items-center gap-4 rounded-lg p-4 border" style={{ background: "var(--card)", borderColor: item.status === "main" ? `${ORANGE}40` : "var(--border)" }}>
-                  <div className="text-xs font-mono font-bold px-3 py-1.5 rounded text-center min-w-[80px]" style={{ background: item.status === "main" ? `${ORANGE}15` : `${TEAL}12`, color: item.status === "main" ? ORANGE : TEAL }}>
-                    {item.date}
-                  </div>
-                  <span className="text-sm text-foreground font-medium">{item.event}</span>
-                  {item.status === "main" && <Star className="w-4 h-4 ml-auto flex-shrink-0" style={{ color: ORANGE }} />}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Coming Soon schedule */}
-          <div>
-            <h3 className="font-display text-xl font-bold text-white mb-6 flex items-center gap-2">
-              <Clock className="w-5 h-5" style={{ color: TEAL }} /> Conference Schedule
-            </h3>
-            <div className="rounded-xl border overflow-hidden" style={{ background: "var(--card)", borderColor: "var(--border)" }}>
-              <div className="p-8 text-center">
-                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: `${TEAL}15` }}>
-                  <Calendar className="w-8 h-8" style={{ color: TEAL }} />
-                </div>
-                <ComingSoonBadge />
-                <h4 className="font-display font-bold text-white text-xl mt-4 mb-2">Full Schedule Coming Soon</h4>
-                <p className="text-muted-foreground text-sm">The detailed conference agenda including daily schedule, ceremony times, workshop slots, and competition rounds will be published here.</p>
-              </div>
-              <div className="border-t p-4 space-y-2" style={{ borderColor: "var(--border)" }}>
-                {["Opening Ceremony", "Chem-E-Car Competition", "Technical Sessions", "Workshops", "Networking Events", "Closing Gala"].map((item) => (
-                  <div key={item} className="flex items-center justify-between text-sm py-1">
-                    <span className="text-muted-foreground flex items-center gap-2">
-                      <CheckCircle className="w-3 h-3" style={{ color: TEAL }} /> {item}
-                    </span>
-                    <ComingSoonBadge />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Teams & Delegations ──────────────────────────────────────────────────────
 function TeamsPage() {
   return (
@@ -2665,139 +2529,6 @@ function TeamsPage() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Logistics ────────────────────────────────────────────────────────────────
-function LogisticsPage({ goToContact }: { goToContact: () => void }) {
-  const faqs = [
-    { q: "How do I get to KFUPM?", a: "KFUPM is located in Dhahran, Eastern Province, Saudi Arabia. The nearest airport is King Fahd International Airport (DMM) in Dammam, approximately 30 minutes away by road." },
-    { q: "Are there on-campus accommodation options?", a: "Visiting delegations may be eligible for on-campus guest housing. Details will be confirmed closer to the conference date. Several hotels are available near the KFUPM campus." },
-    { q: "Is parking available?", a: "Yes, ample free parking is available on the KFUPM campus for registered attendees and teams." },
-    { q: "What transportation is available from the airport?", a: "Taxis, ride-hailing apps (Uber, Careem), and rental cars are available from DMM airport. A shuttle service for registered teams is under consideration." },
-  ];
-
-  const hotels = [
-    { name: "On-Campus Guest Housing", note: "Available for registered teams — contact teams.src2026@kfupm.edu.sa" },
-    { name: "Dhahran Palace Hotel", note: "~5 min from campus · dhahranpalacehotel.com" },
-    { name: "JW Marriott Dammam", note: "~20 min from campus · marriott.com" },
-    { name: "Le Méridien Al Khobar", note: "~15 min from campus · marriott.com" },
-  ];
-
-  const travel = [
-    { icon: <Globe className="w-4 h-4" />, label: "Nearest Airport", value: "King Fahd International Airport (DMM), Dammam" },
-    { icon: <Clock className="w-4 h-4" />, label: "Drive from Airport", value: "~30 minutes" },
-    { icon: <MapPin className="w-4 h-4" />, label: "City", value: "Dhahran, Eastern Province, Saudi Arabia" },
-    { icon: <CheckCircle className="w-4 h-4" />, label: "Visa", value: "eVisa available for most nationalities — visitsaudi.com" },
-  ];
-
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const logisticsMailto = `mailto:logistics.src2026@kfupm.edu.sa?subject=${encodeURIComponent("Accommodation & travel — SRC 2026")}`;
-
-  return (
-    <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
-      {/* Scoped animations (same as FAQ) */}
-      <style>{`
-        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
-        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
-        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
-        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
-        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
-        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
-      `}</style>
-
-      {/* Molecule network background */}
-      <MoleculeNetwork />
-      <div className="absolute -left-32 top-10 w-[420px] h-[420px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${TEAL}2E 0%, transparent 65%)`, filter: "blur(60px)", animation: "faqFloat 14s ease-in-out infinite, faqGlow 9s ease-in-out infinite" }} />
-      <div className="absolute right-[-9rem] bottom-0 w-[480px] h-[480px] rounded-full pointer-events-none"
-        style={{ background: `radial-gradient(circle, ${ORANGE}26 0%, transparent 65%)`, filter: "blur(70px)", animation: "faqDrift 18s ease-in-out infinite, faqGlow 11s ease-in-out infinite" }} />
-      <div className="absolute inset-0 pointer-events-none opacity-60" style={{
-        backgroundImage: `linear-gradient(rgba(12,191,206,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(12,191,206,0.035) 1px, transparent 1px)`,
-        backgroundSize: "72px 72px",
-        maskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
-        WebkitMaskImage: "radial-gradient(ellipse 70% 70% at 50% 35%, black 30%, transparent 80%)",
-      }} />
-
-      <div className="relative max-w-7xl mx-auto px-6">
-        {/* Title — screenshot style: line + eyebrow, white + gradient over two lines */}
-        <div className="faq-pop">
-          <div className="mb-7">
-            <GradientEyebrow>Logistics</GradientEyebrow>
-          </div>
-          <h2 className="font-display text-5xl md:text-6xl font-extrabold leading-tight mb-4">
-            <span className="text-white">Venue &amp;</span>
-            <br />
-            <span style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>Travel</span>
-          </h2>
-          <Divider />
-        </div>
-
-        {/* Cards — each takes the full row */}
-        <div className="space-y-6 mt-4">
-          {/* Venue */}
-          <GlassCard className="p-6" delay={120}>
-            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
-              <MapPin className="w-5 h-5" style={{ color: ORANGE }} /> Venue
-            </h3>
-            <h4 className="font-bold text-white mb-1">King Fahd University of Petroleum &amp; Minerals</h4>
-            <p className="text-muted-foreground text-sm mb-5">KFUPM Main Campus, Dhahran 31261, Eastern Province, Saudi Arabia</p>
-            <div className="rounded-lg overflow-hidden h-56 flex items-center justify-center" style={{ background: `${TEAL}08`, border: `1px solid ${TEAL}20` }}>
-              <div className="text-center">
-                <MapPin className="w-8 h-8 mx-auto mb-2" style={{ color: TEAL }} />
-                <p className="text-sm text-muted-foreground">Interactive map coming soon</p>
-              </div>
-            </div>
-          </GlassCard>
-
-          {/* Accommodation */}
-          <GlassCard className="p-6" delay={190}>
-            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
-              <Building2 className="w-5 h-5" style={{ color: ORANGE }} /> Accommodation
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              On-campus accommodation will be provided for competition participants. Details will be shared with registered teams closer to the event.
-            </p>
-          </GlassCard>
-
-      
-          {/* FAQs for Visitors */}
-          <GlassCard className="p-6" delay={330}>
-            <h3 className="font-display text-xl font-bold text-white mb-5 flex items-center gap-2">
-              <HelpCircle className="w-5 h-5" style={{ color: ORANGE }} /> FAQs for Visitors
-            </h3>
-            <div className="space-y-3">
-              {faqs.map((faq, i) => {
-                const isOpen = openFaq === i;
-                return (
-                  <div key={faq.q} className="rounded-lg overflow-hidden" style={{ background: "rgba(7,17,30,0.5)", border: `1px solid ${isOpen ? `${ORANGE}55` : `${ORANGE}18`}` }}>
-                    <button className="w-full flex items-center justify-between p-4 text-left focus:outline-none" onClick={() => setOpenFaq(isOpen ? null : i)}>
-                      <span className="text-sm font-medium text-white pr-4">{faq.q}</span>
-                      <span style={{ color: ORANGE }} className="flex-shrink-0">
-                        {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed border-t" style={{ borderColor: `${ORANGE}20` }}>
-                        <div className="pt-3">{faq.a}</div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </GlassCard>
-        </div>
-
-        {/* Still have a question? — jumps to the Contact page message form */}
-        <div className="faq-pop mt-10 flex flex-col items-start text-left">
-          <button onClick={goToContact} className="inline-flex items-center gap-1 font-semibold text-sm transition-all hover:opacity-80" style={{ color: ORANGE }}>
-            Still have a question?
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
         </div>
       </div>
     </div>
@@ -2925,9 +2656,6 @@ function PartnershipPage() {
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Mail className="w-4 h-4" style={{ color: TEAL }} /> aiche@kfupm.edu.sa
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" style={{ color: TEAL }} /> +966 13 860 0000
-                </div>
               </div>
             </div>
           </div>
@@ -2937,113 +2665,6 @@ function PartnershipPage() {
   );
 }
 
-// ─── Sponsors Page ────────────────────────────────────────────────────────────
-function SponsorsPage() {
-  return (
-    <div className="relative pt-24 pb-20 overflow-hidden">
-      <MoleculeNetwork />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6">
-        <SectionTag>Thank You</SectionTag>
-        <SectionTitle>Sponsors & Partners</SectionTitle>
-        <Divider />
-
-        {[
-          { level: "Main Host", color: ORANGE },
-          { level: "Premier Sponsors", color: TEAL },
-          { level: "Strategic Partners", color: TEAL },
-          { level: "Supporters", color: "#4A9BB5" },
-          { level: "Academic Partners", color: "#4A9BB5" },
-        ].map((group, i) => (
-          <RevealOnScroll key={group.level} delay={i * 100} className="mb-32">
-            <h3 className="font-display text-xl font-bold mb-15 flex items-center gap-3" style={{ color: group.color }}>
-              <span className="w-8 h-0.5 inline-block" style={{ background: group.color }} />
-              {group.level}
-            </h3>
-            <div className="rounded-xl border p-10 flex flex-wrap gap-8 items-center justify-center min-h-[120px] transition-all duration-500" style={{ background: `${group.color}0d`, borderColor: `${group.color}40` }}>
-              <div className="text-center">
-                <ComingSoonBadge />
-                <p className="text-xs text-muted-foreground mt-2">Announcements coming soon</p>
-              </div>
-            </div>
-          </RevealOnScroll>
-        ))}
-
-        <RevealOnScroll>
-          <div className="mt-20 text-center">
-            <p className="text-xs text-muted-foreground">
-              Interested in sponsoring? Join us as a partner and make a lasting impact
-              on the engineering community of the GCC.
-            </p>
-            <button className="mt-2 text-xs font-medium transition-opacity hover:opacity-80" style={{ color: TEAL }}>
-              View Partnership Packages →
-            </button>
-          </div>
-        </RevealOnScroll>
-      </div>
-    </div>
-  );
-}
-
-// ─── Speakers Page ────────────────────────────────────────────────────────────
-function SpeakersPage() {
-  const categories = [
-    { label: "Keynote Speakers", icon: <Mic2 className="w-7 h-7" />, desc: "Industry leaders and innovators sharing their vision for the future of chemical engineering.", color: TEAL },
-    { label: "Competition Judges", icon: <Award className="w-7 h-7" />, desc: "Experienced engineers and academics evaluating student work across all competitions.", color: ORANGE },
-    { label: "Mentors & Guests", icon: <Star className="w-7 h-7" />, desc: "Industry professionals available for 1-on-1 mentoring, career advice, and networking.", color: TEAL },
-  ];
-
-  return (
-    <div className="relative pt-24 pb-20 overflow-hidden">
-      <MoleculeNetwork />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6">
-        <SectionTag>Meet The Experts</SectionTag>
-        <SectionTitle>Speakers, Judges & Mentors</SectionTitle>
-        <Divider />
-
-        <div className="grid md:grid-cols-3 gap-8 mb-12 mt-8">
-          {categories.map((cat, i) => (
-            <RevealOnScroll key={cat.label} delay={i * 120}>
-              <InteractiveCard
-                accent={cat.color}
-                className="group relative rounded-2xl p-8 overflow-hidden text-center transition-colors duration-300"
-                style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${cat.color}30` }}
-              >
-                {/* Corner glow blob — same treatment as Mission/Vision cards */}
-                <div
-                  className="absolute -top-16 -right-16 w-44 h-44 rounded-full pointer-events-none"
-                  style={{ background: `radial-gradient(circle, ${cat.color}40 0%, transparent 70%)`, filter: "blur(28px)" }}
-                />
-
-                <div className="relative flex flex-col items-center">
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: `${cat.color}18`, color: cat.color, boxShadow: `inset 0 0 0 1px ${cat.color}40` }}
-                  >
-                    {cat.icon}
-                  </div>
-                  <h3 className="font-display font-bold text-white text-lg mb-2">{cat.label}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-5">{cat.desc}</p>
-                  <ComingSoonBadge />
-                </div>
-              </InteractiveCard>
-            </RevealOnScroll>
-          ))}
-        </div>
-
-        <RevealOnScroll>
-          <div className="mt-35 text-center text-xs text-muted-foreground">
-            Interested in speaking or judging?{" "}
-            <span className="cursor-pointer font-medium" style={{ color: ORANGE }}>
-              Express Interest →
-            </span>
-          </div>
-        </RevealOnScroll>
-      </div>
-    </div>
-  );
-}
 // ─── Organizing Team ──────────────────────────────────────────────────────────
 function OrganizingPage() {
   const leadership = [
@@ -3676,13 +3297,9 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
     { label: "Home", section: "home" },
     { label: "About", section: "about" },
     { label: "Competitions", section: "competitions" },
-    { label: "Program", section: "program" },
     { label: "Registration", section: "registration" },
     { label: "Teams", section: "teams" },
-    { label: "Logistics", section: "logistics" },
     { label: "Partnership", section: "partnership" },
-    { label: "Sponsors", section: "sponsors" },
-    { label: "Speakers", section: "speakers" },
     { label: "Organizing Team", section: "organizing" },
     { label: "Media", section: "media" },
     { label: "FAQ", section: "faq" },
@@ -3747,11 +3364,6 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
   <div className="flex items-center gap-2 text-sm text-muted-foreground">
     <MapPin className="w-4 h-4" style={{ color: TEAL }} />
     KFUPM, Dhahran, Saudi Arabia
-  </div>
-  
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <Phone className="w-4 h-4" style={{ color: TEAL }} />
-    +966 13 860 0000
   </div>
 
 </div>
@@ -4483,14 +4095,10 @@ export default function App() {
     about: <AboutPage />,
     competitions: <CompetitionsPage />,
     registration: <RegistrationPage />,
-    program: <ProgramPage />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
     teams: <TeamsPage />,
-    logistics: <LogisticsPage goToContact={goToContactForm} />,
     partnership: <PartnershipPage />,
-    sponsors: <SponsorsPage />,
-    speakers: <SpeakersPage />,
     organizing: <OrganizingPage />,
     media: <MediaPage />,
     faq: <FAQPage goToContactForm={goToContactForm} />,
