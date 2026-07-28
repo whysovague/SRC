@@ -3899,7 +3899,7 @@ function RegistrationModal({ open, onClose }: { open: boolean; onClose: () => vo
                               onChange={e => setField(field.key, e.target.checked ? "true" : "")}
                               className="w-4 h-4 rounded accent-[#0CBFCE] cursor-pointer"
                             />
-                            <span className="text-xs text-white leading-tight">{field.label}</span>
+                            <span className="text-xs text-white leading-tight">{field.label}. To become an active member, join <a href="https://www2.aiche.org/membership" className="text-blue-500 hover:underline">here</a></span>
                           </label>
                         ) : field.type === "textarea" ? (
                           <textarea
