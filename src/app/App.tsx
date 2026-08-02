@@ -2919,16 +2919,60 @@ function MediaPage() {
 function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
   const [open, setOpen] = useState<number | null>(null);
 
-  const faqs = [
-    { q: "Who can attend SRC 2026?", a: "SRC 2026 is open to undergraduate students in chemical engineering or related disciplines, faculty advisors, industry professionals, and anyone interested in engineering education. Some events may require a registered student affiliation." },
-    { q: "How can teams register for competitions?", a: "Registration is done entirely through this website. Click \"Register Now\", choose \"Competition Participant\", then pick your competition and complete the form online. Teams should represent a university with an active AIChE student chapter." },
-    { q: "What competitions are offered?", a: "SRC 2026 features: Chem-E-Car, ChemE Jeopardy, Student Technical Presentation Competition, and Undergraduate Student Poster Competition. See the Competitions page for full details." },
-    { q: "Are there hotel or accommodation options?", a: "Yes. On-campus guest housing may be available for visiting teams. Several hotels are located within 5-20 minutes of KFUPM campus including Dhahran Palace Hotel, JW Marriott Dammam, and Le Méridien Al Khobar." },
-    { q: "How can companies partner with or sponsor SRC 2026?", a: "Visit the Partnership page to explore our sponsorship and partnership packages, then request a proposal online or email aiche@kfupm.edu.sa. Our partnership team will get back to you." },
-    { q: "Where is the conference held?", a: "At King Fahd University of Petroleum & Minerals (KFUPM), Dhahran, Eastern Province, Saudi Arabia — near Dammam and Al Khobar in the Eastern Province." },
-    { q: "What are the important dates?", a: "Registration opens in Q1 2026. Competition deadlines, submission dates, and the conference schedule will be announced on the Program page and our social media channels. Sign up for notifications at src2026@kfupm.edu.sa." },
-    { q: "Is SRC 2026 only for Saudi students?", a: "No. International teams from GCC countries and beyond are warmly welcomed. We encourage participation from any university with an AIChE student chapter." },
-    { q: "How do I volunteer?", a: "A volunteer interest form will be available on the Registration page soon. Contact us at src2026@kfupm.edu.sa to be notified when it opens." },
+  const faqs: {
+    q: string; a: string; list?: string[];
+  }[] = [
+    {
+      q: "Are international (non-Saudi) scholarship students allowed to participate?",
+      a: "Yes. The conference is open to all university students, and everyone is welcome to register for the competitions.",
+    },
+    {
+      q: "For the Poster Competition (Research), can someone participate if they only have an initial idea that has not been fully developed?",
+      a: "No. The submission must be a genuine research project with sufficient data and findings to present. An initial idea alone is not considered a research project.",
+    },
+    {
+      q: "What are the eligibility requirements for the Poster and Presentation Competitions?",
+      a: "Any university student may participate. Winners will qualify to compete at the AIChE Annual Student Conference in the United States, provided their major falls under a STEM discipline. STEM stands for:",
+      list: ["Science", "Technology", "Engineering", "Mathematics"],
+    },
+    {
+      q: "Will participants in the Poster Competition receive a certificate even if they do not qualify or win?",
+      a: "Yes. All participants in the Poster Competition will receive a certificate.",
+    },
+    {
+      q: "Does the Poster Competition require a prototype or completed project, or is a research study sufficient?",
+      a: "A research study is sufficient. A prototype or completed project is not required.",
+    },
+    {
+      q: "When will the competitions take place?",
+      a: "",
+      list: [
+        "Day 1 (August 31): ChemE Jeopardy",
+        "Day 2 (September 1): Poster Competition",
+        "Day 3 (September 2): Chem-E-Car & Presentation Competition",
+      ],
+    },
+    {
+      q: "Is the conference only intended for Chemical Engineering students?",
+      a: "No. While the conference focuses on Chemical Engineering, it welcomes students from various majors. The workshops, keynote sessions, and technical talks offer valuable learning opportunities for students from different academic backgrounds.",
+    },
+    {
+      q: "What are the conference hours?",
+      a: "",
+      list: [
+        "Day 1: 8:30 AM – 8:30 PM",
+        "Day 2: 8:30 AM – 8:30 PM",
+        "Day 3: 8:30 AM – 10:00 PM",
+      ],
+    },
+    {
+      q: "Is the Poster Competition limited to individual participation?",
+      a: "No. Participants may choose to compete individually or as a team.",
+    },
+    {
+      q: "Regarding AIChE membership, is it necessary to have a Global AIChE membership or just be a member of the university's student chapter?",
+      a: "Participants are required to have an AIChE Global Membership. The process is straightforward, and after registering for the competition, participants will be guided through the steps to obtain their membership.",
+    },
   ];
 
   const askMailto = `mailto:src2026@kfupm.edu.sa?subject=${encodeURIComponent("Question about SRC 2026")}`;
@@ -2978,79 +3022,75 @@ function FAQPage({ goToContactForm }: { goToContactForm: () => void }) {
         <div className="space-y-3 mt-4">
           {faqs.map((faq, i) => {
             const isOpen = open === i;
+            const accent = TEAL;
             return (
-              <div
-                key={i}
-                className="faq-pop relative rounded-xl overflow-hidden"
-                style={{
-                  background: "rgba(13,30,48,0.55)",
-                  border: `1px solid ${isOpen ? `${ORANGE}75` : `${ORANGE}22`}`,
-                  backdropFilter: "blur(12px)",
-                  WebkitBackdropFilter: "blur(12px)",
-                  boxShadow: isOpen
-                    ? `0 20px 50px -16px ${ORANGE}40, inset 0 1px 0 rgba(255,255,255,0.06)`
-                    : "inset 0 1px 0 rgba(255,255,255,0.04)",
-                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-                  animationDelay: `${140 + i * 70}ms`,
-                }}
-              >
-                <div className="absolute inset-0 pointer-events-none" style={{
-                  background: "linear-gradient(115deg, transparent 6%, rgba(255,255,255,0.0) 9%, rgba(255,255,255,0.08) 13%, rgba(255,255,255,0.13) 16%, rgba(255,255,255,0.0) 21%, transparent 26%)",
-                }} />
-                <div className="absolute right-0 top-0 w-80 h-full pointer-events-none" style={{
-                  background: `radial-gradient(circle at 80% 30%, ${ORANGE}1E 0%, ${ORANGE}08 50%, transparent 100%)`,
-                }} />
-                <div className="absolute inset-x-0 -top-16 h-48 pointer-events-none"
+                <InteractiveCard
+                  key={i}
+                  accent={accent}
+                  className="faq-pop rounded-xl border overflow-hidden group transition-colors duration-300"
                   style={{
-                    background: `radial-gradient(60% 80% at 50% 0%, ${ORANGE}5C 0%, ${ORANGE}26 38%, transparent 72%)`,
-                    filter: "blur(10px)",
-                    opacity: isOpen ? 0.95 : 0.7,
-                    transition: "opacity 0.3s ease",
-                    zIndex: 0,
-                  }} />
-                <div className="absolute top-0 right-14 w-12 h-1 rounded-b-md pointer-events-none"
-                  style={{
-                    background: isOpen ? ORANGE : `${ORANGE}25`,
-                    boxShadow: isOpen ? `0 1px 10px ${ORANGE}` : "none",
-                    transition: "background 0.3s ease, box-shadow 0.3s ease",
-                  }} />
-
-                {/* Question */}
-                <button
-                  className="relative z-10 w-full flex items-center justify-between p-5 text-left focus:outline-none"
-                  onClick={() => setOpen(isOpen ? null : i)}
-                >
-                  <span className="font-semibold text-white text-sm pr-4 tracking-wide">{faq.q}</span>
-                  <span
-                    className="flex-shrink-0"
-                    style={{
-                      color: ORANGE,
-                      transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-                      transition: "transform 0.5s cubic-bezier(.16,.84,.44,1)",
-                    }}
-                  >
-                    <ChevronDown className="w-4 h-4" />
-                  </span>
-                </button>
-
-                {/* Answer — grid-template-rows dropdown */}
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateRows: isOpen ? "1fr" : "0fr",
-                    transition: "grid-template-rows 0.55s cubic-bezier(.16,.84,.44,1)",
+                    background: "var(--card)",
+                    borderColor: isOpen ? `${accent}66` : "var(--border)",
+                    animationDelay: `${140 + i * 70}ms`,
                   }}
                 >
-                  <div style={{ overflow: "hidden" }}>
-                    <div
-                      className="relative z-10 px-5 pb-5 text-sm leading-relaxed border-t"
-                      style={{ borderColor: `${ORANGE}26`, color: "var(--muted-foreground)" }}
+                  {/* Accent status bar (top-right) — site card signature */}
+                  <div className="absolute top-0 right-14 w-12 h-1 rounded-b-md pointer-events-none z-10"
+                    style={{
+                      background: isOpen ? accent : `${accent}25`,
+                      boxShadow: isOpen ? `0 1px 10px ${accent}` : "none",
+                      transition: "background 0.3s ease, box-shadow 0.3s ease",
+                    }} />
+
+                  {/* Question */}
+                  <button
+                    className="relative z-10 w-full flex items-center gap-4 p-6 text-left focus:outline-none"
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    aria-expanded={isOpen}
+                  >
+                    <span className="font-display font-bold text-white text-base flex-1 pr-2">{faq.q}</span>
+                    <span
+                      className="flex-shrink-0"
+                      style={{
+                        color: accent,
+                        transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                        transition: "transform 0.5s cubic-bezier(.16,.84,.44,1)",
+                      }}
                     >
-                      <div className="pt-4">{faq.a}</div>
+                      <ChevronDown className="w-4 h-4" />
+                    </span>
+                  </button>
+
+                  {/* Answer — grid-template-rows dropdown */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateRows: isOpen ? "1fr" : "0fr",
+                      transition: "grid-template-rows 0.55s cubic-bezier(.16,.84,.44,1)",
+                    }}
+                  >
+                    <div style={{ overflow: "hidden" }}>
+                      <div
+                        className="relative z-10 px-6 pb-6 text-sm leading-relaxed border-t"
+                        style={{ borderColor: "var(--border)", color: "var(--muted-foreground)" }}
+                      >
+                        <div className="pt-4">
+                          {faq.a && <p className="mb-0">{faq.a}</p>}
+                          {faq.list && (
+                            <ul className={`space-y-1.5 ${faq.a ? "mt-3" : ""}`}>
+                              {faq.list.map((d) => (
+                                <li key={d} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <CheckCircle className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accent }} />
+                                  {d}
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </InteractiveCard>
             );
           })}
         </div>
