@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  Menu, X, ChevronDown, ChevronRight, ArrowRight, MapPin, Calendar,
+  X, ChevronDown, ChevronRight, ArrowRight, MapPin, Calendar,
   Users, Trophy, Mic2, Building2, Mail, Phone, ExternalLink, Download,
   Star, Award, Zap, Globe, BookOpen, Layers, Heart, Target, Eye,
   CheckCircle, Clock, Instagram, Twitter, Linkedin, Youtube,
@@ -12,8 +12,11 @@ import type { Section, RegType, Competition } from "./types";
 import {
   SectionTag, SectionTitle, Divider, GradientEyebrow, ComingSoonBadge,
   CTAButton, RevealOnScroll, InteractiveCard, GlassCard,
-  MoleculeNetwork, Marquee, SRCLogo, CountUp,
+  MoleculeNetwork, Marquee, CountUp,
 } from "./components/common";
+import { Navbar } from "./components/layout/Navbar";
+import { Footer } from "./components/layout/Footer";
+import { HelpButton } from "./components/layout/HelpButton";
 import { HeroLogo } from "./components/hero/HeroLogo";
 import { CountdownTimer } from "./components/hero/CountdownTimer";
 import { submitRegistration } from "./lib/firebase";
@@ -21,200 +24,6 @@ import { findUserByEmail, createUserIfNotExists, type AppUser } from "./lib/user
 import kfupmLogoImg from "@/assets/kfupm-logo-png_seeklogo-643173.png";
 import aicheLogoImg from "@/assets/aichelogo.png";
 
-// ─── Navigation ───────────────────────────────────────────────────────────────
-const navItems: { label: string; section: Section }[] = [
-  { label: "Home", section: "home" },
-  { label: "Competitions", section: "competitions" },
-  { label: "Agenda", section: "agenda" },
-  { label: "Partnership", section: "partnership" },
-  { label: "Contact", section: "contact" },
-  //{ label: "Organizing Team", section: "organizing" },
-  { label: "FAQ", section: "faq" },
-];
-
-function Navbar({ active, setSection, onRegisterClick, user, onLogout }: {
-  active: Section;
-  setSection: (s: Section) => void;
-  onRegisterClick: () => void;
-  user: AppUser | null;
-  onLogout: () => void;
-}) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const itemRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [hoverRect, setHoverRect] = useState<{ left: number; width: number; height: number; top: number } | null>(null);
-
-  const mainNav = navItems;
-  
-  const updateHover = (key: string) => {
-    const el = itemRefs.current[key];
-    const parent = navRef.current;
-    if (!el || !parent) return;
-    const elR = el.getBoundingClientRect();
-    const pR = parent.getBoundingClientRect();
-    setHoverRect({
-      left: elR.left - pR.left,
-      top: elR.top - pR.top,
-      width: elR.width,
-      height: elR.height,
-    });
-  };
-
-  // Pixelated noise SVG used as overlay for the "pixelated-blur glass" feel
-  const pixelNoise =
-    "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.35 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
-
-  return (
-    <header className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="max-w-7xl mx-auto px-4 pt-4 pointer-events-auto">
-        <div className="relative w-full overflow-visible">
-          <div
-            aria-hidden
-            className="absolute inset-0 rounded-full overflow-hidden"
-            style={{
-              background: "rgba(7,17,30,0.55)",
-              backdropFilter: "blur(18px) saturate(160%)",
-              WebkitBackdropFilter: "blur(18px) saturate(160%)",
-              border: `1px solid ${TEAL}30`,
-              boxShadow: `0 10px 40px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08)`,
-            }}
-          >
-            <span
-              aria-hidden
-              className="absolute inset-0 opacity-[0.18] mix-blend-overlay pointer-events-none"
-              style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
-            />
-          </div>
-
-          <div className="relative z-10 flex h-14 w-full items-center gap-2 rounded-full px-2">
-            <button
-              onClick={() => setSection("home")}
-              className="relative z-10 flex h-full items-center px-2 rounded-full transition-transform hover:scale-[1.02] overflow-visible"
-              style={{ background: "transparent" }}
-            >
-              <SRCLogo size={72} yOffset={4} />
-            </button>
-
-            <div
-              ref={navRef}
-              onMouseLeave={() => setHoverRect(null)}
-              className="relative z-10 hidden lg:flex items-center gap-1"
-            >
-            {/* Animated hover ring */}
-            <span
-              aria-hidden
-              className="absolute pointer-events-none rounded-full"
-              style={{
-                left: hoverRect?.left ?? 0,
-                top: hoverRect?.top ?? 0,
-                width: hoverRect?.width ?? 0,
-                height: hoverRect?.height ?? 0,
-                border: `1px solid ${TEAL}`,
-                boxShadow: `0 0 0 3px ${TEAL}1A, 0 0 18px ${TEAL}55, inset 0 0 12px ${TEAL}22`,
-                background: `${TEAL}10`,
-                opacity: hoverRect ? 1 : 0,
-                transition: "left 280ms cubic-bezier(.22,1,.36,1), top 280ms cubic-bezier(.22,1,.36,1), width 280ms cubic-bezier(.22,1,.36,1), height 280ms cubic-bezier(.22,1,.36,1), opacity 180ms ease",
-              }}
-            />
-
-            {mainNav.map((item) => (
-              <button
-                key={item.section}
-                ref={(el) => { itemRefs.current[item.section] = el; }}
-                onMouseEnter={() => updateHover(item.section)}
-                onFocus={() => updateHover(item.section)}
-                onClick={() => setSection(item.section)}
-                className={`relative z-10 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                  active === item.section ? "text-white" : "text-muted-foreground hover:text-white"
-                }`}
-                style={active === item.section ? { color: TEAL } : {}}
-              >
-                {item.label}
-              </button>
-            ))}
-
-            
-            </div>
-
-            <div className="hidden lg:flex relative z-10 items-center gap-2 ml-auto mr-2">
-              {user ? (
-                <>
-                  <span
-                    className="text-sm font-semibold text-white whitespace-nowrap px-4 py-2 rounded-full"
-                    style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}35` }}
-                  >
-                    Welcome, {user.fullName || user.email} 👋
-                  </span>
-                  <CTAButton onClick={onLogout}>Logout</CTAButton>
-                </>
-              ) : (
-                <CTAButton primary onClick={onRegisterClick}>Register or Login Now</CTAButton>
-              )}
-            </div>
-
-            <button
-              className="lg:hidden relative z-10 text-foreground h-10 w-10 rounded-full flex items-center justify-center overflow-hidden ml-auto"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              style={{ background: "transparent" }}
-            >
-              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          className="lg:hidden mx-4 mt-3 rounded-3xl overflow-hidden pointer-events-auto relative"
-          style={{
-            background: "rgba(7,17,30,0.85)",
-            backdropFilter: "blur(18px) saturate(160%)",
-            WebkitBackdropFilter: "blur(18px) saturate(160%)",
-            border: `1px solid ${TEAL}25`,
-            boxShadow: `0 10px 40px -10px rgba(0,0,0,0.6)`,
-          }}
-        >
-          <span
-            aria-hidden
-            className="absolute inset-0 opacity-[0.15] mix-blend-overlay pointer-events-none"
-            style={{ backgroundImage: pixelNoise, backgroundSize: "120px 120px", imageRendering: "pixelated" }}
-          />
-          <div className="relative z-10">
-            {navItems.map((item) => (
-              <button
-                key={item.section}
-                onClick={() => { setSection(item.section); setMobileOpen(false); }}
-                className="w-full text-left px-6 py-3 text-sm text-muted-foreground hover:text-white border-b border-white/5 transition-colors"
-                style={active === item.section ? { color: TEAL } : {}}
-              >
-                {item.label}
-              </button>
-            ))}
-            <div className="px-6 py-4 flex flex-col gap-3">
-              {user ? (
-                <>
-                  <span
-                    className="text-sm font-semibold text-white text-center px-4 py-2 rounded-full"
-                    style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}35` }}
-                  >
-                    Welcome, {user.fullName || user.email} 👋
-                  </span>
-                  <CTAButton onClick={() => { onLogout(); setMobileOpen(false); }}>Logout</CTAButton>
-                </>
-              ) : (
-                <CTAButton primary onClick={() => { onRegisterClick(); setMobileOpen(false); }}>Register or Login Now</CTAButton>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
-
-// ─── Molecular Orbit (press-and-hold to spin) ────────────────────────────────
 // ─── Home Page ────────────────────────────────────────────────────────────────
 function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) => void; onRegisterClick: () => void }) {
   const aboutSectionRef = useRef<HTMLElement | null>(null);
@@ -2666,103 +2475,7 @@ function ContactPage({ focusForm = false, onFocusHandled }: { focusForm?: boolea
     </div>
   );
 }
-// ─── Footer ───────────────────────────────────────────────────────────────────
-function Footer({ setSection }: { setSection: (s: Section) => void }) {
-  const links: { label: string; section: Section }[] = [
-    { label: "Home", section: "home" },
-    { label: "About", section: "about" },
-    { label: "Competitions", section: "competitions" },
-    { label: "Registration", section: "registration" },
-    { label: "Teams", section: "teams" },
-    { label: "Partnership", section: "partnership" },
-    { label: "Organizing Team", section: "organizing" },
-    { label: "Media", section: "media" },
-    { label: "FAQ", section: "faq" },
-    { label: "Contact", section: "contact" },
-  ];
-
-  return (
-    <footer className="border-t" style={{ background: "#050D18", borderColor: `${TEAL}15` }}>
-      <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex justify-start mb-12">
-          <div className="max-w-lg ml-6">
-            <SRCLogo size={70} />
-            <p className="text-muted-foreground text-sm mt-4 mb-6 max-w-sm leading-relaxed">
-              The first AIChE Student Regional Conference in the GCC — bringing together the brightest chemical engineering minds across the region.
-            </p>
-            <div className="flex justify-start gap-3">
-  {[
-    {
-      icon: <Instagram className="w-4 h-4" />,
-      color: "#E1306C",
-      href: "https://www.instagram.com/kfupm_aiche/",
-    },
-    {
-      icon: <Twitter className="w-4 h-4" />,
-      color: "#1DA1F2",
-      href: "https://x.com/KFUPMAIChE?lang=ar",
-    },
-    {
-      icon: <Linkedin className="w-4 h-4" />,
-      color: "#0A66C2",
-      href: "https://sa.linkedin.com/company/kfupm-aiche",
-    },
-    {
-      icon: <Youtube className="w-4 h-4" />,
-      color: "#FF0000",
-      href: "https://youtube.com/@kfupmaiche?si=FpLHkciIUcAnlXAZ",
-    },
-  ].map((s, i) => (
-    <a
-      key={i}
-      href={s.href}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="w-9 h-9 rounded-xl flex items-center justify-center border hover:border-white/30 transition-colors"
-      style={{
-        background: "#0D1E30",
-        borderColor: `${TEAL}20`,
-        color: s.color,
-      }}
-    >
-      {s.icon}
-    </a>
-  ))}
-</div>
-
-<div className="space-y-2 mt-6">
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <Mail className="w-4 h-4" style={{ color: TEAL }} />
-    aiche@kfupm.edu.sa
-  </div>
-
-  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-    <MapPin className="w-4 h-4" style={{ color: TEAL }} />
-    KFUPM, Dhahran, Saudi Arabia
-  </div>
-
-</div>
-          </div>
-
-          
-
-          
-        </div>
-
-        <div className="border-t pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: `${TEAL}15` }}>
-          <p className="text-xs text-muted-foreground">
-            © 2026 SRC KFUPM · AIChE Student Chapter · All rights reserved
-          </p>
-          <p className="text-xs text-muted-foreground flex items-center gap-1">
-            Powered by <span className="font-semibold" style={{ color: TEAL }}>AIChE</span> · Hosted by <span className="font-semibold text-white">KFUPM</span>
-          </p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-// ─── Registration Modal ───────────────────────────────────────────────────────
+// ─── Registration Modal ───────────────────────────────────
 const REG_TYPES = [
   {
     id: "participant" as const,
@@ -3519,69 +3232,7 @@ function RegistrationModal({ open, onClose, onLoginSuccess, initialCompetition =
 }
 
 // ─── Floating "Do you need help?" button ─────────────────────────────────────
-// Fixed bottom-right helper that jumps to the FAQ page. Collapsed to a glass
-// circle; expands to reveal its label on hover (label always shown on touch).
-function HelpButton({ active, onClick }: { active: Section; onClick: () => void }) {
-  // Redundant on the pages it points at — hide there.
-  if (active === "faq") return null;
-
-  return (
-    <>
-      <style>{`
-        @keyframes srcHelpIn {
-          from { opacity: 0; transform: translateY(20px) scale(.9); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        @keyframes srcHelpPulse {
-          0%   { box-shadow: 0 0 0 0 ${TEAL}55; }
-          70%  { box-shadow: 0 0 0 14px ${TEAL}00; }
-          100% { box-shadow: 0 0 0 0 ${TEAL}00; }
-        }
-        .src-help { animation: srcHelpIn .5s cubic-bezier(.16,.84,.44,1) both; }
-        .src-help-core { animation: srcHelpPulse 2.6s ease-out infinite; }
-        .src-help .src-help-label {
-          max-width: 0; opacity: 0; overflow: hidden; white-space: nowrap;
-          transition: max-width .4s cubic-bezier(.16,.84,.44,1), opacity .3s ease, margin-left .35s ease;
-        }
-        .src-help:hover .src-help-label,
-        .src-help:focus-visible .src-help-label { max-width: 220px; opacity: 1; margin-left: 8px; }
-        @media (hover: none) {
-          .src-help .src-help-label { max-width: 220px; opacity: 1; margin-left: 8px; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .src-help, .src-help-core { animation: none; }
-          .src-help .src-help-label { transition: none; }
-        }
-      `}</style>
-
-      <button
-        onClick={onClick}
-        aria-label="Do you need help?"
-        className="src-help fixed bottom-6 right-6 z-[120] flex items-center rounded-full pointer-events-auto"
-        style={{
-          padding: "8px",
-          background: "rgba(7,17,30,0.72)",
-          backdropFilter: "blur(14px) saturate(160%)",
-          WebkitBackdropFilter: "blur(14px) saturate(160%)",
-          border: `1px solid ${TEAL}45`,
-          boxShadow: `0 12px 36px -10px rgba(0,0,0,0.6), 0 0 22px -6px ${TEAL}66`,
-        }}
-      >
-        <span
-          className="src-help-core flex items-center justify-center rounded-full flex-shrink-0"
-          style={{ width: 44, height: 44, background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`, color: "#07111E" }}
-        >
-          <HelpCircle className="w-5 h-5" />
-        </span>
-        <span className="src-help-label text-sm font-semibold" style={{ color: "#fff" }}>
-          Do you need help?
-        </span>
-      </button>
-    </>
-  );
-}
-
-// ─── Root App ─────────────────────────────────────────────────────────────────
+// ─── Root App ─────────────────────────────────────────────
 const USER_STORAGE_KEY = "src2026:user";
 
 export default function App() {
