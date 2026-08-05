@@ -2,7 +2,8 @@
 // Kept free of imports so that any module (pages, components, data files) can
 // depend on it without risking an import cycle.
 
-/** A page in the app. `App` swaps pages off this value — there is no router. */
+/** A page in the app. Each Section maps to a URL in routes.ts; App derives the
+ *  current Section from the address bar and navigates when it is set. */
 export type Section =
   | "home" | "about" | "competitions"
   | "agenda"

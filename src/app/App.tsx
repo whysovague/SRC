@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import type { Section, Competition } from "./types";
+import { pathToSection, sectionToPath } from "./routes";
 import { HomePage } from "./pages/HomePage";
 import { AboutPage } from "./pages/AboutPage";
 import { CompetitionsPage } from "./pages/CompetitionsPage";
@@ -17,7 +19,19 @@ import type { AppUser } from "./lib/users";
 const USER_STORAGE_KEY = "src2026:user";
 
 export default function App() {
-  const [section, setSection] = useState<Section>("home");
+  // The URL is the source of truth for which page is shown. Everything else in
+  // the app still speaks in Sections, so `setSection` just navigates.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const matched = pathToSection(location.pathname);
+  const section: Section = matched ?? "home";
+  const setSection = (s: Section) => navigate(sectionToPath(s));
+
+  // Unknown URL — replace it with home so the address bar never shows a dead path.
+  useEffect(() => {
+    if (matched === null) navigate("/", { replace: true });
+  }, [matched, navigate]);
+
   const [regModalOpen, setRegModalOpen] = useState(false);
   // Competition preselected from a Competitions-page card ("Participate")
   const [regCompetition, setRegCompetition] = useState<Competition>(null);
