@@ -261,9 +261,9 @@ Remember that the Firebase variables must also be set in the host's build enviro
 
 Small things worth knowing, none of them blocking:
 
-- **`src/pages/Register.tsx` is orphaned** — a standalone Firebase-auth registration form that nothing imports. The live flow is `components/registration/RegistrationModal.tsx`. Safe to delete once confirmed unwanted.
-- **`@types/react` is v19 while `react` is v18** — types can describe APIs the runtime does not have. Aligning them is a small cleanup.
+- **`src/app/lib/auth.ts` and `src/app/lib/userLogin.ts` are unused.** `auth.ts` wraps Firebase Auth (register, login, logout, password reset); `userLogin.ts` is a Firestore login helper. The live flow uses `lib/users.ts` + `lib/firebase.ts` instead, via `RegistrationModal`. They are kept as a starting point should the project move to real Firebase Auth — delete them if that is not planned.
 - **`pnpm-workspace.yaml` without a pnpm lockfile** — see the install note above.
+- **`src/package-lock.json`** — a stray lockfile inside `src/`; the real one is at the repo root.
 
 ## 📚 Additional Resources
 
