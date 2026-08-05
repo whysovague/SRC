@@ -7,29 +7,17 @@ import {
   FlaskConical, Presentation, FileText, Lightbulb, Network, Wrench,
   MessageSquare, HelpCircle, ChevronUp
 } from "lucide-react";
+import {
+  TEAL, ORANGE, PALETTE_BLUE, PALETTE_ORANGE,
+  ORBIT_CYAN, ORBIT_ORANGE, ORBIT_WHITE,
+} from "./theme";
+import type { Section, RegType, Competition } from "./types";
 import srcTealSvg from "@/assets/src_teal.svg";
 import srcLettersSvg from "@/assets/src_letters.svg";
 import { submitRegistration } from "./lib/firebase";
 import { findUserByEmail, createUserIfNotExists, type AppUser } from "./lib/users";
 import kfupmLogoImg from "@/assets/kfupm-logo-png_seeklogo-643173.png";
 import aicheLogoImg from "@/assets/aichelogo.png";
-
-// ─── Types ───────────────────────────────────────────────────────────────────
-type Section =
-  | "home" | "about" | "competitions" | "registration"
-  | "agenda"
-  | "teams" | "partnership"
-  | "organizing" | "media" | "faq" | "contact";
-
-// ─── Brand constants ──────────────────────────────────────────────────────────
-const TEAL = "#0CBFCE";
-const ORANGE = "#E87C2A";
-// Palette accents for section-header gradient (light blue → orange)
-const PALETTE_BLUE = "#4c90c1";
-const PALETTE_ORANGE = "#e47d1b";
-const ORBIT_CYAN = "12,191,206";
-const ORBIT_ORANGE = "232,124,42";
-const ORBIT_WHITE = "255,255,255";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function SectionTag({ children }: { children: React.ReactNode }) {
@@ -3678,9 +3666,6 @@ function Footer({ setSection }: { setSection: (s: Section) => void }) {
 }
 
 // ─── Registration Modal ───────────────────────────────────────────────────────
-type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;
-type Competition = "chem-e-car" | "cheme-jeopardy" | "technical-presentation" | "poster-competition" | null;
-
 const REG_TYPES = [
   {
     id: "participant" as const,
