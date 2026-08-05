@@ -13,7 +13,6 @@ export const navItems: { label: string; section: Section }[] = [
   { label: "Agenda", section: "agenda" },
   { label: "Partnership", section: "partnership" },
   { label: "Contact", section: "contact" },
-  //{ label: "Organizing Team", section: "organizing" },
   { label: "FAQ", section: "faq" },
 ];
 

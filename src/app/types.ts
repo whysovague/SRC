@@ -4,10 +4,10 @@
 
 /** A page in the app. `App` swaps pages off this value — there is no router. */
 export type Section =
-  | "home" | "about" | "competitions" | "registration"
+  | "home" | "about" | "competitions"
   | "agenda"
-  | "teams" | "partnership"
-  | "organizing" | "media" | "faq" | "contact";
+  | "partnership"
+  | "faq" | "contact";
 
 /** Which track a visitor registers under in the registration modal. */
 export type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;

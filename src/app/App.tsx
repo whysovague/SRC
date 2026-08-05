@@ -7,11 +7,7 @@ import { CompetitionsPage } from "./pages/CompetitionsPage";
 import { FAQPage } from "./pages/FAQPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AgendaPage, AgendaComingSoon, AGENDA_LIVE } from "./pages/AgendaPage";
-import { RegistrationPage } from "./pages/RegistrationPage";
-import { TeamsPage } from "./pages/TeamsPage";
 import { PartnershipPage } from "./pages/PartnershipPage";
-import { OrganizingPage } from "./pages/OrganizingPage";
-import { MediaPage } from "./pages/MediaPage";
 import { RegistrationModal } from "./components/registration/RegistrationModal";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
@@ -69,13 +65,9 @@ export default function App() {
     home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} />,
     about: <AboutPage />,
     competitions: <CompetitionsPage onParticipate={openRegistration} />,
-    registration: <RegistrationPage />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
-    teams: <TeamsPage />,
     partnership: <PartnershipPage />,
-    organizing: <OrganizingPage />,
-    media: <MediaPage />,
     faq: <FAQPage goToContactForm={goToContactForm} />,
     contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
   };

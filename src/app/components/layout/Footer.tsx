@@ -10,11 +10,7 @@ export function Footer({ setSection }: { setSection: (s: Section) => void }) {
     { label: "Home", section: "home" },
     { label: "About", section: "about" },
     { label: "Competitions", section: "competitions" },
-    { label: "Registration", section: "registration" },
-    { label: "Teams", section: "teams" },
     { label: "Partnership", section: "partnership" },
-    { label: "Organizing Team", section: "organizing" },
-    { label: "Media", section: "media" },
     { label: "FAQ", section: "faq" },
     { label: "Contact", section: "contact" },
   ];
@@ -22,7 +18,7 @@ export function Footer({ setSection }: { setSection: (s: Section) => void }) {
   return (
     <footer className="border-t" style={{ background: "#050D18", borderColor: `${TEAL}15` }}>
       <div className="max-w-7xl mx-auto px-6 py-16">
-        <div className="flex justify-start mb-12">
+        <div className="flex flex-col md:flex-row justify-start md:justify-between gap-12 mb-12">
           <div className="max-w-lg ml-6">
             <SRCLogo size={70} />
             <p className="text-muted-foreground text-sm mt-4 mb-6 max-w-sm leading-relaxed">
@@ -82,9 +78,22 @@ export function Footer({ setSection }: { setSection: (s: Section) => void }) {
 </div>
           </div>
 
-          
-
-          
+          {/* Quick links — mirrors the top navigation plus About */}
+          <nav className="ml-6 md:ml-0 md:mr-6">
+            <h3 className="font-display text-sm font-bold text-white mb-4 tracking-wide">Quick Links</h3>
+            <ul className="space-y-2.5">
+              {links.map((link) => (
+                <li key={link.section}>
+                  <button
+                    onClick={() => setSection(link.section)}
+                    className="text-sm text-muted-foreground hover:text-white transition-colors"
+                  >
+                    {link.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
 
         <div className="border-t pt-8 flex flex-col md:flex-row items-center justify-between gap-4" style={{ borderColor: `${TEAL}15` }}>
