@@ -97,61 +97,7 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
           .src-tl-card { opacity: 1; transform: none; transition: none; }
         }
 
-        /* InteractiveCard — mouse-tracked 3D tilt + radial glow */
-        .src-icard {
-          position: relative;
-          isolation: isolate;
-          transform-style: preserve-3d;
-          transform:
-            perspective(1100px)
-            rotateX(var(--rx, 0deg))
-            rotateY(var(--ry, 0deg))
-            translateZ(0);
-          transition: transform .45s cubic-bezier(.22,.61,.36,1),
-                      border-color .3s ease,
-                      box-shadow .3s ease;
-          will-change: transform;
-        }
-        .src-icard:hover {
-          box-shadow:
-            0 18px 50px -22px color-mix(in srgb, var(--accent, #0CBFCE) 55%, transparent),
-            0 4px 14px -6px rgba(0,0,0,0.5);
-        }
-        .src-icard-glow {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          border-radius: inherit;
-          opacity: calc(var(--active, 0) * 1);
-          transition: opacity .35s ease;
-          background: radial-gradient(
-            var(--glow-size, 360px) circle
-            at var(--mx, 50%) var(--my, 50%),
-            color-mix(in srgb, var(--accent, #0CBFCE) 28%, transparent) 0%,
-            color-mix(in srgb, var(--accent, #0CBFCE) 10%, transparent) 28%,
-            transparent 60%
-          );
-          mix-blend-mode: screen;
-          z-index: -1;
-        }
-        /* Subtle highlight ring that intensifies on hover */
-        .src-icard-border {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          border-radius: inherit;
-          opacity: calc(var(--active, 0) * 1);
-          transition: opacity .35s ease;
-          box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent, #0CBFCE) 35%, transparent);
-          z-index: 0;
-        }
-        @media (hover: none), (prefers-reduced-motion: reduce) {
-          .src-icard {
-            transform: none !important;
-            transition: border-color .3s ease;
-          }
-          .src-icard-glow, .src-icard-border { display: none; }
-        }
+
 
           /* Section eyebrow — gradient-bordered pill */
         .src-eyebrow {

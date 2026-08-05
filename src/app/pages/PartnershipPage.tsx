@@ -34,12 +34,6 @@ export function PartnershipPage() {
     <div className="relative overflow-hidden pt-24 pb-28" style={{ background: "linear-gradient(180deg, transparent 0%, rgba(232,124,42,0.03) 45%, transparent 100%)" }}>
       {/* Scoped animations (match Logistics / FAQ) */}
       <style>{`
-        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
-        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
-        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
-        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
-        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
-        @media (prefers-reduced-motion: reduce) { .faq-pop { animation: none; } }
       `}</style>
 
       {/* Molecule network background + glow orbs + faint grid */}

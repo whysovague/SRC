@@ -157,16 +157,11 @@ export function AgendaComingSoon() {
       style={{ background: "linear-gradient(180deg, transparent 0%, rgba(12,191,206,0.03) 45%, transparent 100%)" }}
     >
       <style>{`
-        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
-        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
-        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
-        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
         @keyframes csRing   { 0% { transform: scale(1); opacity:.5; } 100% { transform: scale(1.6); opacity:0; } }
-        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
         .cs-ring { animation: csRing 3s ease-out infinite; }
         .cs-ring-2 { animation-delay: 1.5s; }
         @media (prefers-reduced-motion: reduce) {
-          .faq-pop, .cs-ring { animation: none; }
+          .cs-ring { animation: none; }
         }
       `}</style>
 
@@ -300,19 +295,14 @@ export function AgendaPage() {
       style={{ background: "linear-gradient(180deg, transparent 0%, rgba(12,191,206,0.03) 45%, transparent 100%)" }}
     >
       <style>{`
-        @keyframes faqFloat { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(0,-26px) scale(1.05); } }
-        @keyframes faqDrift { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(20px,16px) scale(1.08); } }
-        @keyframes faqGlow  { 0%,100% { opacity:.4; } 50% { opacity:.8; } }
-        @keyframes faqPop   { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
         @keyframes agSlideIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
-        .faq-pop { animation: faqPop .6s cubic-bezier(.16,.84,.44,1) both; }
         .ag-seg { transition: color .25s ease, background .3s cubic-bezier(.16,.84,.44,1), box-shadow .3s ease; }
         .ag-row { animation: agSlideIn .45s cubic-bezier(.16,.84,.44,1) both; transition: background .25s ease, padding-left .25s ease; }
         .ag-row:hover { background: rgba(12,191,206,0.07); padding-left: 26px; }
         .ag-row-alt { background: rgba(255,255,255,0.016); }
         .ag-daytitle { animation: agSlideIn .5s cubic-bezier(.16,.84,.44,1) both; }
         @media (prefers-reduced-motion: reduce) {
-          .faq-pop, .ag-row, .ag-daytitle { animation: none; }
+          .ag-row, .ag-daytitle { animation: none; }
           .ag-row:hover { padding-left: 20px; }
         }
       `}</style>
