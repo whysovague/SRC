@@ -29,10 +29,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Fail fast during development if environment variables aren't bound
-if (!firebaseConfig.projectId) {
+// Warn during development if environment variables aren't bound.
+// IMPORTANT: never throw at module scope — that would blank the whole site.
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
   console.error(
-    "Firebase Initialization Error: VITE_FIREBASE_PROJECT_ID is missing from environment variables."
+    "Firebase is not configured: missing VITE_FIREBASE_* environment variables " +
+    "(create a .env file — see .env.example). The site will render, but " +
+    "registration and login will not work until they are set."
   );
 }
 
@@ -51,8 +54,16 @@ try {
 
 export const db = dbInstance;
 
-// Firebase Authentication
-export const auth = getAuth(app);
+// Firebase Authentication — getAuth() throws on a missing/invalid API key, so
+// guard it: without config the site still renders and only auth calls fail.
+export const auth = (() => {
+  try {
+    return getAuth(app);
+  } catch (e) {
+    console.error("Firebase Auth unavailable (invalid or missing API key):", e);
+    return null as unknown as ReturnType<typeof getAuth>;
+  }
+})();
 
 export type RegistrationPayload = {
   type: "participant" | "team" | "speaker" | "volunteer" | "partner";

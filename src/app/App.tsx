@@ -1670,8 +1670,11 @@ function AboutPage() {
 }
 
 // ─── Competitions Page ────────────────────────────────────────────────────────
-function CompetitionsPage() {
-  const competitions = [
+function CompetitionsPage({ onParticipate }: { onParticipate: (competition: Competition) => void }) {
+  const competitions: {
+    icon: React.ReactNode; title: string; category: "Competition" | "Activity";
+    desc: string; details: string[]; color: string; compId?: Competition;
+  }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
       title: "Chem-E-Car",
@@ -1679,6 +1682,7 @@ function CompetitionsPage() {
       desc: "Teams design and build a car powered by a chemical energy source that can travel a specified distance and stop using a chemical stopping mechanism. One of AIChE's most iconic student challenges.",
       details: ["Team-based competition", "Design, build & present", "Chemical power & stopping mechanism"],
       color: TEAL,
+      compId: "chem-e-car",
     },
     {
       icon: <Trophy className="w-7 h-7" />,
@@ -1687,6 +1691,7 @@ function CompetitionsPage() {
       desc: "A fast-paced, Jeopardy-style trivia competition testing breadth of chemical engineering knowledge from thermodynamics to reactor design to safety.",
       details: ["Team of 3-4 students", "Live Q&A format", "All ChE disciplines"],
       color: ORANGE,
+      compId: "cheme-jeopardy",
     },
     {
       icon: <Presentation className="w-7 h-7" />,
@@ -1695,6 +1700,7 @@ function CompetitionsPage() {
       desc: "Individual students present original technical research or analysis to a panel of industry and academic judges. Builds critical presentation and communication skills.",
       details: ["Individual presentations", "Industry judges", "Research & analysis focus"],
       color: TEAL,
+      compId: "technical-presentation",
     },
     {
       icon: <FileText className="w-7 h-7" />,
@@ -1703,6 +1709,7 @@ function CompetitionsPage() {
       desc: "Students present their research and technical projects in a poster format, engaging directly with judges and attendees in a dynamic gallery setting.",
       details: ["Research poster", "Peer & judge engagement", "Open gallery format"],
       color: ORANGE,
+      compId: "poster-competition",
     },
     {
       icon: <Zap className="w-7 h-7" />,
@@ -1820,7 +1827,7 @@ function CompetitionsPage() {
                 className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300 h-full"
                 style={{ background: "var(--card)", borderColor: "var(--border)" }}
               >
-                <div className="p-6">
+                <div className="p-6 flex flex-col h-full">
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
                       {item.icon}
@@ -1831,7 +1838,7 @@ function CompetitionsPage() {
                   </div>
                   <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-                  <ul className="space-y-1">
+                  <ul className="space-y-1 mb-5">
                     {item.details.map((d) => (
                       <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
                         <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
@@ -1839,6 +1846,23 @@ function CompetitionsPage() {
                       </li>
                     ))}
                   </ul>
+                  {/* Register / Participate → opens the registration & login modal,
+                      preselecting this competition when the card is one */}
+                  <div className="mt-auto pt-1">
+                    <button
+                      onClick={() => onParticipate(item.compId ?? null)}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+                      style={{
+                        color: item.color,
+                        background: `${item.color}12`,
+                        border: `1px solid ${item.color}35`,
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.background = `${item.color}22`; e.currentTarget.style.borderColor = `${item.color}70`; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = `${item.color}12`; e.currentTarget.style.borderColor = `${item.color}35`; }}
+                    >
+                      {item.compId ? "Participate" : "Register"} <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </InteractiveCard>
             </RevealOnScroll>
@@ -3717,10 +3741,11 @@ const INDIVIDUAL_COMPETITIONS = ["technical-presentation"];
 
 const STEP_LABELS = ["Select Type", "Fill Information", "Review & Submit"];
 
-function RegistrationModal({ open, onClose, onLoginSuccess }: {
+function RegistrationModal({ open, onClose, onLoginSuccess, initialCompetition = null }: {
   open: boolean;
   onClose: () => void;
   onLoginSuccess: (user: AppUser) => void;
+  initialCompetition?: Competition;
 }) {
   // "register" = the existing conference flow (unchanged).
   // "login"    = the modal body is swapped for the lightweight login screen.
@@ -3751,7 +3776,7 @@ function RegistrationModal({ open, onClose, onLoginSuccess }: {
   // Reset on close
   useEffect(() => {
     if (!open) {
-      setTimeout(() => {
+      const id = setTimeout(() => {
         setStep(0);
         setRegType(null);
         setCompetition(null);
@@ -3765,8 +3790,21 @@ function RegistrationModal({ open, onClose, onLoginSuccess }: {
         setLoginError(null);
         setLoggingIn(false);
       }, 300);
+      return () => clearTimeout(id); // reopening cancels the pending reset
     }
   }, [open]);
+
+  // Deep link from the Competitions page — jump straight to the team form
+  // with the chosen competition preselected (user can still hit "Change").
+  useEffect(() => {
+    if (open && initialCompetition) {
+      setMode("register");
+      setSubmitted(false);
+      setRegType("team");
+      setCompetition(initialCompetition);
+      setStep(1);
+    }
+  }, [open, initialCompetition]);
 
   // Close on escape
   useEffect(() => {
@@ -4467,6 +4505,13 @@ const USER_STORAGE_KEY = "src2026:user";
 export default function App() {
   const [section, setSection] = useState<Section>("home");
   const [regModalOpen, setRegModalOpen] = useState(false);
+  // Competition preselected from a Competitions-page card ("Participate")
+  const [regCompetition, setRegCompetition] = useState<Competition>(null);
+
+  const openRegistration = (competition: Competition = null) => {
+    setRegCompetition(competition);
+    setRegModalOpen(true);
+  };
 
   // Lightweight local session — a plain Firestore document, no Firebase Auth.
   const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
@@ -4503,9 +4548,9 @@ export default function App() {
   }, [section]);
 
   const pages: Record<Section, React.ReactNode> = {
-    home: <HomePage setSection={setSection} onRegisterClick={() => setRegModalOpen(true)} />,
+    home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} />,
     about: <AboutPage />,
-    competitions: <CompetitionsPage />,
+    competitions: <CompetitionsPage onParticipate={openRegistration} />,
     registration: <RegistrationPage />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
@@ -4605,7 +4650,7 @@ export default function App() {
       <Navbar
         active={section}
         setSection={setSection}
-        onRegisterClick={() => setRegModalOpen(true)}
+        onRegisterClick={() => openRegistration()}
         user={currentUser}
         onLogout={handleLogout}
       />
@@ -4616,6 +4661,7 @@ export default function App() {
         open={regModalOpen}
         onClose={() => setRegModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
+        initialCompetition={regCompetition}
       />
 
       <main>
