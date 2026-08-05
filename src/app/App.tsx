@@ -4,7 +4,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import type { Section, Competition } from "./types";
 import { pathToSection, sectionToPath } from "./routes";
 import { HomePage } from "./pages/HomePage";
-import { AboutPage } from "./pages/AboutPage";
 import { CompetitionsPage } from "./pages/CompetitionsPage";
 import { FAQPage } from "./pages/FAQPage";
 import { ContactPage } from "./pages/ContactPage";
@@ -77,7 +76,6 @@ export default function App() {
 
   const pages: Record<Section, React.ReactNode> = {
     home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} />,
-    about: <AboutPage />,
     competitions: <CompetitionsPage onParticipate={openRegistration} />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,

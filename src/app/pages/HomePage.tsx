@@ -3,7 +3,7 @@ import { ArrowRight, Award, Building2, Calendar, ChevronRight, Eye, Globe, Heart
 
 import { TEAL, ORANGE, PALETTE_BLUE, PALETTE_ORANGE } from "@/app/theme";
 import type { Section } from "@/app/types";
-import { Divider, GradientEyebrow, CTAButton, RevealOnScroll, InteractiveCard, MoleculeNetwork, Marquee, CountUp } from "@/app/components/common";
+import { Divider, GradientEyebrow, CTAButton, RevealOnScroll, InteractiveCard, MoleculeNetwork, CountUp } from "@/app/components/common";
 import { HeroLogo } from "@/app/components/hero/HeroLogo";
 import { CountdownTimer } from "@/app/components/hero/CountdownTimer";
 import { TimelineSection } from "./TimelineSection";
@@ -62,8 +62,6 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
         @media (hover: none) {
           .val-card .val-desc { max-height: 200px; opacity: 1; margin-top: 10px; }
         }
-        /* Marquee styling moved to src/styles/theme.css so it applies on every
-           page that uses <Marquee>, not just this one. */
         @keyframes srcHeroFloat {
           0%, 100% { transform: translateY(0); }
           50%      { transform: translateY(-10px); }

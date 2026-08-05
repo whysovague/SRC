@@ -8,6 +8,5 @@ export { RevealOnScroll } from "./RevealOnScroll";
 export { InteractiveCard } from "./InteractiveCard";
 export { GlassCard } from "./GlassCard";
 export { MoleculeNetwork } from "./MoleculeNetwork";
-export { Marquee } from "./Marquee";
 export { SRCLogo } from "./SRCLogo";
 export { CountUp } from "./CountUp";

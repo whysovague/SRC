@@ -6,7 +6,6 @@ import type { Section } from "./types";
 
 export const SECTION_PATHS: Record<Section, string> = {
   home: "/",
-  about: "/about",
   competitions: "/competitions",
   agenda: "/agenda",
   partnership: "/partnership",

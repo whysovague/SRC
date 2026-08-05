@@ -8,7 +8,6 @@ import { SRCLogo } from "@/app/components/common";
 export function Footer({ setSection }: { setSection: (s: Section) => void }) {
   const links: { label: string; section: Section }[] = [
     { label: "Home", section: "home" },
-    { label: "About", section: "about" },
     { label: "Competitions", section: "competitions" },
     { label: "Partnership", section: "partnership" },
     { label: "FAQ", section: "faq" },

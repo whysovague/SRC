@@ -260,14 +260,6 @@
   .src-cta:hover .src-cta-shine { transform: translateX(-110%); }
 }
 
-/* ─── Marquee ────────────────────────────────────────────────────────────────
-   Edge mask for the <Marquee> component. The scrolling itself is driven in JS
-   (see components/common/Marquee.tsx); this rule only fades the two ends.
-   It lives here — global — because Marquee is used on more than one page. */
-.src-edge-fade {
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-}
 
 /* ─── Page-shell typography & chrome ─────────────────────────────────────────
    Previously injected from a <style> block inside App.tsx. */

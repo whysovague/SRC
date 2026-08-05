@@ -5,7 +5,7 @@
 /** A page in the app. Each Section maps to a URL in routes.ts; App derives the
  *  current Section from the address bar and navigates when it is set. */
 export type Section =
-  | "home" | "about" | "competitions"
+  | "home" | "competitions"
   | "agenda"
   | "partnership"
   | "faq" | "contact";
