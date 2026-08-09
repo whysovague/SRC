@@ -531,9 +531,9 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
           {mode === "register" && !submitted && step === 0 && (
             <div className="reg-step">
               <p className="text-muted-foreground text-sm mb-4">How would you like to participate in SRC 2026?</p>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {REG_TYPES.map((type) => (
-                  <button key={type.id} className="reg-card-type reg-card-type-lg" onClick={() => handleTypeSelect(type.id)}>
+                  <button key={type.id} className="reg-card-type reg-card-type-lg w-full sm:w-[calc(50%-0.5rem)] max-w-sm" onClick={() => handleTypeSelect(type.id)}>
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${type.color}15`, color: type.color }}>
                       {type.icon}
                     </div>

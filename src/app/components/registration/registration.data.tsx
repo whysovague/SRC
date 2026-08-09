@@ -11,13 +11,14 @@ export const REG_TYPES = [
     desc: "Attend sessions, workshops, panels, and networking events.",
     color: TEAL,
   },
-  {
-    id: "team" as const,
-    icon: <Trophy className="w-7 h-7" />,
-    title: "Competition Participant",
-    desc: "Register to compete in one of our flagship competitions.",
-    color: ORANGE,
-  },
+  // Hidden for now — restore to re-enable competition registration.
+  // {
+  //   id: "team" as const,
+  //   icon: <Trophy className="w-7 h-7" />,
+  //   title: "Competition Participant",
+  //   desc: "Register to compete in one of our flagship competitions.",
+  //   color: ORANGE,
+  // },
 ];
 
 export const COMPETITIONS = [
