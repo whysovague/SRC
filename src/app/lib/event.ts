@@ -19,10 +19,17 @@ export const EVENT = {
 
   venue: "King Fahd University of Petroleum & Minerals",
   venueShort: "KFUPM",
+  /** Matches the badge artwork, which reads "KFUPM Building 54". */
+  building: "Building 54",
   city: "Dhahran, Saudi Arabia",
 
   supportEmail: "aiche@kfupm.edu.sa",
 } as const;
 
-/** "KFUPM, Dhahran, Saudi Arabia" — the one-line location used in the email. */
+/** "KFUPM, Dhahran, Saudi Arabia" — the one-line location. */
 export const EVENT_LOCATION = `${EVENT.venueShort}, ${EVENT.city}`;
+
+/** "KFUPM Building 54 · Dhahran, Saudi Arabia" — the compact venue line shown
+ *  in the email, so the where survives an email client blocking the badge. */
+export const EVENT_VENUE_LINE =
+  `${EVENT.venueShort} ${EVENT.building} · ${EVENT.city}`;

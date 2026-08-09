@@ -11,9 +11,6 @@ export const SECTION_PATHS: Record<Section, string> = {
   partnership: "/partnership",
   faq: "/faq",
   contact: "/contact",
-  // Deep-linked from the confirmation email as /complete-profile?t=<token>.
-  // pathToSection only looks at the pathname, so the token survives the match.
-  "complete-profile": "/complete-profile",
 };
 
 const PATH_TO_SECTION = new Map<string, Section>(

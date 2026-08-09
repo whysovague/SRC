@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle, ChevronRight, Loader2, Mail, Trophy, X } from "lucide-react";
+import {
+  ArrowRight, Camera, CheckCircle, ChevronRight, Download, Loader2, Mail, Trash2, Trophy, User, X,
+} from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition, RegType } from "@/app/types";
@@ -7,6 +9,8 @@ import { CTAButton } from "@/app/components/common";
 import { submitRegistration } from "@/app/lib/firebase";
 import { findUserByEmail, createUserIfNotExists, type AppUser } from "@/app/lib/users";
 import { sendConfirmationEmail, emailConfigured } from "@/app/lib/email";
+import { fileToSquareDataUrl, ImageError, ACCEPT_ATTRIBUTE } from "@/app/lib/image";
+import { renderBadge, badgeFilename } from "@/app/lib/badge";
 
 import {
   REG_TYPES, COMPETITIONS, TEAM_COMPETITIONS, INDIVIDUAL_COMPETITIONS, STEP_LABELS,
@@ -25,7 +29,7 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
   const [loginEmail, setLoginEmail] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loggingIn, setLoggingIn] = useState(false);
-  const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
   const [regType, setRegType] = useState<RegType>(null);
   const [competition, setCompetition] = useState<Competition>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
@@ -35,9 +39,15 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
   // null until a send has been attempted. Drives the success-screen wording so
   // the modal never claims an email went out when it did not.
   const [emailSent, setEmailSent] = useState<boolean | null>(null);
+  // Optional badge photo, already downscaled to a square JPEG data URL.
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  // The rendered badge, shown on the success screen and attached to the email.
+  const [badge, setBadge] = useState<string | null>(null);
   // Incremented per submission and on reset, so a late-resolving email or user
   // write can tell whether the modal it started in is still the one on screen.
   const submissionRef = useRef(0);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when open
@@ -62,6 +72,9 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
         setSubmitting(false);
         setSubmitError(null);
         setEmailSent(null);
+        setPhoto(null);
+        setPhotoError(null);
+        setBadge(null);
         submissionRef.current++; // orphan any in-flight follow-up work
         setMode("register");
         setLoginName("");
@@ -96,12 +109,48 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
     setFormData(prev => ({ ...prev, [key]: value }));
   }, []);
 
+  // ── Badge photo ─────────────────────────────────────────────────────────────
+  const handlePhoto = useCallback(async (file: File | undefined) => {
+    if (!file) return;
+    setPhotoError(null);
+    try {
+      setPhoto(await fileToSquareDataUrl(file));
+    } catch (e) {
+      setPhotoError(
+        e instanceof ImageError ? e.message : "That photo could not be processed. Please try another."
+      );
+    } finally {
+      // A file input fires no change event when the same path is picked again,
+      // so clear it — otherwise "shrink the file and re-select it" does nothing.
+      if (photoInputRef.current) photoInputRef.current.value = "";
+    }
+  }, []);
+
+  const removePhoto = () => {
+    setPhoto(null);
+    setPhotoError(null);
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  };
+
+  const downloadBadge = () => {
+    if (!badge) return;
+    const a = document.createElement("a");
+    a.href = badge;
+    a.download = badgeFilename(badgeName());
+    a.click();
+  };
+
+  /** Name to print on the badge, across every registration type. */
+  const badgeName = () =>
+    (formData.fullName || formData.contactPerson || formData.teamName || "").trim();
+
   const handleTypeSelect = (type: RegType) => {
     setRegType(type);
     setStep(1);
   };
 
   const goBack = () => {
+    if (step === 3) { setStep(2); return; }
     if (step === 2) { setStep(1); return; }
     if (step === 1) {
       if (regType === "team" && competition) { setCompetition(null); return; }
@@ -138,7 +187,7 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
     const newUserEmail = (formData.email ?? "").trim();
     if (!newUserEmail) return;
 
-    const newUserName = (formData.fullName ?? formData.contactPerson ?? formData.teamName ?? "").trim();
+    const newUserName = badgeName();
     const regTypeLabel = getRegTypeLabel();
     const competitionLabel = regType === "team" ? getCompetitionLabel() : null;
 
@@ -147,19 +196,27 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
     const ticket = ++submissionRef.current;
     const stillCurrent = () => submissionRef.current === ticket;
 
+    // Render the badge first so the success screen can show it immediately,
+    // even if the email or the user write is slow. A failure here is never
+    // fatal — the email simply goes out without an attachment.
+    let badgeDataUrl: string | null = null;
     try {
-      const user = await createUserIfNotExists(newUserName, newUserEmail);
-      if (!user?.profileToken) {
-        if (stillCurrent()) setEmailSent(false);
-        return;
-      }
+      badgeDataUrl = await renderBadge({ fullName: newUserName, photoDataUrl: photo });
+      if (stillCurrent()) setBadge(badgeDataUrl);
+    } catch (badgeErr) {
+      console.error("Badge render failed:", badgeErr);
+    }
+
+    try {
+      const user = await createUserIfNotExists(newUserName, newUserEmail, photo);
 
       const sent = await sendConfirmationEmail({
-        fullName: user.fullName || newUserName,
-        email: user.email,
+        fullName: user?.fullName || newUserName,
+        email: user?.email || newUserEmail,
         registrationType: regTypeLabel,
         competition: competitionLabel,
-        profileToken: user.profileToken,
+        badgeDataUrl,
+        badgeFilename: badgeFilename(newUserName),
       });
       if (stillCurrent()) setEmailSent(sent);
     } catch (userErr) {
@@ -405,6 +462,19 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
           gap: 12px;
         }
         .reg-review-row:last-child { border-bottom: none; }
+        .reg-avatar {
+          width: 132px; height: 132px;
+          border-radius: 50%;
+          display: flex; align-items: center; justify-content: center;
+          overflow: hidden;
+          flex-shrink: 0;
+          border: 2px dashed rgba(12,191,206,0.35);
+          background: rgba(7,17,30,0.6);
+          cursor: pointer;
+          transition: border-color 0.2s, background 0.2s;
+        }
+        .reg-avatar:hover { border-color: #0CBFCE; background: rgba(12,191,206,0.07); }
+        .reg-avatar-filled { border-style: solid; border-color: rgba(12,191,206,0.55); }
       `}</style>
 
       <div
@@ -427,7 +497,9 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
             <h2 className="font-display text-xl font-bold text-white">
               {mode === "login"
                 ? "Welcome Back"
-                : submitted ? "Registration Submitted" : step === 0 ? "Register" : step === 1 ? getRegTypeLabel() : "Review & Submit"}
+                : submitted ? "Registration Submitted" : step === 0 ? "Register" : step === 1 ? getRegTypeLabel() : step === 2 ? (
+                    <>Badge Photo <span className="font-normal opacity-60 text-base">(optional)</span></>
+                  ) : "Review & Submit"}
             </h2>
             {mode === "register" && !submitted && step === 0 && (
               <button
@@ -554,6 +626,28 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
                 Your registration as a <span className="text-white font-semibold">{getRegTypeLabel()}</span>
                 {regType === "team" && competition && <> for <span className="text-white font-semibold">{getCompetitionLabel()}</span></>} has been submitted. We'll be in touch at your provided email address.
               </p>
+
+              {/* The badge, ready to save and share. Shown as soon as it renders,
+                  independently of whether the email has gone out yet. */}
+              {badge && (
+                <div className="mb-6">
+                  <img
+                    src={badge}
+                    alt="Your SRC 2026 badge"
+                    className="w-full max-w-md mx-auto rounded-xl"
+                    style={{ border: `1px solid ${TEAL}30` }}
+                  />
+                  <button
+                    type="button"
+                    onClick={downloadBadge}
+                    className="mt-4 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                    style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}35` }}
+                  >
+                    <Download className="w-4 h-4" style={{ color: TEAL }} /> Download badge
+                  </button>
+                </div>
+              )}
+
               {emailSent === null ? (
                 <div className="max-w-sm mx-auto">
                   <div
@@ -572,8 +666,8 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
                     <Mail className="w-4 h-4" /> Confirmation sent to {formData.email}
                   </div>
                   <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-                    Open it to confirm the name on your badge and add a photo. If it
-                    hasn't arrived in a minute or two, check your spam folder.
+                    Your badge is attached to it too. If it hasn't arrived in a minute
+                    or two, check your spam folder.
                   </p>
                 </div>
               ) : (
@@ -704,13 +798,67 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
                       </div>
                     ))}
                   </div>
+
                 </div>
               )}
             </div>
           )}
 
-          {/* STEP 2 — REVIEW */}
+          {/* STEP 2 — BADGE PHOTO */}
           {mode === "register" && !submitted && step === 2 && (
+            <div className="reg-step">
+              <div className="flex flex-col items-center text-center">
+                <div
+                  className={`reg-avatar ${photo ? "reg-avatar-filled" : ""}`}
+                  onClick={() => photoInputRef.current?.click()}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => { if (e.key === "Enter" || e.key === " ") photoInputRef.current?.click(); }}
+                  aria-label="Choose a badge photo"
+                >
+                  {photo
+                    ? <img src={photo} alt="" className="w-full h-full object-cover" />
+                    : <User className="w-12 h-12" style={{ color: `${TEAL}70` }} />}
+                </div>
+
+                <div className="flex items-center gap-3 mt-6 flex-wrap justify-center">
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors"
+                    style={{ background: `${TEAL}12`, border: `1px solid ${TEAL}35` }}
+                  >
+                    <Camera className="w-4 h-4" style={{ color: TEAL }} />
+                    {photo ? "Change photo" : "Upload photo"}
+                  </button>
+                  {photo && (
+                    <button
+                      type="button"
+                      onClick={removePhoto}
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-muted-foreground hover:text-white transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  )}
+                </div>
+
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept={ACCEPT_ATTRIBUTE}
+                  className="hidden"
+                  onChange={e => handlePhoto(e.target.files?.[0])}
+                />
+
+                {photoError && (
+                  <p className="text-xs mt-4" style={{ color: "#ff8a8a" }}>{photoError}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3 — REVIEW */}
+          {mode === "register" && !submitted && step === 3 && (
             <div className="reg-step">
               <div className="rounded-xl p-5 mb-5" style={{ background: "rgba(12,191,206,0.05)", border: `1px solid ${TEAL}20` }}>
                 <div className="flex items-center gap-2 mb-4">
@@ -753,10 +901,15 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
 
             {step === 1 && (regType !== "team" || competition) && (
               <CTAButton primary onClick={() => setStep(2)} className={isFormValid() ? "" : "opacity-40 pointer-events-none"}>
-                Review <ChevronRight className="w-4 h-4" />
+                Continue <ChevronRight className="w-4 h-4" />
               </CTAButton>
             )}
             {step === 2 && (
+              <CTAButton primary onClick={() => setStep(3)}>
+                {photo ? "Review" : "Skip & review"} <ChevronRight className="w-4 h-4" />
+              </CTAButton>
+            )}
+            {step === 3 && (
               <div className="flex flex-col items-end gap-2">
                 {submitError && (
                   <p className="text-xs text-right" style={{ color: "#ff8a8a" }}>{submitError}</p>
