@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, MessageSquare, Network, Presentation, Trophy, Wrench, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, MessageSquare, Presentation, Trophy, Wrench } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
@@ -47,15 +47,6 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       compId: "poster-competition",
     },
     {
-      icon: <Zap className="w-7 h-7" />,
-      title: "Youth Pulse",
-      category: "Activity",
-      desc: "An energetic program designed for younger engineering students and prospective engineers, featuring hands-on demos, mentoring sessions, and career exposure.",
-      details: ["Mentorship sessions", "Hands-on demos", "Career guidance"],
-      color: TEAL,
-      comingSoon: true,
-    },
-    {
       icon: <Wrench className="w-7 h-7" />,
       title: "Workshops",
       category: "Activity",
@@ -71,14 +62,6 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
       details: ["Expert panelists", "Q&A sessions", "Industry insights"],
       color: TEAL,
-    },
-    {
-      icon: <Network className="w-7 h-7" />,
-      title: "Networking & Industry Engagement",
-      category: "Activity",
-      desc: "Dedicated networking hours, a career fair, and structured industry engagement activities connecting students directly with potential employers and mentors.",
-      details: ["Career fair", "Company booths", "Structured networking"],
-      color: ORANGE,
     },
     {
       icon: <Lightbulb className="w-7 h-7" />,
