@@ -14,10 +14,10 @@ import aicheLogoImg from "@/assets/aichelogo.png";
 export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) => void; onRegisterClick: () => void }) {
   const aboutSectionRef = useRef<HTMLElement | null>(null);
   const stats: { to: number; suffix: string; label: string }[] = [
-    { to: 1000, suffix: "+", label: "Expected Participants" },
-    { to: 10,   suffix: "+", label: "Universities" },
-    { to: 5,    suffix: "+", label: "GCC Countries" },
-    { to: 20,   suffix: "+", label: "Activities & Events" },
+    { to: 1200, suffix: "+", label: "Expected Participants" },
+    { to: 14,   suffix: "+", label: "Universities" },
+    { to: 7,    suffix: "+", label: "GCC Countries" },
+    { to: 25,   suffix: "+", label: "Activities & Events" },
   ];
 
   const scrollToAbout = () => {
