@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, MessageSquare, Network, Presentation, Trophy, Wrench, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, MessageSquare, Network, Presentation, Trophy, Wrench, Zap } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
@@ -8,7 +8,7 @@ import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetw
 export function CompetitionsPage({ onParticipate }: { onParticipate: (competition: Competition) => void }) {
   const competitions: {
     icon: React.ReactNode; title: string; category: "Competition" | "Activity";
-    desc: string; details: string[]; color: string; compId?: Competition;
+    desc: string; details: string[]; color: string; compId?: Competition; comingSoon?: boolean;
   }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
@@ -53,6 +53,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "An energetic program designed for younger engineering students and prospective engineers, featuring hands-on demos, mentoring sessions, and career exposure.",
       details: ["Mentorship sessions", "Hands-on demos", "Career guidance"],
       color: TEAL,
+      comingSoon: true,
     },
     {
       icon: <Wrench className="w-7 h-7" />,
@@ -61,6 +62,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Practical, skills-based sessions led by industry experts and faculty. Topics range from process safety to digital engineering tools and AI in chemical engineering.",
       details: ["Industry-led sessions", "Hands-on learning", "Multiple tracks"],
       color: ORANGE,
+      comingSoon: true,
     },
     {
       icon: <MessageSquare className="w-7 h-7" />,
@@ -132,7 +134,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
 
         {/* Filter pills */}
         <div className="faq-pop flex gap-2 mb-12" style={{ animationDelay: "80ms" }}>
-          {(["All", "Competition", "Activity"] as const).map((f) => (
+          {([ "Competition", "Activity"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -161,9 +163,21 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
                       {item.icon}
                     </div>
-                    <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color === TEAL ? TEAL : ORANGE, background: `${item.color}12`, border: `1px solid ${item.color}30` }}>
-                      {item.category}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {item.compId && (
+                        <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: "#ff8a8a", background: "rgba(255,138,138,0.1)", border: "1px solid rgba(255,138,138,0.3)" }}>
+                          Closed
+                        </span>
+                      )}
+                      {item.comingSoon && (
+                        <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: "#f5c451", background: "rgba(245,196,81,0.1)", border: "1px solid rgba(245,196,81,0.3)" }}>
+                          Coming Soon
+                        </span>
+                      )}
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color === TEAL ? TEAL : ORANGE, background: `${item.color}12`, border: `1px solid ${item.color}30` }}>
+                        {item.category}
+                      </span>
+                    </div>
                   </div>
                   <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
@@ -178,19 +192,43 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
                   {/* Register / Participate → opens the registration & login modal,
                       preselecting this competition when the card is one */}
                   <div className="mt-auto pt-1">
-                    <button
-                      onClick={() => onParticipate(item.compId ?? null)}
-                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
-                      style={{
-                        color: item.color,
-                        background: `${item.color}12`,
-                        border: `1px solid ${item.color}35`,
-                      }}
-                      onMouseEnter={(e) => { e.currentTarget.style.background = `${item.color}22`; e.currentTarget.style.borderColor = `${item.color}70`; }}
-                      onMouseLeave={(e) => { e.currentTarget.style.background = `${item.color}12`; e.currentTarget.style.borderColor = `${item.color}35`; }}
-                    >
-                      {item.compId ? "Participate" : "Register"} <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {item.compId ? (
+                      <div
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold cursor-not-allowed"
+                        style={{
+                          color: "var(--muted-foreground)",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                        }}
+                      >
+                        <Lock className="w-4 h-4" /> Registration Closed
+                      </div>
+                    ) : item.comingSoon ? (
+                      <div
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold cursor-not-allowed"
+                        style={{
+                          color: "var(--muted-foreground)",
+                          background: "rgba(255,255,255,0.04)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                        }}
+                      >
+                        <Lock className="w-4 h-4" /> Coming Soon
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => onParticipate(item.compId ?? null)}
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
+                        style={{
+                          color: item.color,
+                          background: `${item.color}12`,
+                          border: `1px solid ${item.color}35`,
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = `${item.color}22`; e.currentTarget.style.borderColor = `${item.color}70`; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = `${item.color}12`; e.currentTarget.style.borderColor = `${item.color}35`; }}
+                      >
+                        Register <ArrowRight className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </InteractiveCard>
