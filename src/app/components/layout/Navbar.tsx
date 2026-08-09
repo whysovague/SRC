@@ -11,7 +11,7 @@ export const navItems: { label: string; section: Section }[] = [
   { label: "Home", section: "home" },
   { label: "Competitions", section: "competitions" },
   { label: "Agenda", section: "agenda" },
-//  { label: "Partnership", section: "partnership" },
+  { label: "Partnership", section: "partnership" },
   { label: "Contact", section: "contact" },
   { label: "FAQ", section: "faq" },
 ];
