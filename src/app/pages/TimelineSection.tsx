@@ -25,7 +25,7 @@ export function TimelineSection() {
       status: "upcoming" as const,
     },
     {
-      date: "16/8/2026",
+      date: "10/8/2026",
       event: "Visitor Registration Opens",
       desc: "General visitor registration goes live.",
       status: "upcoming" as const,

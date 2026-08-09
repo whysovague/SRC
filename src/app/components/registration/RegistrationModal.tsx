@@ -695,7 +695,6 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
           {/* STEP 0 — TYPE SELECTION */}
           {mode === "register" && !submitted && step === 0 && (
             <div className="reg-step">
-              <p className="text-muted-foreground text-sm mb-4">How would you like to participate in SRC 2026?</p>
               <div className="flex flex-wrap justify-center gap-4">
                 {REG_TYPES.map((type) => (
                   <button key={type.id} className="reg-card-type reg-card-type-lg w-full sm:w-[calc(50%-0.5rem)] max-w-sm" onClick={() => handleTypeSelect(type.id)}>
