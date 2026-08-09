@@ -79,7 +79,7 @@ export default function App() {
     competitions: <CompetitionsPage onParticipate={openRegistration} />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
-    partnership: <PartnershipPage />,
+    partnership: <PartnershipPage goToContactForm={goToContactForm} />,
     faq: <FAQPage goToContactForm={goToContactForm} />,
     contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
   };
