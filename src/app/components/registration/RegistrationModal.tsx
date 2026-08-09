@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, CheckCircle, ChevronRight, Mail, Trophy, X } from "lucide-react";
+import { ArrowRight, CheckCircle, ChevronRight, Loader2, Mail, Trophy, X } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition, RegType } from "@/app/types";
 import { CTAButton } from "@/app/components/common";
 import { submitRegistration } from "@/app/lib/firebase";
 import { findUserByEmail, createUserIfNotExists, type AppUser } from "@/app/lib/users";
+import { sendConfirmationEmail, emailConfigured } from "@/app/lib/email";
 
 import {
   REG_TYPES, COMPETITIONS, TEAM_COMPETITIONS, INDIVIDUAL_COMPETITIONS, STEP_LABELS,
@@ -31,6 +32,12 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // null until a send has been attempted. Drives the success-screen wording so
+  // the modal never claims an email went out when it did not.
+  const [emailSent, setEmailSent] = useState<boolean | null>(null);
+  // Incremented per submission and on reset, so a late-resolving email or user
+  // write can tell whether the modal it started in is still the one on screen.
+  const submissionRef = useRef(0);
   const overlayRef = useRef<HTMLDivElement>(null);
 
   // Lock body scroll when open
@@ -54,6 +61,8 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
         setSubmitted(false);
         setSubmitting(false);
         setSubmitError(null);
+        setEmailSent(null);
+        submissionRef.current++; // orphan any in-flight follow-up work
         setMode("register");
         setLoginName("");
         setLoginEmail("");
@@ -101,37 +110,64 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
   };
 
   const handleSubmit = async () => {
-  if (!regType || submitting) return;
-  setSubmitting(true);
-  setSubmitError(null);
-  
-  try {
-    await submitRegistration({
-      type: regType,
-      competition: regType === "team" ? competition : null,
-      data: formData,
-    });
+    if (!regType || submitting) return;
+    setSubmitting(true);
+    setSubmitError(null);
 
-    // Lightweight user record — one per email, never duplicated.
-    // Wrapped separately so it can never fail an otherwise-successful registration.
-    const newUserEmail = (formData.email ?? "").trim();
-    const newUserName = (formData.fullName ?? formData.contactPerson ?? formData.teamName ?? "").trim();
-    if (newUserEmail) {
-      try {
-        await createUserIfNotExists(newUserName, newUserEmail);
-      } catch (userErr) {
-        console.error("User record error:", userErr);
-      }
+    // The registration write is the only thing the user waits on. Everything
+    // after it — the user record, the confirmation email — is follow-up work
+    // that must not hold the success screen hostage, because neither has a
+    // guaranteed deadline the way submitRegistration's 10s race does.
+    try {
+      await submitRegistration({
+        type: regType,
+        competition: regType === "team" ? competition : null,
+        data: formData,
+      });
+    } catch (e: any) {
+      console.error("Firestore submit error:", e);
+      setSubmitError(e?.message || "Submission failed. Please check your connection and try again.");
+      setSubmitting(false);
+      return;
     }
 
+    // Safely stored. Show the success screen now.
     setSubmitted(true);
-  } catch (e: any) {
-    console.error("Firestore submit error:", e);
-    setSubmitError(e?.message || "Submission failed. Please check your connection and try again.");
-  } finally {
     setSubmitting(false);
-  }
-};
+
+    const newUserEmail = (formData.email ?? "").trim();
+    if (!newUserEmail) return;
+
+    const newUserName = (formData.fullName ?? formData.contactPerson ?? formData.teamName ?? "").trim();
+    const regTypeLabel = getRegTypeLabel();
+    const competitionLabel = regType === "team" ? getCompetitionLabel() : null;
+
+    // Stamp this submission so a slow response cannot write into a modal that
+    // has since been closed and reset, or into someone else's registration.
+    const ticket = ++submissionRef.current;
+    const stillCurrent = () => submissionRef.current === ticket;
+
+    try {
+      const user = await createUserIfNotExists(newUserName, newUserEmail);
+      if (!user?.profileToken) {
+        if (stillCurrent()) setEmailSent(false);
+        return;
+      }
+
+      const sent = await sendConfirmationEmail({
+        fullName: user.fullName || newUserName,
+        email: user.email,
+        registrationType: regTypeLabel,
+        competition: competitionLabel,
+        profileToken: user.profileToken,
+      });
+      if (stillCurrent()) setEmailSent(sent);
+    } catch (userErr) {
+      // Logged only — the registration itself already succeeded.
+      console.error("User record error:", userErr);
+      if (stillCurrent()) setEmailSent(false);
+    }
+  };
 
   // Lightweight login — Firestore lookup by email only. No auth, no passwords.
   const handleLogin = async () => {
@@ -518,9 +554,44 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
                 Your registration as a <span className="text-white font-semibold">{getRegTypeLabel()}</span>
                 {regType === "team" && competition && <> for <span className="text-white font-semibold">{getCompetitionLabel()}</span></>} has been submitted. We'll be in touch at your provided email address.
               </p>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm" style={{ background: `${TEAL}10`, border: `1px solid ${TEAL}25`, color: TEAL }}>
-                <Mail className="w-4 h-4" /> Confirmation sent to {formData.email || formData.leaderEmail}
-              </div>
+              {emailSent === null ? (
+                <div className="max-w-sm mx-auto">
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                    style={{ background: `${TEAL}10`, border: `1px solid ${TEAL}25`, color: TEAL }}
+                  >
+                    <Loader2 className="w-4 h-4 animate-spin" /> Sending your confirmation…
+                  </div>
+                </div>
+              ) : emailSent === true ? (
+                <div className="max-w-sm mx-auto">
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                    style={{ background: `${TEAL}10`, border: `1px solid ${TEAL}25`, color: TEAL }}
+                  >
+                    <Mail className="w-4 h-4" /> Confirmation sent to {formData.email}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                    Open it to confirm the name on your badge and add a photo. If it
+                    hasn't arrived in a minute or two, check your spam folder.
+                  </p>
+                </div>
+              ) : (
+                <div className="max-w-sm mx-auto">
+                  <div
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                    style={{ background: `${ORANGE}10`, border: `1px solid ${ORANGE}25`, color: ORANGE }}
+                  >
+                    <Mail className="w-4 h-4" /> Confirmation email pending
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                    {emailConfigured
+                      ? "Your registration is saved, but we couldn't send the confirmation email just now. Our team will follow up at "
+                      : "Your registration is saved. Our team will follow up at "}
+                    <span className="text-white">{formData.email}</span>.
+                  </p>
+                </div>
+              )}
               <div className="mt-8">
                 <CTAButton primary onClick={onClose}>Close</CTAButton>
               </div>
@@ -531,9 +602,9 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
           {mode === "register" && !submitted && step === 0 && (
             <div className="reg-step">
               <p className="text-muted-foreground text-sm mb-4">How would you like to participate in SRC 2026?</p>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {REG_TYPES.map((type) => (
-                  <button key={type.id} className="reg-card-type reg-card-type-lg" onClick={() => handleTypeSelect(type.id)}>
+                  <button key={type.id} className="reg-card-type reg-card-type-lg w-full sm:w-[calc(50%-0.5rem)] max-w-sm" onClick={() => handleTypeSelect(type.id)}>
                     <div className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${type.color}15`, color: type.color }}>
                       {type.icon}
                     </div>

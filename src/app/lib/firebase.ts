@@ -5,9 +5,6 @@ import {
   addDoc,
   collection,
   serverTimestamp,
-  getDocs,
-  query,
-  where,
 } from "firebase/firestore";
 
 import {
@@ -103,36 +100,17 @@ export async function submitRegistration(payload: RegistrationPayload) {
     )
   );
 
-  const registrationPromise = (async () => {
-    // التسجيل الحالي (كما هو)
-    const registration = await addDoc(
-      collection(db, "registrations"),
-      docData
-    );
-
-    // إضافة المستخدم إلى Collection users إذا لم يكن موجودًا
-    const email = cleanData.email?.trim().toLowerCase();
-    const fullName = cleanData.fullName?.trim();
-
-    if (email && fullName) {
-      const existingUser = await getDocs(
-        query(
-          collection(db, "users"),
-          where("email", "==", email)
-        )
-      );
-
-      if (existingUser.empty) {
-        await addDoc(collection(db, "users"), {
-          fullName,
-          email,
-          createdAt: serverTimestamp(),
-        });
-      }
-    }
-
-    return registration;
-  })();
+  // التسجيل الحالي (كما هو)
+  //
+  // This used to also create the matching `users` document. That is now done
+  // by createUserIfNotExists in lib/users.ts, which the registration modal
+  // calls straight after this resolves — one owner for the collection.
+  //
+  // The duplicate was actively harmful once profile tokens arrived: it wrote a
+  // user document with no profileToken, which the very next call then had to
+  // find and patch. It also skipped partner and team registrations, whose name
+  // lives in contactPerson / teamName rather than fullName.
+  const registrationPromise = addDoc(collection(db, "registrations"), docData);
 
   return Promise.race([
     registrationPromise,

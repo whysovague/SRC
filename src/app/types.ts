@@ -8,7 +8,10 @@ export type Section =
   | "home" | "competitions"
   | "agenda"
   | "partnership"
-  | "faq" | "contact";
+  | "faq" | "contact"
+  // Reached from the confirmation email rather than the nav —
+  // see pages/CompleteProfilePage.tsx.
+  | "complete-profile";
 
 /** Which track a visitor registers under in the registration modal. */
 export type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;

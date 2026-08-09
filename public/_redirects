@@ -1,0 +1,19 @@
+# Netlify SPA fallback.
+#
+# This site uses real URLs (/faq, /agenda, /complete-profile) resolved by
+# React Router in the browser. Without this rule the host looks for a file at
+# that path, doesn't find one, and returns 404 — which breaks page refreshes
+# and, more importantly, the "Complete my profile" link in every confirmation
+# email, since that link opens a deep URL directly from the inbox.
+#
+# Vite copies everything in public/ to dist/, so this ends up at dist/_redirects
+# where Netlify picks it up.
+#
+# Not on Netlify? Delete this file and use the equivalent for your host:
+#   Vercel       - vercel.json in the repo root (included)
+#   Nginx        - try_files $uri $uri/ /index.html;
+#   Apache       - .htaccess with FallbackResource /index.html
+#   GitHub Pages - copy dist/index.html to dist/404.html after building
+#   Cloudflare   - a _redirects file works there too, same syntax
+
+/*    /index.html   200

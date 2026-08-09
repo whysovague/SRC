@@ -9,6 +9,7 @@ import { FAQPage } from "./pages/FAQPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AgendaPage, AgendaComingSoon, AGENDA_LIVE } from "./pages/AgendaPage";
 import { PartnershipPage } from "./pages/PartnershipPage";
+import { CompleteProfilePage } from "./pages/CompleteProfilePage";
 import { RegistrationModal } from "./components/registration/RegistrationModal";
 import { Navbar } from "./components/layout/Navbar";
 import { Footer } from "./components/layout/Footer";
@@ -60,6 +61,13 @@ export default function App() {
     try { localStorage.removeItem(USER_STORAGE_KEY); } catch { /* ignore */ }
   };
 
+  // Saving the badge profile updates the header name straight away, but only
+  // for the person already signed in — clicking an emailed link for someone
+  // else's registration must not log you in as them.
+  const handleProfileSaved = (user: AppUser) => {
+    if (currentUser?.id === user.id) handleLoginSuccess(user);
+  };
+
   const [contactFocus, setContactFocus] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +90,13 @@ export default function App() {
     partnership: <PartnershipPage goToContactForm={goToContactForm} />,
     faq: <FAQPage goToContactForm={goToContactForm} />,
     contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
+    "complete-profile": (
+      <CompleteProfilePage
+        currentUser={currentUser}
+        onProfileSaved={handleProfileSaved}
+        setSection={setSection}
+      />
+    ),
   };
 
   return (

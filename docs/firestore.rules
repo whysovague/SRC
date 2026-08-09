@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Conference registrations ───────────────────────────────────────────
+    // Unchanged from the original rules: write-only from the client, with the
+    // shape validated on create. Nothing may read them back.
+    match /registrations/{document} {
+      allow create: if request.resource.data.type in [
+        'participant',
+        'team',
+        'speaker',
+        'volunteer',
+        'partner'
+      ]
+      && request.resource.data.status == 'pending'
+      && request.resource.data.data is map;
+      allow read, update, delete: if false;
+    }
+
+    // ─── Lightweight login users + badge profile ────────────────────────────
+    // `read: if true` is inherited from the original rules and is required by
+    // the current design: login looks a user up by email, and the profile page
+    // looks one up by token, both unauthenticated from the browser. It also
+    // means anyone can list every registrant's name and email. Fixing that
+    // needs Firebase Auth or a Cloud Function — see EMAIL_SETUP.md.
+    match /users/{userId} {
+      allow create: if true;
+      allow read: if true;
+      allow delete: if false;
+
+      // Update is what the badge-profile flow needs, and what the original
+      // rules blocked outright. Only these five fields may ever change, and
+      // each is validated only when it is actually part of the write — a
+      // profileToken backfill on an older document must not be rejected for
+      // having no fullName.
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['fullName', 'photoDataUrl', 'profileComplete',
+                      'profileUpdatedAt', 'profileToken'])
+
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['fullName'])
+            || (request.resource.data.fullName is string
+                && request.resource.data.fullName.size() > 1
+                && request.resource.data.fullName.size() <= 120))
+
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['photoDataUrl'])
+            || (request.resource.data.photoDataUrl is string
+                && request.resource.data.photoDataUrl.size() <= 700000))
+
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['profileComplete'])
+            || request.resource.data.profileComplete is bool)
+
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['profileToken'])
+            || (request.resource.data.profileToken is string
+                && request.resource.data.profileToken.size() <= 64));
+    }
+  }
+}

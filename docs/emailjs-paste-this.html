@@ -1,0 +1,175 @@
+<!-- Preheader: the grey preview line in the inbox list. Hidden in the body. -->
+  <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">
+    Your place at {{event_name}} is confirmed — {{event_dates}}, {{event_location}}. One step left: confirm the name on your badge.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#07111e;margin:0;padding:0;">
+    <tr>
+      <td align="center" style="padding:32px 12px;">
+
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#0d1e30;border:1px solid rgba(12,191,206,0.25);border-radius:16px;overflow:hidden;">
+
+          <!-- ── Header ─────────────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:32px 32px 8px 32px;border-top:3px solid #0cbfce;">
+              <p style="margin:0 0 6px 0;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#0cbfce;">
+                {{event_name}}
+              </p>
+              <h1 style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:bold;color:#ffffff;">
+                You're registered
+              </h1>
+            </td>
+          </tr>
+
+          <!-- ── Intro ──────────────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:16px 32px 0 32px;">
+              <p style="margin:0 0 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
+                Hi {{to_name}},
+              </p>
+              <p style="margin:0 0 24px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
+                Your registration for the <strong style="color:#ffffff;">{{event_full_name}}</strong> is confirmed. We're looking forward to seeing you at {{event_venue}}.
+              </p>
+            </td>
+          </tr>
+
+          <!-- ── Event facts ────────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:rgba(12,191,206,0.06);border:1px solid rgba(12,191,206,0.2);border-radius:12px;">
+                <tr>
+                  <td style="padding:20px 22px;">
+
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+                          Dates
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 18px 0;font-family:Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;color:#ffffff;">
+                          {{event_dates}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 10px 0;border-top:1px solid rgba(255,255,255,0.08);"></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+                          Location
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 4px 0;font-family:Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;color:#ffffff;">
+                          {{event_venue}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 18px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#c3cedb;">
+                          {{event_location}}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 10px 0;border-top:1px solid rgba(255,255,255,0.08);"></td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+                          Doors open
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#e87c2a;">
+                          {{event_doors}}
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── Their details ──────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:24px 32px 0 32px;">
+              <p style="margin:0 0 12px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+                Your registration
+              </p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Name</td>
+                  <td align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{to_name}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Email</td>
+                  <td align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_email}}</td>
+                </tr>
+                <tr>
+                  <td style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Type</td>
+                  <td align="right" style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_type}}</td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── Call to action ─────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:32px 32px 0 32px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:rgba(232,124,42,0.08);border:1px solid rgba(232,124,42,0.28);border-radius:12px;">
+                <tr>
+                  <td style="padding:22px;" align="center">
+                    <p style="margin:0 0 8px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;">
+                      One step left
+                    </p>
+                    <p style="margin:0 0 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#c3cedb;">
+                      Confirm the name we print on your badge, and add a photo if you'd like one on it. It takes under a minute.
+                    </p>
+
+                    <!-- Bulletproof button: VML for Outlook, anchor everywhere else -->
+                    <!--[if mso]>
+                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                                 href="{{profile_url}}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="26%"
+                                 stroke="f" fillcolor="#0cbfce">
+                      <w:anchorlock/>
+                      <center style="color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;">
+                        Complete my profile
+                      </center>
+                    </v:roundrect>
+                    <![endif]-->
+                    <!--[if !mso]><!-- -->
+                    <a href="{{profile_url}}"
+                       style="display:inline-block;background-color:#0cbfce;color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;">
+                      Complete my profile
+                    </a>
+                    <!--<![endif]-->
+
+                    <p style="margin:18px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.6;color:#7b8a9c;">
+                      Button not working? Copy this link into your browser:<br>
+                      <a href="{{profile_url}}" style="color:#0cbfce;word-break:break-all;text-decoration:underline;">{{profile_url}}</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- ── Footer ─────────────────────────────────────────────────── -->
+          <tr>
+            <td style="padding:28px 32px 32px 32px;">
+              <p style="margin:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.65;color:#7b8a9c;">
+                Questions? Reply to this email or write to
+                <a href="mailto:{{support_email}}" style="color:#0cbfce;text-decoration:underline;">{{support_email}}</a>.
+              </p>
+              <p style="margin:16px 0 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.6;color:#5c6b7d;">
+                {{event_full_name}} · Hosted by KFUPM · AIChE Student Chapter<br>
+                This link is personal to you — please don't forward it.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
