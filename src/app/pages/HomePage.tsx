@@ -7,7 +7,7 @@ import { Divider, GradientEyebrow, CTAButton, RevealOnScroll, InteractiveCard, M
 import { HeroLogo } from "@/app/components/hero/HeroLogo";
 import { CountdownTimer } from "@/app/components/hero/CountdownTimer";
 import { TimelineSection } from "./TimelineSection";
-import kfupmLogoImg from "@/assets/kfupm-logo-png_seeklogo-643173.png";
+import kfupmLogoImg from "@/assets/Full Stacked - negative.png";
 import aicheLogoImg from "@/assets/aichelogo.png";
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
@@ -16,7 +16,7 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
   const stats: { to: number; suffix: string; label: string }[] = [
     { to: 1200, suffix: "+", label: "Expected Participants" },
     { to: 14,   suffix: "+", label: "Universities" },
-    { to: 7,    suffix: "+", label: "GCC Countries" },
+    { to: 7,    suffix: "+", label: "Countries" },
     { to: 25,   suffix: "+", label: "Activities & Events" },
   ];
 
