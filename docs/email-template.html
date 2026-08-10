@@ -4,11 +4,24 @@
   Paste the contents of <body> into the EmailJS template editor's HTML view
   (Email Templates -> your template -> "Code" / "</>" tab).
 
-  In the template SETTINGS tab, set:
+  In the template CONTENT tab's right-hand panel, set:
     To Email  :  {{to_email}}
-    Subject   :  You're registered for SRC 2026 — confirm your badge
+    Subject   :  You're registered for SRC 2026 — here's your badge
     From Name :  SRC 2026
+    From Email:  leave "Use Default Email Address" ticked
     Reply To  :  aiche@kfupm.edu.sa
+
+  In the ATTACHMENTS tab, add ONE Variable Attachment:
+    Parameter Name :  badge          <- must be exactly this
+    Filename       :  {{badge_filename}}
+    Content Type   :  Image (JPEG)
+
+  The <img src="cid:badge"> below renders that same attachment inline. If the
+  parameter name does not match, EmailJS treats the base64 as ordinary text and
+  rejects the send with "maximum allowed variables size is 50Kb" — which reads
+  like a size problem but is really a naming one.
+
+  Attachments require the EmailJS Personal plan ($9/mo). The free tier has none.
 
   Variables used (all supplied by src/app/lib/email.ts):
     {{to_name}}          Registrant's name
@@ -21,31 +34,66 @@
     {{event_venue}}      "King Fahd University of Petroleum & Minerals"
     {{event_doors}}      "8:30 AM (AST), Monday 31 August"
     {{support_email}}    "aiche@kfupm.edu.sa"
-    {{profile_url}}      Personal link to /complete-profile?t=<token>
+    {{site_url}}         "https://srcsa26.com"
+    {{badge_filename}}   e.g. "src-2026-badge-faisal-alqahtani.jpg"
+    badge                the attachment itself (not printed as text)
 
-  Built with tables and inline styles on purpose — Outlook and Gmail strip
-  <style> blocks, flexbox and grid.
+  Built with tables and inline styles on purpose — most clients strip flexbox
+  and grid. The one <style> block is only for dark mode; every colour is also
+  set inline, so stripping it degrades gracefully rather than breaking.
 -->
 <body style="margin:0;padding:0;background-color:#07111e;">
 
+  <!--
+    Dark-mode handling.
+
+    iOS Mail, Apple Mail and Outlook auto-invert emails that do not declare a
+    colour scheme. Because this email is ALREADY dark, that inversion flips it
+    to light and wrecks it — dark text on a pale blue card.
+
+    Declaring `color-scheme` tells those clients "this email handles both modes
+    itself, leave it alone". Normally it belongs in <head>, which EmailJS does
+    not expose — but Apple Mail parses <style> wherever it appears, so putting
+    it at the top of the body works in practice. The media query below then
+    re-asserts the palette for clients that invert anyway.
+
+    Outlook.com strips <style> entirely and will still invert. There is no fix
+    for that one from inside the body; it is a known limit of HTML email.
+  -->
+  <style>
+    :root { color-scheme: light dark; supported-color-schemes: light dark; }
+
+    @media (prefers-color-scheme: dark) {
+      .src-bg    { background-color: #07111e !important; }
+      .src-card  { background-color: #0d1e30 !important; }
+      .src-panel { background-color: #0e2233 !important; }
+      .src-white { color: #ffffff !important; }
+      .src-body  { color: #c3cedb !important; }
+      .src-muted { color: #7b8a9c !important; }
+      .src-dim   { color: #5c6b7d !important; }
+      .src-teal  { color: #0cbfce !important; }
+      .src-cta   { background-color: #0cbfce !important; color: #07111e !important; }
+    }
+  </style>
+
   <!-- Preheader: the grey preview line in the inbox list. Hidden in the body. -->
   <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">
-    Your place at {{event_name}} is confirmed — {{event_dates}}, {{event_location}}. One step left: confirm the name on your badge.
+    Your place at {{event_name}} is confirmed — {{event_dates}}, {{event_location}}. Your badge is attached, ready to share.
   </div>
 
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#07111e;margin:0;padding:0;">
+  <table role="presentation" class="src-bg" bgcolor="#07111e" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#07111e;margin:0;padding:0;">
     <tr>
       <td align="center" style="padding:32px 12px;">
 
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#0d1e30;border:1px solid rgba(12,191,206,0.25);border-radius:16px;overflow:hidden;">
+        <table role="presentation" class="src-card" bgcolor="#0d1e30" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;background-color:#0d1e30;border:1px solid rgba(12,191,206,0.25);border-radius:16px;overflow:hidden;">
 
           <!-- ── Header ─────────────────────────────────────────────────── -->
           <tr>
             <td style="padding:32px 32px 8px 32px;border-top:3px solid #0cbfce;">
-              <p style="margin:0 0 6px 0;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#0cbfce;">
+              <p class="src-teal" style="margin:0 0 6px 0;font-family:'Courier New',Courier,monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#0cbfce;">
                 {{event_name}}
               </p>
-              <h1 style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:bold;color:#ffffff;">
+              <h1 class="src-white" style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:26px;line-height:1.25;font-weight:bold;color:#ffffff;">
                 You're registered
               </h1>
             </td>
@@ -54,66 +102,32 @@
           <!-- ── Intro ──────────────────────────────────────────────────── -->
           <tr>
             <td style="padding:16px 32px 0 32px;">
-              <p style="margin:0 0 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
+              <p class="src-body" style="margin:0 0 16px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
                 Hi {{to_name}},
               </p>
-              <p style="margin:0 0 24px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
-                Your registration for the <strong style="color:#ffffff;">{{event_full_name}}</strong> is confirmed. We're looking forward to seeing you at {{event_venue}}.
+              <p class="src-body" style="margin:0 0 24px 0;font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.65;color:#c3cedb;">
+                Your registration for the <strong class="src-white" style="color:#ffffff;">{{event_full_name}}</strong> is confirmed. We're looking forward to seeing you at {{event_venue}}.
               </p>
             </td>
           </tr>
 
           <!-- ── Event facts ────────────────────────────────────────────── -->
+          <!-- Deliberately kept as text even though the badge image shows the
+               same thing: Outlook and most corporate gateways block images by
+               default, and an image must never be the only place the date and
+               venue appear. Trimmed to one line so it does not read as a
+               repeat of the badge sitting just below it. -->
           <tr>
             <td style="padding:0 32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:rgba(12,191,206,0.06);border:1px solid rgba(12,191,206,0.2);border-radius:12px;">
+              <table role="presentation" class="src-panel" bgcolor="#0e2233" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:rgba(12,191,206,0.06);border:1px solid rgba(12,191,206,0.2);border-radius:12px;">
                 <tr>
-                  <td style="padding:20px 22px;">
-
-                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-                      <tr>
-                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
-                          Dates
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 18px 0;font-family:Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;color:#ffffff;">
-                          {{event_dates}}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 10px 0;border-top:1px solid rgba(255,255,255,0.08);"></td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
-                          Location
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 4px 0;font-family:Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;color:#ffffff;">
-                          {{event_venue}}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 18px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#c3cedb;">
-                          {{event_location}}
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 10px 0;border-top:1px solid rgba(255,255,255,0.08);"></td>
-                      </tr>
-                      <tr>
-                        <td style="padding:0 0 10px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
-                          Doors open
-                        </td>
-                      </tr>
-                      <tr>
-                        <td style="font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;color:#e87c2a;">
-                          {{event_doors}}
-                        </td>
-                      </tr>
-                    </table>
-
+                  <td style="padding:18px 22px;">
+                    <p class="src-white" style="margin:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:17px;font-weight:bold;color:#ffffff;">
+                      {{event_dates}}
+                    </p>
+                    <p class="src-body" style="margin:0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#c3cedb;">
+                      {{event_venue_line}}
+                    </p>
                   </td>
                 </tr>
               </table>
@@ -123,77 +137,70 @@
           <!-- ── Their details ──────────────────────────────────────────── -->
           <tr>
             <td style="padding:24px 32px 0 32px;">
-              <p style="margin:0 0 12px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+              <p class="src-muted" style="margin:0 0 12px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
                 Your registration
               </p>
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Name</td>
-                  <td align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{to_name}}</td>
+                  <td class="src-muted" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Name</td>
+                  <td class="src-white" align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{to_name}}</td>
                 </tr>
                 <tr>
-                  <td style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Email</td>
-                  <td align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_email}}</td>
+                  <td class="src-muted" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Email</td>
+                  <td class="src-white" align="right" style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_email}}</td>
                 </tr>
                 <tr>
-                  <td style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Type</td>
-                  <td align="right" style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_type}}</td>
+                  <td class="src-muted" style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;color:#7b8a9c;">Type</td>
+                  <td class="src-white" align="right" style="padding:9px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;font-weight:bold;color:#ffffff;">{{reg_type}}</td>
                 </tr>
               </table>
             </td>
           </tr>
 
-          <!-- ── Call to action ─────────────────────────────────────────── -->
+          <!-- ── The badge ──────────────────────────────────────────────── -->
+          <!-- cid:badge refers to the Variable Attachment configured in the
+               template's Attachments tab. The parameter name there, the CID
+               here, and BADGE_PARAM in src/app/lib/email.ts must all be the
+               literal string "badge". -->
           <tr>
-            <td style="padding:32px 32px 0 32px;">
-              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:rgba(232,124,42,0.08);border:1px solid rgba(232,124,42,0.28);border-radius:12px;">
-                <tr>
-                  <td style="padding:22px;" align="center">
-                    <p style="margin:0 0 8px 0;font-family:Helvetica,Arial,sans-serif;font-size:16px;font-weight:bold;color:#ffffff;">
-                      One step left
-                    </p>
-                    <p style="margin:0 0 20px 0;font-family:Helvetica,Arial,sans-serif;font-size:14px;line-height:1.6;color:#c3cedb;">
-                      Confirm the name we print on your badge, and add a photo if you'd like one on it. It takes under a minute.
-                    </p>
+            <td style="padding:32px 32px 0 32px;" align="center">
+              <p class="src-muted" style="margin:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#7b8a9c;">
+                Your badge
+              </p>
+              <img src="cid:badge" alt="See you in Dhahran — {{to_name}}, SRC 2026"
+                   width="496"
+                   style="display:block;width:100%;max-width:496px;height:auto;border-radius:12px;border:1px solid rgba(12,191,206,0.25);">
+            </td>
+          </tr>
 
-                    <!-- Bulletproof button: VML for Outlook, anchor everywhere else -->
-                    <!--[if mso]>
-                    <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
-                                 href="{{profile_url}}" style="height:46px;v-text-anchor:middle;width:260px;" arcsize="26%"
-                                 stroke="f" fillcolor="#0cbfce">
-                      <w:anchorlock/>
-                      <center style="color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;">
-                        Complete my profile
-                      </center>
-                    </v:roundrect>
-                    <![endif]-->
-                    <!--[if !mso]><!-- -->
-                    <a href="{{profile_url}}"
-                       style="display:inline-block;background-color:#0cbfce;color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;">
-                      Complete my profile
-                    </a>
-                    <!--<![endif]-->
-
-                    <p style="margin:18px 0 0 0;font-family:Helvetica,Arial,sans-serif;font-size:12px;line-height:1.6;color:#7b8a9c;">
-                      Button not working? Copy this link into your browser:<br>
-                      <a href="{{profile_url}}" style="color:#0cbfce;word-break:break-all;text-decoration:underline;">{{profile_url}}</a>
-                    </p>
-                  </td>
-                </tr>
-              </table>
+          <!-- ── Back to the site ───────────────────────────────────────── -->
+          <tr>
+            <td style="padding:28px 32px 0 32px;" align="center">
+              <!--[if mso]>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word"
+                           href="{{site_url}}" style="height:46px;v-text-anchor:middle;width:230px;" arcsize="26%"
+                           stroke="f" fillcolor="#0cbfce">
+                <w:anchorlock/>
+                <center style="color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;">
+                  Visit the site
+                </center>
+              </v:roundrect>
+              <![endif]-->
+              <!--[if !mso]><!-- -->
+              <a class="src-cta" href="{{site_url}}"
+                 style="display:inline-block;background-color:#0cbfce;color:#07111e;font-family:Helvetica,Arial,sans-serif;font-size:15px;font-weight:bold;text-decoration:none;padding:14px 32px;border-radius:12px;">
+                Visit the site
+              </a>
+              <!--<![endif]-->
             </td>
           </tr>
 
           <!-- ── Footer ─────────────────────────────────────────────────── -->
           <tr>
             <td style="padding:28px 32px 32px 32px;">
-              <p style="margin:0 0 6px 0;font-family:Helvetica,Arial,sans-serif;font-size:13px;line-height:1.65;color:#7b8a9c;">
-                Questions? Reply to this email or write to
-                <a href="mailto:{{support_email}}" style="color:#0cbfce;text-decoration:underline;">{{support_email}}</a>.
-              </p>
-              <p style="margin:16px 0 0 0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.6;color:#5c6b7d;">
+              <p class="src-dim" style="margin:0;padding-top:16px;border-top:1px solid rgba(255,255,255,0.07);font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:1.6;color:#5c6b7d;">
                 {{event_full_name}} · Hosted by KFUPM · AIChE Student Chapter<br>
-                This link is personal to you — please don't forward it.
+                You're receiving this because you registered at {{site_url}}.
               </p>
             </td>
           </tr>

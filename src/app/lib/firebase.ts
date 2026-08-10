@@ -106,10 +106,10 @@ export async function submitRegistration(payload: RegistrationPayload) {
   // by createUserIfNotExists in lib/users.ts, which the registration modal
   // calls straight after this resolves — one owner for the collection.
   //
-  // The duplicate was actively harmful once profile tokens arrived: it wrote a
-  // user document with no profileToken, which the very next call then had to
-  // find and patch. It also skipped partner and team registrations, whose name
-  // lives in contactPerson / teamName rather than fullName.
+  // The duplicate was actively harmful: it wrote a bare user document that the
+  // very next call then had to find and patch, and it skipped partner and team
+  // registrations, whose name lives in contactPerson / teamName rather than
+  // fullName — so those people never got a users row at all.
   const registrationPromise = addDoc(collection(db, "registrations"), docData);
 
   return Promise.race([

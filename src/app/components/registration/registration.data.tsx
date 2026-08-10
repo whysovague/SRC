@@ -62,4 +62,4 @@ export const TEAM_COMPETITIONS: Record<string, { exactMembers?: number }> = {
 };
 export const INDIVIDUAL_COMPETITIONS = ["technical-presentation"];
 
-export const STEP_LABELS = ["Select Type", "Fill Information", "Review & Submit"];
+export const STEP_LABELS = ["Select Type", "Fill Information", "Badge Photo", "Review & Submit"];

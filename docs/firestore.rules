@@ -29,11 +29,17 @@ service cloud.firestore {
       allow read: if true;
       allow delete: if false;
 
-      // Update is what the badge-profile flow needs, and what the original
-      // rules blocked outright. Only these five fields may ever change, and
-      // each is validated only when it is actually part of the write — a
-      // profileToken backfill on an older document must not be rejected for
-      // having no fullName.
+      // Update is what a repeat registration needs — filling in a missing name
+      // or storing a new badge photo — and what the original rules blocked
+      // outright. Only these five fields may ever change, and each is validated
+      // only when it is actually part of the write, so a photo-only update is
+      // not rejected for having no fullName.
+      //
+      // `profileToken` and `profileComplete` are legacy: they belonged to the
+      // emailed profile page, which was replaced by collecting the name and
+      // photo during registration. Nothing writes them any more. They are left
+      // in the allow-list deliberately — permitting a field nobody writes is
+      // harmless, and removing them would mean republishing rules for no gain.
       allow update: if
         request.resource.data.diff(resource.data).affectedKeys()
             .hasOnly(['fullName', 'photoDataUrl', 'profileComplete',

@@ -1,12 +1,14 @@
-# Test plan — confirmation email & badge profile
+# Test plan — confirmation email & shareable badge
 
-Work through these in order. Tests 1–3 are the ones that matter; 4–10 are edge
-cases that are quick to check and each one has bitten a real project before.
+Work through these in order. Tests 1–4 are the ones that matter; the rest are
+edge cases that are quick to check and each one has bitten a real project before.
 
 Before starting:
 
+- EmailJS on the **Personal plan** (attachments do not exist on free)
+- The template's **Attachments** tab has a Variable Attachment named `badge`
 - Firestore rules published (`docs/firestore.rules`)
-- `.env.local` has the three `VITE_EMAILJS_*` values
+- `.env.local` has the four `VITE_*` values from `EMAIL_SETUP.md`
 - Dev server **restarted** since editing `.env.local`
 - Browser console open (F12) — most failures announce themselves there
 
@@ -15,62 +17,51 @@ Have two email addresses ready: your own, and any second one you can open
 
 ---
 
-## 1. Happy path — Visitor
-
-The main flow. If this works, the feature works.
+## 1. Happy path — Visitor, no photo
 
 **Register** → Visitor → fill in:
 
 | Field | Value |
 |---|---|
-| Full Name | `Test Visitor One` |
+| Full Name | `Faisal Alqahtani` |
 | Email | `you+src1@gmail.com` |
 | Organization | `KFUPM` |
 | Position | `Student` |
 | Country | `Saudi Arabia` |
 
-Review → Submit.
+Leave the badge photo empty. Review → Submit.
 
 **Expect:**
 
 1. "You're registered!" appears **immediately** — it must not wait on the email
-2. A teal "Sending your confirmation…" pill, which becomes "Confirmation sent to you+src1@gmail.com"
-3. Email arrives (check spam) from **SRC 2026**, dark background, teal header
-4. It shows `Test Visitor One`, `you+src1@gmail.com`, `Visitor`,
-   `31 August – 2 September 2026`, `King Fahd University of Petroleum & Minerals`,
-   `KFUPM, Dhahran, Saudi Arabia`, `8:30 AM (AST), Monday 31 August`
-5. No literal `{{...}}` anywhere in the email
-6. Firestore `users` has one new doc with `profileToken` and `profileComplete: false`
-
-**Then click "Complete my profile":**
-
-7. Lands on `/complete-profile?t=<32 hex chars>`
-8. Shows your email, the dates, the location; name prefilled with `Test Visitor One`
-9. Change the name to `Test Visitor Won`, upload a photo, Save
-10. "You're all set" with the photo shown as a circle
-11. Firestore doc now has `fullName: Test Visitor Won`, `profileComplete: true`,
-    `photoDataUrl` starting `data:image/jpeg;base64,`, and a `profileUpdatedAt`
-
-> The name **changed** between registration and profile — that is the point of
-> the page. The badge should read what they typed in step 9, not step 1.
+2. The badge renders on the success screen within a second or two, showing
+   **FAISAL** on one line and **ALQAHTANI** on the next, with the light streak
+   beneath
+3. **Download badge** saves `src-2026-badge-faisal-alqahtani.jpg`
+4. The pill changes from "Sending your confirmation…" to "Confirmation sent to…"
+5. Email arrives (check spam) with the badge **visible inline in the body**
+6. The same badge is **attached** as a downloadable `.jpg`
+7. No literal `{{...}}` anywhere in the email
 
 ---
 
-## 2. Happy path — Competition Participant
+## 2. Happy path — with a photo
 
-Checks that the competition name reaches the email, and that a different form
-shape still finds the name and email fields.
+Register as `you+src2@gmail.com`, this time uploading a clear headshot.
 
-**Register** → Competition Participant → **ChemE Jeopardy** → fill in:
+**Expect:** the badge uses the photo layout — face in the circle with the blue
+glow ring, and **FAISAL ALQAHTANI** on one line beneath it. Not the two-line
+name layout.
 
-| Field | Value |
-|---|---|
-| University Name | `KFUPM` |
-| Team Captain Name | `Test Captain` |
-| Team Captain Email | `you+src2@gmail.com` |
-| Team Captain Phone | `0500000000` |
-| Members 1–4 | `A ChemE`, `B ChemE`, `C ChemE`, `D ChemE` |
-| AIChE confirmation | ticked |
+Check the photo is **centre-cropped, not squashed**. Try a portrait phone photo
+(taller than wide) — the crop should take the middle, not letterbox it.
+
+---
+
+## 3. Competition Participant
+
+**Register** → Competition Participant → **ChemE Jeopardy** → fill in the team
+captain fields.
 
 **Expect:** the email's **Type** row reads
 
@@ -78,129 +69,117 @@ shape still finds the name and email fields.
 Competition Participant — ChemE Jeopardy
 ```
 
-not just "Competition Participant", and not with a trailing dash.
+and the badge uses the **Team Captain Name**, since that's where the name lives
+for this form.
 
 ---
 
-## 3. Repeat registration — the one the old rules broke
+## 4. Repeat registration
 
-This is the important regression test. Under the previous rules
-(`allow update: if false`) this case silently sent no email at all.
-
-Register **again** with `you+src1@gmail.com` — same address as test 1, this
-time as a Competition Participant for **Poster Competition**.
+Register **again** with `you+src1@gmail.com` — same address as test 1 — this
+time for **Poster Competition**, and upload a photo.
 
 **Expect:**
 
-- The confirmation email still sends
+- The email sends, and the badge now has the photo
 - Firestore has **one** `users` doc for that address, not two
-- Its `profileToken` is **unchanged** from test 1 — so the older emailed link
-  still works
-- `fullName` is still `Test Visitor Won` — a repeat registration must not
-  overwrite a name the person deliberately set on their profile page
-
-### 3b. A pre-existing user
-
-If your `users` collection has documents from before today, they have no
-`profileToken` at all. Register with one of those addresses.
-
-**Expect:** the email sends, and the document gains a `profileToken`. This is
-the backfill path — it is what most of your existing registrants will hit.
+- That doc's `photoDataUrl` has been **updated** to the new photo
+- Its `fullName` is unchanged — a repeat registration must not overwrite a name
+  that is already set
 
 ---
 
-## 4. Badge name is mandatory
+## 5. Long and short names
 
-On the profile page, clear the name field.
+On the success screen, check the badge for:
 
-**Expect:** "Save my profile" greys out and cannot be clicked. Type one
-character `A` — still greyed, with "Please enter your full name." underneath.
-Two characters enables it.
+| Name | Expect |
+|---|---|
+| `Abdulrahman Mohammed Al-Otaibi` | Shrinks to fit — smaller, but nothing clipped or overflowing |
+| `Zayd` | Single line, vertically centred between where the two lines would be |
+| `محمد` or any non-Latin name | See below |
 
----
-
-## 5. Photo is genuinely optional
-
-Fresh registration, open the profile link, set only a name, Save.
-
-**Expect:** saves fine. Firestore has `profileComplete: true` and no
-`photoDataUrl` (or an empty one). Nothing errors.
+Anton has no Arabic glyphs, so an Arabic name falls back to a system font and
+may look inconsistent. If registrants are likely to enter Arabic names, that
+needs a second font — raise it rather than discovering it on the day.
 
 ---
 
 ## 6. Photo rejection paths
 
-On the profile page, click Upload photo and try:
+In the registration form, click Upload photo and try:
 
 | File | Expect |
 |---|---|
 | A `.pdf` or `.txt` | Not selectable, or "That file type isn't supported." |
 | An `.svg` | Rejected — this one silently stored a broken image before it was fixed |
 | A photo over 10 MB | "That image is larger than 10 MB." |
-| A normal phone photo (3–8 MB) | Accepted, appears in the circle within a second or two |
+| A normal phone photo (3–8 MB) | Accepted, appears in the circle within a second |
 
 Then **re-select the exact same file you were just rejected for**. It must
 respond — if nothing happens at all, the file input isn't clearing.
 
-After a successful upload, check the Firestore `photoDataUrl` length: a 400×400
-JPEG should be roughly **30,000–80,000 characters**. If it is 6 characters
-(`data:,`) something is broken. If it is over 700,000 the write will fail.
+---
+
+## 7. Attachment size
+
+In Firestore, check a `photoDataUrl` after a photo registration: a 400×400 JPEG
+should be roughly **30,000–80,000 characters**. If it is 6 characters
+(`data:,`) something is broken.
+
+The badge itself lands around **260–300 KB base64**, well under EmailJS's
+500 KB. If you ever change the plate artwork to something busier, re-check —
+`lib/badge.ts` steps the JPEG quality down automatically, but a much heavier
+image would come out visibly softer.
 
 ---
 
-## 7. Bad token
+## 8. Badge failure must not lose the email
 
-Take a working profile URL and change the last character of the token:
+Simulate a broken badge: in DevTools → Network, block the request for
+`badge-plate*.jpg`, then register.
 
-```
-/complete-profile?t=a1b2c3...cX      <- was ...c7
-```
-
-**Expect:** "This link isn't valid" with Back to home / Contact us buttons.
-Not a crash, not a blank page, not an infinite spinner.
-
----
-
-## 8. No token at all
-
-Visit `/complete-profile` with no query string, while logged out.
-
-**Expect:** "Open the link from your email."
-
-Then log in through the modal and revisit the same URL — it should now load
-**your own** profile for editing.
+**Expect:** the registration saves, the email still sends (without the
+attachment), and the success screen simply shows no badge. A badge failure must
+never cost someone their confirmation.
 
 ---
 
 ## 9. Existing login still works
 
-The feature must not have regressed anything.
-
 - Modal → "Already registered? Log in here"
 - Enter the name and email from test 1
-- **Expect:** logs in, navbar shows "Welcome, Test Visitor Won 👋"
+- **Expect:** logs in, navbar shows "Welcome, Faisal Alqahtani 👋"
 - Log out, then try an email that was never registered → "This email is not
   registered."
+
+**No email should be sent by logging in.** If one arrives, something is wrong.
 
 ---
 
 ## 10. Slow / offline behaviour
 
-Open DevTools → Network → set throttling to **Offline**, then submit a
-registration.
+DevTools → Network → **Offline**, then submit a registration.
 
 **Expect:** an error message within about 10 seconds — *not* a button stuck on
-"Submitting…" forever. Do the same on the profile page's Save.
+"Submitting…" forever.
 
 Set it back to **Online** afterwards.
 
 ---
 
+## 11. Deployed routes
+
+After deploying, in a fresh tab:
+
+- `https://srcsa26.com/faq` → loads the FAQ, **not** a 404
+- `https://srcsa26.com/competitions` → loads, and survives a refresh
+
+If either 404s, `vercel.json` isn't in the deployed commit.
+
+---
+
 ## Watch the quota
 
-Every test above burns one of your **200** free emails, and the window does not
-reset until **9 September** — after the conference. A full pass through this
-plan costs roughly 6–8. Budget accordingly, and upgrade to the $9 Personal plan
-before registration opens publicly.
-
-Check the counter at the top of the EmailJS dashboard as you go.
+Every test above burns one of your monthly emails. A full pass costs roughly
+8–10. Check the counter at the top of the EmailJS dashboard as you go.
