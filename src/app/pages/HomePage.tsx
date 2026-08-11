@@ -182,7 +182,6 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
                     className="shrink-0 object-contain"
                     style={{
                       width: "min(46%, 200px)",
-                      filter: "brightness(0) invert(1)",
                     }}
                   />
 

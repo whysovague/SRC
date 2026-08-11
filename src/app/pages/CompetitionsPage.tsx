@@ -62,6 +62,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
       details: ["Expert panelists", "Q&A sessions", "Industry insights"],
       color: TEAL,
+      comingSoon: true,
     },
     {
       icon: <Lightbulb className="w-7 h-7" />,
@@ -70,6 +71,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Cultural tours, social events, an opening ceremony, closing gala, and more. Making SRC 2026 an unforgettable complete experience.",
       details: ["Opening ceremony", "Closing gala", "Cultural activities"],
       color: TEAL,
+      comingSoon: true,
     },
   ];
 
