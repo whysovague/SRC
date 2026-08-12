@@ -1,0 +1,7 @@
+# SRC 2026 — KFUPM AIChE Student Regional Conference
+# Everything here is public information; allow all crawlers.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://srcsa26.com/sitemap.xml

@@ -17,6 +17,49 @@ const PATH_TO_SECTION = new Map<string, Section>(
   (Object.entries(SECTION_PATHS) as [Section, string][]).map(([s, p]) => [p, s])
 );
 
+// ─── Per-page metadata ────────────────────────────────────────────────────────
+// index.html carries the metadata for the home page; App applies these when the
+// visitor navigates, so every page has its own title and description in the tab,
+// in shared links and for crawlers that render JavaScript.
+//
+// Keep "SRC", "KFUPM" and "AIChE" in every title — those are the terms people
+// search for.
+
+export const SITE_NAME = "SRC 2026";
+
+export const PAGE_META: Record<Section, { title: string; description: string }> = {
+  home: {
+    title: "SRC 2026 | AIChE Student Regional Conference at KFUPM",
+    description:
+      "SRC 2026 — the first AIChE Student Regional Conference in the GCC, hosted by the KFUPM AIChE Student Chapter in Dhahran, Saudi Arabia, August 31 – September 2, 2026.",
+  },
+  competitions: {
+    title: "Competitions & Activities | SRC 2026 KFUPM AIChE",
+    description:
+      "Chem-E-Car, ChemE Jeopardy, the Undergraduate Poster Competition and the Student Technical Presentation Competition at SRC 2026, KFUPM.",
+  },
+  agenda: {
+    title: "Agenda | SRC 2026 KFUPM AIChE",
+    description:
+      "The three-day schedule for SRC 2026 at KFUPM, Dhahran — competitions, keynote sessions, workshops and networking, August 31 to September 2, 2026.",
+  },
+  partnership: {
+    title: "Partnership & Sponsorship | SRC 2026 KFUPM AIChE",
+    description:
+      "Partner with SRC 2026 at KFUPM and reach chemical engineering students from across the GCC. Explore sponsorship packages and request a proposal.",
+  },
+  faq: {
+    title: "FAQ | SRC 2026 KFUPM AIChE",
+    description:
+      "Answers about eligibility, AIChE membership, competition rules, conference hours and registration for SRC 2026 at KFUPM.",
+  },
+  contact: {
+    title: "Contact | SRC 2026 KFUPM AIChE",
+    description:
+      "Get in touch with the SRC 2026 organizing team at the KFUPM AIChE Student Chapter, Dhahran, Saudi Arabia.",
+  },
+};
+
 export function sectionToPath(section: Section): string {
   return SECTION_PATHS[section] ?? "/";
 }

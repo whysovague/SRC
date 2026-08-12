@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import type { Section, Competition } from "./types";
-import { pathToSection, sectionToPath } from "./routes";
+import { pathToSection, sectionToPath, PAGE_META } from "./routes";
 import { HomePage } from "./pages/HomePage";
 import { CompetitionsPage } from "./pages/CompetitionsPage";
 import { FAQPage } from "./pages/FAQPage";
@@ -30,6 +30,22 @@ export default function App() {
   useEffect(() => {
     if (matched === null) navigate("/", { replace: true });
   }, [matched, navigate]);
+
+  // Give each page its own title and description. index.html covers the home
+  // page for crawlers that do not run JavaScript; this keeps the other pages
+  // correct in the tab, in shared links and for crawlers that do.
+  useEffect(() => {
+    const meta = PAGE_META[section];
+    if (!meta) return;
+    document.title = meta.title;
+    for (const selector of ['meta[name="description"]', 'meta[property="og:description"]']) {
+      document.querySelector(selector)?.setAttribute("content", meta.description);
+    }
+    document.querySelector('meta[property="og:title"]')?.setAttribute("content", meta.title);
+    const url = `${window.location.origin}${sectionToPath(section)}`;
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
+    document.querySelector('meta[property="og:url"]')?.setAttribute("content", url);
+  }, [section]);
 
   const [regModalOpen, setRegModalOpen] = useState(false);
   // Competition preselected from a Competitions-page card ("Participate")

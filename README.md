@@ -240,6 +240,34 @@ Brand colours live in two places, deliberately:
 
 Changing a brand colour usually means updating both.
 
+## 🔍 SEO & Metadata
+
+The site is set up to be found by searches like "SRC KFUPM" or "SRC AIChE".
+
+| Where | What it holds |
+|---|---|
+| `index.html` | Title, description, canonical, Open Graph / Twitter tags, and JSON-LD structured data for the home page |
+| `src/app/routes.ts` → `PAGE_META` | Per-page title and description |
+| `public/robots.txt` | Allows all crawlers, points to the sitemap |
+| `public/sitemap.xml` | The six public URLs — **keep in sync with `SECTION_PATHS`** |
+| `public/og-image.png` | 1200×630 social preview card |
+
+**How the pieces fit:** `index.html` is what a crawler sees before JavaScript runs, so it carries the home page's metadata. `App.tsx` then applies `PAGE_META[section]` on navigation, updating the title, description, canonical and `og:` tags for the other pages.
+
+The JSON-LD declares an `EducationEvent` plus the organizing `Organization`, and lists `"SRC KFUPM"` and `"SRC AIChE"` as `alternateName` values — that is what tells a search engine those phrases refer to this event.
+
+> ⚠️ Absolute URLs (`canonical`, `og:url`, `og:image`, the sitemap) are hardcoded to `https://srcsa26.com`. **If the domain changes, update `index.html` and `public/sitemap.xml`.**
+
+### After deploying
+
+1. Verify with [Google Rich Results Test](https://search.google.com/test/rich-results) and the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/).
+2. Register the site in [Google Search Console](https://search.google.com/search-console), submit `sitemap.xml`, and use "Request indexing" for the home page.
+3. Ranking for a term like "SRC KFUPM" also depends on other sites linking to you — the KFUPM and AIChE chapter pages and social profiles are the highest-value links.
+
+### Adding a page
+
+Add its entry to `PAGE_META` in `routes.ts` (TypeScript requires it) and add its `<url>` to `public/sitemap.xml`.
+
 ## 🌐 Deployment
 
 ```bash

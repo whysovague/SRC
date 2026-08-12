@@ -1,23 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!DOCTYPE html>
-  <html lang="en">
-    <head>
-      
-      <meta charset="UTF-8" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>SRC</title>
-      <link rel="icon" type="image/x-icon" href="src/assets/favicon.ico" />
-      <meta name="description" content="This platform facilitates the organization and participation in the SRC 2026-KFUPM Student Regional Conference, offering registration, event details, and partnership opportunities." />
-      <meta name="robots" content="noindex, nofollow" />
-      <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
-      
-    </head>
+    <!-- ── Primary metadata ─────────────────────────────────────────────────
+         The title carries the terms people actually search for: SRC, KFUPM
+         and AIChE. Keep those three words in it. -->
+    <title>SRC 2026 | AIChE Student Regional Conference at KFUPM</title>
+    <meta
+      name="description"
+      content="SRC 2026 — the first AIChE Student Regional Conference in the GCC, hosted by the KFUPM AIChE Student Chapter in Dhahran, Saudi Arabia, August 31 – September 2, 2026. Chem-E-Car, ChemE Jeopardy, poster and technical presentation competitions, workshops and industry networking."
+    />
+    <meta name="author" content="KFUPM AIChE Student Chapter" />
+    <meta
+      name="keywords"
+      content="SRC, SRC 2026, SRC KFUPM, SRC AIChE, AIChE KFUPM, KFUPM conference, AIChE Student Regional Conference, Chem-E-Car, ChemE Jeopardy, chemical engineering conference Saudi Arabia, Dhahran, GCC"
+    />
 
-    <body>
-      
-      <div id="root"></div>
-      <script type="module" src="/src/main.tsx"></script>
-      
-    </body>
-  </html>
-  
+    <!-- Allow indexing. NOTE: this previously read "noindex, nofollow", which
+         told every search engine to skip the site entirely. -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://srcsa26.com/" />
+
+    <link rel="icon" type="image/x-icon" href="/src/assets/favicon.ico" />
+    <meta name="theme-color" content="#07111E" />
+
+    <!-- ── Social sharing (WhatsApp, X, LinkedIn, Discord) ─────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SRC 2026 — KFUPM AIChE" />
+    <meta property="og:title" content="SRC 2026 | AIChE Student Regional Conference at KFUPM" />
+    <meta
+      property="og:description"
+      content="The first AIChE Student Regional Conference in the GCC. KFUPM, Dhahran, Saudi Arabia — August 31 to September 2, 2026."
+    />
+    <meta property="og:url" content="https://srcsa26.com/" />
+    <meta property="og:image" content="https://srcsa26.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="SRC 2026 — AIChE Student Regional Conference, KFUPM, Dhahran" />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SRC 2026 | AIChE Student Regional Conference at KFUPM" />
+    <meta
+      name="twitter:description"
+      content="The first AIChE Student Regional Conference in the GCC. KFUPM, Dhahran — August 31 to September 2, 2026."
+    />
+    <meta name="twitter:image" content="https://srcsa26.com/og-image.png" />
+
+    <!-- ── Structured data ───────────────────────────────────────────────────
+         Tells search engines this is a real event and, via alternateName,
+         that "SRC KFUPM" and "SRC AIChE" refer to it. -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://srcsa26.com/#website",
+            "url": "https://srcsa26.com/",
+            "name": "SRC 2026 — AIChE Student Regional Conference at KFUPM",
+            "alternateName": ["SRC KFUPM", "SRC AIChE", "SRC 2026", "KFUPM AIChE SRC"],
+            "inLanguage": "en"
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://srcsa26.com/#organizer",
+            "name": "KFUPM AIChE Student Chapter",
+            "alternateName": ["AIChE KFUPM", "KFUPM AIChE"],
+            "url": "https://srcsa26.com/",
+            "email": "aiche@kfupm.edu.sa",
+            "parentOrganization": {
+              "@type": "CollegeOrUniversity",
+              "name": "King Fahd University of Petroleum & Minerals",
+              "alternateName": "KFUPM"
+            },
+            "sameAs": [
+              "https://www.instagram.com/kfupm_aiche/",
+              "https://x.com/KFUPMAIChE",
+              "https://sa.linkedin.com/company/kfupm-aiche",
+              "https://youtube.com/@kfupmaiche"
+            ]
+          },
+          {
+            "@type": "EducationEvent",
+            "@id": "https://srcsa26.com/#event",
+            "name": "SRC 2026 — AIChE Student Regional Conference",
+            "alternateName": ["SRC KFUPM", "SRC AIChE", "SRC 2026 KFUPM"],
+            "description": "The first AIChE Student Regional Conference held in the GCC, hosted by the KFUPM AIChE Student Chapter. Features Chem-E-Car, ChemE Jeopardy, the Undergraduate Poster Competition and the Student Technical Presentation Competition, alongside workshops, keynote sessions and industry networking.",
+            "startDate": "2026-08-31T08:30:00+03:00",
+            "endDate": "2026-09-02T22:00:00+03:00",
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "url": "https://srcsa26.com/",
+            "image": "https://srcsa26.com/og-image.png",
+            "inLanguage": "en",
+            "isAccessibleForFree": true,
+            "organizer": { "@id": "https://srcsa26.com/#organizer" },
+            "location": {
+              "@type": "Place",
+              "name": "King Fahd University of Petroleum & Minerals (KFUPM)",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "KFUPM Campus",
+                "addressLocality": "Dhahran",
+                "addressRegion": "Eastern Province",
+                "addressCountry": "SA"
+              }
+            }
+          }
+        ]
+      }
+    </script>
+
+    <style>html, body { height: 100%; margin: 0; } #root { height: 100%; }</style>
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
