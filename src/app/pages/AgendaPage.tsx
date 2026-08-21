@@ -1,59 +1,26 @@
-import { useState } from "react";
-import { Calendar, Clock, Layers, MapPin, Trophy, Zap } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Calendar, Clock, Layers, MapPin, Zap } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import { Divider, GradientEyebrow, ComingSoonBadge, GlassCard, MoleculeNetwork } from "@/app/components/common";
 
 export type AgendaTrack = "Youth" | "Undergraduate";
-export type AgendaCat =
-  | "Main Session"
-  | "Competition"
-  | "Workshop"
-  | "Interactive"
-  | "Networking"
-  | "Logistics"
-  | "Unclassified";
-
-// Note: "Unclassified" is deliberately NOT in this array — it drives the filter
-// chips and the legend, and un-colour-coded sessions shouldn't appear in either.
-export const AGENDA_CATS: AgendaCat[] = [
-  "Main Session",
-  "Competition",
-  "Workshop",
-  "Interactive",
-  "Networking",
-  "Logistics",
-];
-
-export const AGENDA_CAT_COLOR: Record<AgendaCat, string> = {
-  "Main Session": "#A78BFA",
-  Competition: "#F2C744",
-  Workshop: "#F08A7E",
-  Interactive: "#66C95B",
-  Networking: "#2FB3F0",
-  Logistics: "#8FA3B8",
-  Unclassified: "#6B7688",
-};
-
-export const AGENDA_CAT_LABEL: Record<AgendaCat, string> = {
-  "Main Session": "Main Session",
-  Competition: "Competition",
-  Workshop: "Workshop",
-  Interactive: "Interactive",
-  Networking: "Networking",
-  Logistics: "Logistics",
-  Unclassified: "Unclassified",
-};
 
 export type AgendaItem = {
   time: string;
   start: number; // minutes from midnight — drives chronological sorting
   title: string;
   track: AgendaTrack;
-  cat: AgendaCat;
+  /** Optional — no speakers are confirmed in the spreadsheet yet, but the row
+   *  renders them, so they can be filled in per session later. */
   speakers?: string;
   note?: string;
 };
+
+// ─── Schedule data ────────────────────────────────────────────────────────────
+// Transcribed from the organising team's agenda spreadsheet. `start` exists only
+// so the two tracks interleave correctly when "Full Schedule" is selected — keep
+// it in sync with `time` if you edit a slot.
 
 export const AGENDA_DAYS: {
   id: number;
@@ -68,19 +35,20 @@ export const AGENDA_DAYS: {
     date: "August 31, 2026",
     weekday: "Monday",
     items: [
-      // ── Youth ──
-      { time: "8:30 – 9:00 AM", start: 510, title: "Registration & Check-in", track: "Youth", cat: "Logistics" },
-      { time: "9:05 – 9:30 AM", start: 545, title: "Opening Ceremony", track: "Youth", cat: "Main Session" },
-      { time: "9:40 AM – 12:10 PM", start: 580, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth", cat: "Networking", note: "Guided by ChE students" },
-      { time: "12:15 – 1:15 PM", start: 735, title: "Science Olympiad", track: "Youth", cat: "Competition", note: "Mixed teams — Youth & Undergraduate" },
-      { time: "1:30 – 2:00 PM", start: 810, title: "Intro to Chemical Engineering", track: "Youth", cat: "Workshop", speakers: "Jumanah Alhawaj, Shouq Almadani" },
-      // ── Undergraduate ──
-      { time: "1:00 – 1:15 PM", start: 780, title: "Registration & Check-in", track: "Undergraduate", cat: "Logistics" },
-      { time: "1:20 – 1:40 PM", start: 800, title: "Opening Ceremony", track: "Undergraduate", cat: "Main Session" },
-      { time: "1:45 – 2:05 PM", start: 825, title: "Keynote Speaker I", track: "Undergraduate", cat: "Main Session", speakers: "Osama Aljeraisy · Hadi Bu Saad · Ali Alsaeedi (KFUPM Alumni) · Muhammad Al-Saggaf (President)", note: "Ministry of Education (MOE)" },
-      { time: "2:25 – 5:25 PM", start: 865, title: "ChemE Jeopardy", track: "Undergraduate", cat: "Competition" },
-      { time: "5:30 – 6:10 PM", start: 1050, title: "Technical Workshop", track: "Undergraduate", cat: "Workshop", speakers: "Steven Qi, Mubarak Alshammari", note: "With Takween (تكوين)" },
-      { time: "6:15 – 8:30 PM", start: 1095, title: "Welcome Dinner", track: "Undergraduate", cat: "Logistics", note: "Outside the venue" },
+      { time: "8:30 am – 9:00 am", start: 510, title: "Registration & Check-in", track: "Youth", note: "Building 70" },
+      { time: "9:05 am – 9:30 am", start: 545, title: "Opening Ceremony", track: "Youth" },
+      { time: "9:35 am – 10:05 am", start: 575, title: "Intro to ChemE", track: "Youth" },
+      { time: "10:15 am – 12:40 pm", start: 615, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth" },
+      { time: "12:45 pm – 2:00 pm", start: 765, title: "Science Olympiad", track: "Youth" },
+      { time: "1:00 pm – 1:15 pm", start: 780, title: "Registration & Check-in", track: "Undergraduate" },
+      { time: "1:15 pm – 1:30 pm", start: 795, title: "Opening Ceremony", track: "Undergraduate" },
+      { time: "1:30 pm – 2:20 pm", start: 810, title: "Keynote Speakers", track: "Undergraduate" },
+      { time: "2:20 pm – 3:10 pm", start: 860, title: "Panel Talks", track: "Undergraduate" },
+      { time: "3:30 pm – 6:30 pm", start: 930, title: "Chem-E-Jeopardy", track: "Undergraduate" },
+      { time: "6:25 pm – 7:05 pm", start: 1105, title: "Technical Workshop (Takwin)", track: "Undergraduate" },
+      { time: "7:05 pm – 7:20 pm", start: 1145, title: "Break", track: "Undergraduate" },
+      { time: "7:20 pm – 8:20 pm", start: 1160, title: "Chem-E-Jeopardy Final", track: "Undergraduate" },
+      { time: "8:20 pm – 10:00 pm", start: 1220, title: "Welcome Dinner", track: "Undergraduate", note: "Outside the venue" },
     ],
   },
   {
@@ -89,22 +57,17 @@ export const AGENDA_DAYS: {
     date: "September 1, 2026",
     weekday: "Tuesday",
     items: [
-      // ── Youth ──
-      { time: "8:30 – 9:00 AM", start: 510, title: "Registration & Check-in", track: "Youth", cat: "Logistics" },
-      { time: "9:00 – 9:25 AM", start: 540, title: "How to Get Into Research", track: "Youth", cat: "Workshop", speakers: "Fatimah Alhassan (KFUPM)" },
-      { time: "9:45 – 11:30 AM", start: 585, title: "Youth Poster Competition", track: "Youth", cat: "Competition" },
-      { time: "11:35 AM – 1:10 PM", start: 695, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth", cat: "Networking", note: "Guided by ChE students" },
-      { time: "1:15 – 1:55 PM", start: 795, title: "Meet Our Future Engineers", track: "Youth", cat: "Networking" },
-      // ── Undergraduate ──
-      { time: "9:00 – 11:00 AM", start: 540, title: "Site Visits", track: "Undergraduate", cat: "Networking" },
-      { time: "1:00 – 1:15 PM", start: 780, title: "Registration & Check-in", track: "Undergraduate", cat: "Logistics" },
-      { time: "2:00 – 2:20 PM", start: 840, title: "Keynote Speaker II", track: "Undergraduate", cat: "Main Session", speakers: "Mohammed Alshammasi (Aramco) · Norm Glisdorf · Gaetano De Santis · Mohammed Bin Shams" },
-      { time: "2:25 – 2:55 PM", start: 865, title: "Women in ChemE", track: "Undergraduate", cat: "Unclassified", speakers: "Reem Ghanim · Raya · Elaf · Malak" },
-      { time: "3:00 – 4:30 PM", start: 900, title: "Presidents Meeting", track: "Undergraduate", cat: "Networking" },
-      { time: "3:15 – 4:00 PM", start: 915, title: "Chem-E-Car Poster Competition & Safety Inspection", track: "Undergraduate", cat: "Competition" },
-      { time: "4:05 – 4:40 PM", start: 965, title: "Poster Set-Up & Break", track: "Undergraduate", cat: "Logistics" },
-      { time: "4:45 – 7:45 PM", start: 1005, title: "Research Poster Competition", track: "Undergraduate", cat: "Competition" },
-      { time: "7:50 – 8:35 PM", start: 1190, title: "Career Workshop", track: "Undergraduate", cat: "Workshop", speakers: "Jafar Alhamad, Amal Alhersh (Forge)" },
+      { time: "8:30 am – 9:00 am", start: 510, title: "Registration & Check-in", track: "Youth" },
+      { time: "9:00 am – 9:40 am", start: 540, title: "Fresh vs Experienced Graduate Talk", track: "Youth" },
+      { time: "9:45 am – 12:15 pm", start: 585, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth" },
+      { time: "12:20 pm – 1:55 pm", start: 740, title: "Youth Poster Competition", track: "Youth" },
+      { time: "1:00 pm – 1:15 pm", start: 780, title: "Registration & Check-in", track: "Undergraduate" },
+      { time: "2:00 pm – 3:00 pm", start: 840, title: "Technical Workshop (Takwin)", track: "Undergraduate" },
+      { time: "2:00 pm – 3:15 pm", start: 840, title: "Chem-E-Car Poster Competition & Safety Inspection", track: "Undergraduate" },
+      { time: "3:15 pm – 3:45 pm", start: 915, title: "Poster Set Up & Prayer Break", track: "Undergraduate" },
+      { time: "4:00 pm – 7:00 pm", start: 960, title: "Research Poster Competition", track: "Undergraduate" },
+      { time: "7:00 pm – 7:30 pm", start: 1140, title: "Prayer Break", track: "Undergraduate" },
+      { time: "7:30 pm – 10:00 pm", start: 1170, title: "Career Workshop", track: "Undergraduate" },
     ],
   },
   {
@@ -113,42 +76,42 @@ export const AGENDA_DAYS: {
     date: "September 2, 2026",
     weekday: "Wednesday",
     items: [
-      // ── Youth ──
-      { time: "8:30 – 9:00 AM", start: 510, title: "Registration & Check-in", track: "Youth", cat: "Logistics" },
-      { time: "9:00 – 11:00 AM", start: 540, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth", cat: "Networking", note: "Guided by ChE students" },
-      { time: "11:05 – 11:40 AM", start: 665, title: "Women in STEM", track: "Youth", cat: "Main Session", speakers: "Rowa Tawfiq, Hanan Alquraish" },
-      { time: "11:45 AM – 1:00 PM", start: 705, title: "Students Visit Undergrad Research Posters", track: "Youth", cat: "Networking" },
-      { time: "1:05 – 1:45 PM", start: 785, title: "Youth Award Ceremony & Closing", track: "Youth", cat: "Main Session" },
-      // ── Undergraduate ──
-      { time: "1:00 – 1:15 PM", start: 780, title: "Registration & Check-in", track: "Undergraduate", cat: "Logistics" },
-      { time: "1:20 – 5:10 PM", start: 800, title: "Chem-E-Car Competition", track: "Undergraduate", cat: "Competition" },
-      { time: "5:10 – 5:30 PM", start: 1030, title: "Coffee Break", track: "Undergraduate", cat: "Logistics" },
-      { time: "5:30 – 7:30 PM", start: 1050, title: "Regional Student Technical Presentation Competition", track: "Undergraduate", cat: "Competition" },
-      { time: "7:35 – 9:00 PM", start: 1175, title: "Industry Roundtable", track: "Undergraduate", cat: "Main Session", speakers: "Ammar Aldubaisi · Madi Asiri · Dr. Soloman Almadi · Abdullah Fairag · Hadi Al-Qahtani · Nawaf Al-Ahmadi" },
-      { time: "9:00 – 10:00 PM", start: 1260, title: "Award Banquet", track: "Undergraduate", cat: "Main Session", note: "Building 70" },
+      { time: "8:30 am – 9:00 am", start: 510, title: "Registration & Check-in", track: "Youth" },
+      { time: "9:00 am – 9:45 am", start: 540, title: "Women in STEM", track: "Youth" },
+      { time: "9:50 am – 11:50 am", start: 590, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth" },
+      { time: "11:50 am – 1:00 pm", start: 710, title: "Students Visit Undergrad Research Posters", track: "Youth" },
+      { time: "1:00 pm – 1:15 pm", start: 780, title: "Registration & Check-in", track: "Undergraduate" },
+      { time: "1:15 pm – 2:00 pm", start: 795, title: "Award Ceremony & Closing", track: "Youth" },
+      { time: "1:20 pm – 2:20 pm", start: 800, title: "Mock Interviews", track: "Undergraduate" },
+      { time: "2:25 pm – 5:25 pm", start: 865, title: "Chem-E-Car Competition", track: "Undergraduate" },
+      { time: "4:00 pm – 7:00 pm", start: 960, title: "Regional Student Technical Presentation Competition", track: "Undergraduate" },
+      { time: "4:30 pm – 6:00 pm", start: 990, title: "International Training Program Talk", track: "Undergraduate" },
+      { time: "8:30 pm – 10:00 pm", start: 1230, title: "Award Banquet", track: "Undergraduate", note: "Building 70" },
     ],
   },
 ];
 
-export const AGENDA_ALL_DAY: { title: string; cat: AgendaCat; days: number[]; track?: AgendaTrack }[] = [
-  { title: "Sponsor Exhibition & Booths", cat: "Networking", days: [1, 2, 3] },
-  { title: "Sponsor Passport", cat: "Networking", days: [1, 2, 3] },
-  { title: "ChemE Treasure Hunt", cat: "Interactive", days: [1, 2, 3] },
-  { title: "Photobooth", cat: "Interactive", days: [1, 2, 3] },
-  { title: "Giant SRC–AIChE Letters", cat: "Interactive", days: [1, 2, 3] },
-  { title: "Gold Sponsor Showcase", cat: "Networking", days: [1] },
-  { title: "Build Your Own Tower", cat: "Interactive", days: [1], track: "Youth" },
-  { title: "Poster Engagement Game", cat: "Interactive", days: [2] },
-  { title: "Presidents Meeting (3:00 – 4:30 PM)", cat: "Unclassified", days: [2], track: "Undergraduate" },
-  { title: "Mini-Experiment Stations", cat: "Interactive", days: [2], track: "Youth" },
-  { title: "Best Moment Captured Competition", cat: "Interactive", days: [3] },
-  { title: 'Chem-E-Car "Stock Market"', cat: "Interactive", days: [3] },
+export const AGENDA_ALL_DAY: { title: string; days: number[]; time?: string }[] = [
+  // The spreadsheet's "All Day Activities" column is per-day, not per-track, so
+  // these show on both tracks. A few carry their own time — those are kept here
+  // rather than in the main table, with the time shown on the chip.
+  { title: "Sponsor Exhibition & Booths", days: [1, 2, 3] },
+  { title: "Sponsor Passport", days: [1, 2, 3] },
+  { title: "Photobooth", days: [1, 2, 3] },
+  { title: "\"Build Your Own Tower\"", days: [1] },
+  { title: "Undergrad Site Visits", days: [2], time: "9:00 – 11:00 am" },
+  { title: "Presidents Meeting", days: [2], time: "3:00 – 4:30 pm" },
+  { title: "Poster Engagement Game", days: [2] },
+  { title: "Mini-Experiment Stations (Slime)", days: [2] },
+  { title: "Best Moment Captured Competition", days: [3] },
+  { title: "Technical Workshop (Takwin)", days: [3] },
+  { title: "Activity 2", days: [3], time: "6:30 – 8:00 pm" },
 ];
 
-// ─── Agenda · Coming Soon ─────────────────────────────────────────────────────
-// The full agenda below is finished but hidden until the schedule is public.
-// Flip this to true to bring it back — nothing else needs to change.
-export const AGENDA_LIVE = false;
+// ─── Agenda visibility ────────────────────────────────────────────────────────
+// Flip to false to swap the schedule back for the "coming soon" screen —
+// nothing else needs to change.
+export const AGENDA_LIVE = true;
 
 export function AgendaComingSoon() {
   return (
@@ -266,28 +229,236 @@ export function AgendaComingSoon() {
 );
 }
 
+// ─── Day motif ────────────────────────────────────────────────────────────────
+// Linear acenes: benzene (one ring), naphthalene (two), anthracene (three).
+// Real molecules, and the ring count happens to land on the day number.
+const ACENE_R = 27;
+
+function acene(rings: number) {
+  const R = ACENE_R;
+  const dx = Math.sqrt(3) * R;
+  const hexes: string[] = [];
+  const centres: number[] = [];
+  for (let i = 0; i < rings; i++) {
+    const cx = i * dx;
+    centres.push(cx);
+    hexes.push(
+      Array.from({ length: 6 }, (_, k) => {
+        const a = (Math.PI / 180) * (30 + 60 * k);
+        return `${(cx + R * Math.cos(a)).toFixed(2)},${(R * Math.sin(a)).toFixed(2)}`;
+      }).join(" ")
+    );
+  }
+  // Radius swept by the outermost vertex as the molecule spins about its centre.
+  // The box has to reserve this much, or the rotation paints over its neighbours.
+  const mid = ((rings - 1) * dx) / 2;
+  const sweep = Math.hypot(mid + dx / 2, R / 2);
+  return { hexes, centres, span: (rings - 1) * dx, sweep };
+}
+
+// One square box for every day, sized to the biggest molecule (anthracene) at its
+// worst angle. Fixed so switching days doesn't shove the schedule up and down.
+const MOL_BOX = Math.ceil(2 * (acene(3).sweep + 3));
+
+/**
+ * The day's molecule. Drag it to spin — same trackball idiom as the hero orbit,
+ * with momentum on release easing back into a slow idle drift.
+ */
+function DayMolecule({ rings, tint }: { rings: number; tint: string }) {
+  const { hexes, centres, span } = acene(rings);
+  const mid = span / 2;
+  const gRef = useRef<SVGGElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const g = gRef.current;
+    const wrap = wrapRef.current;
+    if (!g || !wrap) return;
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    const IDLE = 0.14; // degrees per frame — slow enough to ignore, alive enough to notice
+    let angle = 0, vel = IDLE, held = false, px = 0, raf = 0;
+
+    const frame = () => {
+      if (!held) {
+        vel += (IDLE - vel) * 0.03; // momentum bleeds back to the idle drift
+        angle += vel;
+      }
+      g.setAttribute("transform", `rotate(${angle.toFixed(2)} ${mid} 0)`);
+      raf = requestAnimationFrame(frame);
+    };
+    if (reduce) g.setAttribute("transform", `rotate(0 ${mid} 0)`);
+    else raf = requestAnimationFrame(frame);
+
+    const press = (e: PointerEvent) => {
+      held = true; px = e.clientX;
+      wrap.setPointerCapture?.(e.pointerId);
+      wrap.style.cursor = "grabbing";
+    };
+    const move = (e: PointerEvent) => {
+      if (!held) return;
+      const d = (e.clientX - px) * 0.8;
+      px = e.clientX;
+      angle += d;
+      vel = d * 0.35; // remember the throw
+      g.setAttribute("transform", `rotate(${angle.toFixed(2)} ${mid} 0)`);
+    };
+    const release = () => { held = false; wrap.style.cursor = "grab"; };
+
+    wrap.addEventListener("pointerdown", press);
+    wrap.addEventListener("pointermove", move);
+    wrap.addEventListener("pointerup", release);
+    wrap.addEventListener("pointercancel", release);
+    wrap.addEventListener("pointerleave", release);
+    return () => {
+      cancelAnimationFrame(raf);
+      wrap.removeEventListener("pointerdown", press);
+      wrap.removeEventListener("pointermove", move);
+      wrap.removeEventListener("pointerup", release);
+      wrap.removeEventListener("pointercancel", release);
+      wrap.removeEventListener("pointerleave", release);
+    };
+  }, [rings, mid]);
+
+  return (
+    <div
+      ref={wrapRef}
+      className="inline-block touch-none select-none"
+      style={{ cursor: "grab" }}
+      title="Drag to spin"
+      aria-hidden
+    >
+      <svg
+        width={MOL_BOX}
+        height={MOL_BOX}
+        viewBox={`${mid - MOL_BOX / 2} ${-MOL_BOX / 2} ${MOL_BOX} ${MOL_BOX}`}
+        style={{ overflow: "hidden", display: "block" }}
+      >
+        <g ref={gRef}>
+          {hexes.map((pts, i) => (
+            <polygon key={i} points={pts} fill="none" stroke={tint} strokeWidth={1.6} strokeLinejoin="round" opacity={0.85} />
+          ))}
+          {centres.map((cx, i) => (
+            <circle key={i} cx={cx} cy={0} r={ACENE_R * 0.46} fill="none" stroke={tint} strokeWidth={1.2} opacity={0.45} />
+          ))}
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+// ─── Schedule chain ───────────────────────────────────────────────────────────
+// The spine down the left of the schedule is drawn as a skeletal formula: a
+// zig-zag carbon backbone with one atom per session. Hovering a row lights its
+// atom and vice versa, and atoms drift toward the pointer as it passes.
+const RAIL_W = 64;
+const ROW_H = 78;
+const atomX = (i: number) => (i % 2 ? 42 : 22);
+const atomY = (i: number) => i * ROW_H + ROW_H / 2;
+
+function ChainRail({
+  count, tint, hovered, onHover,
+}: { count: number; tint: string; hovered: number | null; onHover: (i: number | null) => void }) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const atomsRef = useRef<(SVGGElement | null)[]>([]);
+
+  // Pointer magnetism — atoms lean toward the cursor, strongest within ~90px.
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+
+    let raf = 0, mx = -9999, my = -9999;
+    const onMove = (e: PointerEvent) => {
+      const r = svg.getBoundingClientRect();
+      mx = e.clientX - r.left;
+      my = e.clientY - r.top;
+    };
+    const onLeave = () => { mx = -9999; my = -9999; };
+
+    const frame = () => {
+      atomsRef.current.forEach((g, i) => {
+        if (!g) return;
+        const dx = mx - atomX(i);
+        const dy = my - atomY(i);
+        const d = Math.hypot(dx, dy);
+        const pull = d < 110 ? (1 - d / 110) ** 2 * 7 : 0;
+        const tx = d ? (dx / d) * pull : 0;
+        const ty = d ? (dy / d) * pull : 0;
+        g.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+      });
+      raf = requestAnimationFrame(frame);
+    };
+    raf = requestAnimationFrame(frame);
+
+    const parent = svg.parentElement;
+    parent?.addEventListener("pointermove", onMove);
+    parent?.addEventListener("pointerleave", onLeave);
+    return () => {
+      cancelAnimationFrame(raf);
+      parent?.removeEventListener("pointermove", onMove);
+      parent?.removeEventListener("pointerleave", onLeave);
+    };
+  }, [count]);
+
+  const bonds = Array.from({ length: count }, (_, i) => `${i ? "L" : "M"} ${atomX(i)} ${atomY(i)}`).join(" ");
+
+  return (
+    <svg
+      ref={svgRef}
+      width={RAIL_W}
+      height={count * ROW_H}
+      className="hidden md:block absolute left-0 top-0"
+      style={{ overflow: "visible" }}
+    >
+      <path d={bonds} fill="none" stroke={`${tint}55`} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      {Array.from({ length: count }, (_, i) => {
+        const on = hovered === i;
+        return (
+          <g
+            key={i}
+            ref={(el) => { atomsRef.current[i] = el; }}
+            style={{ transition: "none", cursor: "pointer" }}
+            onMouseEnter={() => onHover(i)}
+            onMouseLeave={() => onHover(null)}
+          >
+            <circle cx={atomX(i)} cy={atomY(i)} r={14} fill="transparent" />
+            <circle
+              cx={atomX(i)} cy={atomY(i)} r={on ? 7 : 4.5}
+              fill={on ? tint : "#0A1626"}
+              stroke={tint}
+              strokeWidth={2}
+              style={{ transition: "r .18s ease, fill .18s ease", filter: on ? `drop-shadow(0 0 9px ${tint})` : "none" }}
+            />
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 export function AgendaPage() {
   const [day, setDay] = useState<number>(1);
-  const [track, setTrack] = useState<"All" | AgendaTrack>("All");
-  const [cat, setCat] = useState<"All" | AgendaCat>("All");
+  // Undergraduate is the default: it is the larger track and the conference's
+  // primary audience. There is no combined view — the two tracks run in
+  // parallel and interleaving them made the day harder to read, not easier.
+  const [track, setTrack] = useState<AgendaTrack>("Undergraduate");
+  // Shared between the chain and the rows so hovering either lights both.
+  const [hovered, setHovered] = useState<number | null>(null);
 
   const dayData = AGENDA_DAYS.find((d) => d.id === day) || AGENDA_DAYS[0];
 
-  const byTrack = dayData.items.filter((i) => track === "All" || i.track === track);
-  const items = byTrack
-    .filter((i) => cat === "All" || i.cat === cat)
+  const items = dayData.items
+    .filter((i) => i.track === track)
     .slice()
     .sort((a, b) => a.start - b.start);
 
-  // Day + track only 
-  const allDayForTrack = AGENDA_ALL_DAY.filter((a) => a.days.includes(day))
-    .filter((a) => track === "All" || !a.track || a.track === track);
+  const allDay = AGENDA_ALL_DAY.filter((a) => a.days.includes(day));
 
-  const allDay = allDayForTrack.filter((a) => cat === "All" || a.cat === cat);
-
+  // Youth and Undergraduate are the only distinction the schedule draws, so the
+  // track colour carries it everywhere — rail, dot and badge.
   const trackTint = (t: AgendaTrack) => (t === "Youth" ? ORANGE : TEAL);
-  const compCount = byTrack.filter((i) => i.cat === "Competition").length;
-  const firstTime = byTrack.length ? [...byTrack].sort((a, b) => a.start - b.start)[0].time.split(" – ")[0] : "—";
+  const tint = trackTint(track);
 
   return (
     <div
@@ -297,13 +468,17 @@ export function AgendaPage() {
       <style>{`
         @keyframes agSlideIn { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform: translateY(0); } }
         .ag-seg { transition: color .25s ease, background .3s cubic-bezier(.16,.84,.44,1), box-shadow .3s ease; }
-        .ag-row { animation: agSlideIn .45s cubic-bezier(.16,.84,.44,1) both; transition: background .25s ease, padding-left .25s ease; }
-        .ag-row:hover { background: rgba(12,191,206,0.07); padding-left: 26px; }
-        .ag-row-alt { background: rgba(255,255,255,0.016); }
+        .ag-node {
+          animation: agSlideIn .45s cubic-bezier(.16,.84,.44,1) both;
+          transition: background .22s ease;
+          border-left: 2px solid var(--ag-b);
+        }
+        .ag-node:hover { background: rgba(255,255,255,0.03); }
+        /* From md up the molecular chain is the rail, so the plain border goes. */
+        @media (min-width: 768px) { .ag-node { border-left: 0; } }
         .ag-daytitle { animation: agSlideIn .5s cubic-bezier(.16,.84,.44,1) both; }
         @media (prefers-reduced-motion: reduce) {
-          .ag-row, .ag-daytitle { animation: none; }
-          .ag-row:hover { padding-left: 20px; }
+          .ag-node, .ag-daytitle { animation: none; }
         }
       `}</style>
 
@@ -336,7 +511,6 @@ export function AgendaPage() {
           <div className="flex justify-center"><Divider /></div>
           <p className="text-muted-foreground max-w-2xl mx-auto mb-12 text-lg leading-relaxed">
             Three days of competitions, keynotes, workshops and networking at KFUPM.
-            Choose your track, then browse the day.
           </p>
         </div>
 
@@ -344,7 +518,7 @@ export function AgendaPage() {
         <div className="faq-pop flex justify-center mb-4" style={{ animationDelay: "60ms" }}>
           <div className="inline-flex flex-wrap justify-center gap-1 p-1.5 rounded-2xl"
             style={{ background: "rgba(13,30,48,0.6)", border: `1px solid ${TEAL}22`, backdropFilter: "blur(12px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
-            {(["All", "Youth", "Undergraduate"] as const).map((t) => {
+            {(["Youth", "Undergraduate"] as const).map((t) => {
               const on = track === t;
               return (
                 <button
@@ -362,7 +536,7 @@ export function AgendaPage() {
                     : { background: "transparent", color: "var(--muted-foreground)" }
                   }
                 >
-                  {t === "All" ? "Full Schedule" : t}
+                  {t}
                 </button>
               );
             })}
@@ -401,126 +575,65 @@ export function AgendaPage() {
           <div className="text-sm font-mono text-muted-foreground mt-3 tracking-[0.12em]">
             {dayData.weekday} · {dayData.date}
           </div>
-          <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 mt-5 text-xs font-mono text-muted-foreground">
-            <span className="inline-flex items-center gap-1.5"><Layers className="w-3 h-3" style={{ color: TEAL }} />{byTrack.length} sessions</span>
-            <span className="inline-flex items-center gap-1.5"><Trophy className="w-3 h-3" style={{ color: ORANGE }} />{compCount} competitions</span>
-            <span className="inline-flex items-center gap-1.5"><Clock className="w-3 h-3" style={{ color: TEAL }} />starts {firstTime}</span>
+          <div className="flex justify-center mt-1">
+            <DayMolecule rings={day} tint={tint} />
           </div>
         </div>
 
-        {/* Session-type filter */}
-        <div className="faq-pop flex flex-wrap justify-center gap-2 mb-8" style={{ animationDelay: "140ms" }}>
-          <button
-            onClick={() => setCat("All")}
-            className="px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all duration-200"
-            style={cat === "All"
-              ? { background: "#fff", color: "#07111E" }
-              : { background: "rgba(13,30,48,0.55)", color: "var(--muted-foreground)", border: "1px solid rgba(255,255,255,0.14)", backdropFilter: "blur(8px)" }
-            }
-          >
-            All Types
-          </button>
-          {AGENDA_CATS.map((c) => {
-            const n =
-              byTrack.filter((i) => i.cat === c).length +
-              allDayForTrack.filter((a) => a.cat === c).length;
-            const on = cat === c;
-            const col = AGENDA_CAT_COLOR[c];
-            return (
-              <button
-                key={c}
-                onClick={() => setCat(on ? "All" : c)}
-                className="px-4 py-1.5 rounded-full text-xs font-mono font-semibold transition-all duration-200 inline-flex items-center gap-2"
-                style={on
-                  ? { background: col, color: "#07111E" }
-                  : { background: "rgba(13,30,48,0.55)", color: "var(--muted-foreground)", border: `1px solid ${col}40`, backdropFilter: "blur(8px)", opacity: n === 0 ? 0.35 : 1 }
-                }
-              >
-                <span className="inline-block rounded-full" style={{ width: 7, height: 7, background: on ? "#07111E" : col }} />
-                {AGENDA_CAT_LABEL[c]}
-                <span style={{ opacity: 0.65 }}>{n}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Schedule table */}
-        <div className="faq-pop rounded-2xl overflow-hidden border" style={{
+        {/* Schedule — a skeletal-formula chain, one atom per session */}
+        <div className="faq-pop rounded-2xl border px-5 md:px-7 py-6 md:py-8" style={{
           animationDelay: "180ms",
           borderColor: "rgba(255,255,255,0.09)",
           background: "rgba(7,17,30,0.72)",
           backdropFilter: "blur(14px)",
           boxShadow: "0 30px 80px -40px rgba(0,0,0,0.9)",
         }}>
-          {/* Table header */}
-          <div className="grid md:grid-cols-[200px_1fr_200px] md:gap-4 pl-[23px] pr-5 py-3.5"
-            style={{ background: `linear-gradient(90deg, ${TEAL}, ${ORANGE})` }}>
-            <div className="inline-flex items-center gap-2 text-[11px] font-mono font-bold tracking-[0.24em] uppercase" style={{ color: "#07111E" }}>
-              <Clock className="w-3.5 h-3.5" /> Time
+          {items.length === 0 ? (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              No sessions listed for this track on this day.
             </div>
-            <div className="hidden md:block text-[11px] font-mono font-bold tracking-[0.24em] uppercase" style={{ color: "#07111E" }}>
-              Session
-            </div>
-            <div className="hidden md:block text-[11px] font-mono font-bold tracking-[0.24em] uppercase text-right" style={{ color: "#07111E" }}>
-              Track & Type
-            </div>
-          </div>
+          ) : (
+            <div className="relative" key={`${day}-${track}`}>
+              <ChainRail count={items.length} tint={tint} hovered={hovered} onHover={setHovered} />
 
-          {/* Rows */}
-          {items.length === 0 && (
-            <div className="px-6 py-16 text-center text-sm text-muted-foreground">
-              No sessions match this combination — try another track or session type.
+              {items.map((it, i) => (
+                <div
+                  key={i}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered(null)}
+                  className="ag-node md:h-[78px] flex flex-col md:flex-row md:items-center gap-1 md:gap-6 py-3 md:py-0 md:pl-[86px] pl-4"
+                  style={{
+                    animationDelay: `${Math.min(i, 12) * 45}ms`,
+                    ["--ag-b" as string]: hovered === i ? tint : `${tint}30`,
+                  } as React.CSSProperties}
+                >
+                  <div
+                    className="text-sm font-mono tracking-tight md:w-[150px] flex-shrink-0 transition-colors duration-200"
+                    style={{ color: hovered === i ? tint : "rgba(255,255,255,0.72)" }}
+                  >
+                    {it.time}
+                  </div>
+
+                  <div className="min-w-0">
+                    <h3 className="font-display font-bold text-base md:text-lg text-white leading-snug">
+                      {it.title}
+                      {it.note && (
+                        <span className="ml-2 text-xs font-normal font-mono text-muted-foreground align-middle">
+                          {it.note}
+                        </span>
+                      )}
+                    </h3>
+                    {it.speakers && (
+                      <p className="text-sm leading-relaxed mt-0.5" style={{ color: TEAL }}>{it.speakers}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
-          {items.map((it, i) => {
-            const col = AGENDA_CAT_COLOR[it.cat];
-            const tint = trackTint(it.track);
-            return (
-              <div
-                key={`${day}-${track}-${cat}-${i}`}
-                className={`ag-row grid md:grid-cols-[200px_1fr_200px] md:items-center gap-2 md:gap-4 px-5 py-4 ${i % 2 ? "ag-row-alt" : ""}`}
-                style={{
-                  borderTop: "1px solid rgba(255,255,255,0.055)",
-                  borderLeft: `3px solid ${col}`,
-                  animationDelay: `${Math.min(i, 10) * 45}ms`,
-                }}
-              >
-                <div className="inline-flex items-start gap-2.5">
-                  <span className="inline-block rounded-full flex-shrink-0 mt-[7px]"
-                    style={{ width: 7, height: 7, background: col, boxShadow: `0 0 10px ${col}99` }} />
-                  <span className="text-sm font-mono text-white leading-snug tracking-tight">{it.time}</span>
-                </div>
-
-                <div>
-                  <h3 className="font-display font-bold text-base md:text-lg text-white leading-snug">{it.title}</h3>
-                  {it.speakers && (
-                    <p className="text-sm leading-relaxed mt-1" style={{ color: TEAL }}>{it.speakers}</p>
-                  )}
-                  {it.note && (
-                    <p className="text-xs text-muted-foreground leading-relaxed mt-1 italic">{it.note}</p>
-                  )}
-                </div>
-
-                <div className="flex md:justify-end flex-wrap items-start gap-1.5 mt-1 md:mt-0">
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full whitespace-nowrap"
-                    style={{ color: tint, background: `${tint}12`, border: `1px solid ${tint}30` }}>
-                    {it.track === "Youth" ? "Youth" : "Undergrad"}
-                  </span>
-                  {it.cat !== "Unclassified" && (
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-full whitespace-nowrap"
-                      style={{ color: col, background: `${col}12`, border: `1px solid ${col}30` }}>
-                      {AGENDA_CAT_LABEL[it.cat]}
-                    </span>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* Table footer */}
-          <div className="px-5 py-3.5 text-center text-[11px] font-mono tracking-[0.2em] uppercase"
-            style={{ background: "rgba(255,255,255,0.03)", borderTop: "1px solid rgba(255,255,255,0.07)", color: "var(--muted-foreground)" }}>
+          <div className="mt-7 pt-5 text-center text-[11px] font-mono tracking-[0.2em] uppercase"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.07)", color: "var(--muted-foreground)" }}>
             <MapPin className="w-3 h-3 inline-block mr-2 -mt-0.5" style={{ color: TEAL }} />
             Location: Saudi Arabia · Dhahran · KFUPM
           </div>
@@ -538,16 +651,15 @@ export function AgendaPage() {
               </div>
               <div className="flex flex-wrap gap-2.5">
                 {allDay.map((a) => {
-                  const col = AGENDA_CAT_COLOR[a.cat];
+                  const col = ORANGE;
                   return (
                     <span key={a.title}
                       className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm text-white"
                       style={{ background: "rgba(255,255,255,0.04)", border: `1px solid ${col}33` }}>
-                      <span className="inline-block rounded-full flex-shrink-0" style={{ width: 7, height: 7, background: col }} />
                       {a.title}
-                      {a.track && (
-                        <span className="text-[11px] font-mono" style={{ color: trackTint(a.track) }}>
-                          {a.track === "Youth" ? "YOUTH" : "UNDERGRAD"}
+                      {a.time && (
+                        <span className="text-[11px] font-mono" style={{ color: "var(--muted-foreground)" }}>
+                          {a.time}
                         </span>
                       )}
                     </span>
@@ -558,19 +670,6 @@ export function AgendaPage() {
           </GlassCard>
         )}
 
-        {/* Legend */}
-        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-10">
-          {AGENDA_CATS.map((c) => (
-            <span key={c} className="inline-flex items-center gap-2 text-xs font-mono text-muted-foreground">
-              <span className="inline-block rounded-sm" style={{ width: 10, height: 10, background: AGENDA_CAT_COLOR[c] }} />
-              {AGENDA_CAT_LABEL[c]}
-            </span>
-          ))}
-        </div>
-
-        <p className="text-xs font-mono text-center text-muted-foreground mt-8">
-          Agenda is provisional and subject to change. Final timings will be confirmed closer to the event.
-        </p>
       </div>
     </div>
   );
