@@ -45,7 +45,7 @@ export const AGENDA_DAYS: {
       { time: "1:30 pm – 2:20 pm", start: 810, title: "Keynote Speakers", track: "Undergraduate" },
       { time: "2:20 pm – 3:10 pm", start: 860, title: "Panel Talks", track: "Undergraduate" },
       { time: "3:30 pm – 6:30 pm", start: 930, title: "Chem-E-Jeopardy", track: "Undergraduate" },
-      { time: "6:25 pm – 7:05 pm", start: 1105, title: "Technical Workshop (Takwin)", track: "Undergraduate" },
+      { time: "6:25 pm – 7:05 pm", start: 1105, title: "Technical Workshop", track: "Undergraduate" },
       { time: "7:05 pm – 7:20 pm", start: 1145, title: "Break", track: "Undergraduate" },
       { time: "7:20 pm – 8:20 pm", start: 1160, title: "Chem-E-Jeopardy Final", track: "Undergraduate" },
       { time: "8:20 pm – 10:00 pm", start: 1220, title: "Welcome Dinner", track: "Undergraduate", note: "Outside the venue" },
@@ -62,7 +62,7 @@ export const AGENDA_DAYS: {
       { time: "9:45 am – 12:15 pm", start: 585, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth" },
       { time: "12:20 pm – 1:55 pm", start: 740, title: "Youth Poster Competition", track: "Youth" },
       { time: "1:00 pm – 1:15 pm", start: 780, title: "Registration & Check-in", track: "Undergraduate" },
-      { time: "2:00 pm – 3:00 pm", start: 840, title: "Technical Workshop (Takwin)", track: "Undergraduate" },
+      { time: "2:00 pm – 3:00 pm", start: 840, title: "Technical Workshop", track: "Undergraduate" },
       { time: "2:00 pm – 3:15 pm", start: 840, title: "Chem-E-Car Poster Competition & Safety Inspection", track: "Undergraduate" },
       { time: "3:15 pm – 3:45 pm", start: 915, title: "Poster Set Up & Prayer Break", track: "Undergraduate" },
       { time: "4:00 pm – 7:00 pm", start: 960, title: "Research Poster Competition", track: "Undergraduate" },
@@ -104,7 +104,7 @@ export const AGENDA_ALL_DAY: { title: string; days: number[]; time?: string }[] 
   { title: "Poster Engagement Game", days: [2] },
   { title: "Mini-Experiment Stations (Slime)", days: [2] },
   { title: "Best Moment Captured Competition", days: [3] },
-  { title: "Technical Workshop (Takwin)", days: [3] },
+  { title: "Technical Workshop", days: [3] },
   { title: "Activity 2", days: [3], time: "6:30 – 8:00 pm" },
 ];
 
