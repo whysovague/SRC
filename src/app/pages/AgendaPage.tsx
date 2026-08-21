@@ -356,9 +356,8 @@ const RAIL_W = 64;   // desktop gutter
 const RAIL_W_SM = 32; // phone gutter
 
 function ChainRail({
-  rowsRef, count, tint, hovered, onHover,
+  count, tint, hovered, onHover,
 }: {
-  rowsRef: React.RefObject<HTMLDivElement | null>;
   count: number;
   tint: string;
   hovered: number | null;
@@ -370,10 +369,13 @@ function ChainRail({
   const [h, setH] = useState(0);
   const [w, setW] = useState(RAIL_W);
 
-  // Measure where the rows actually sit. ResizeObserver catches reflow from a
-  // rotation, a late webfont, or the breakpoint flipping row layout.
+  // Measure where the rows actually sit. The host is read from the SVG's own
+  // parent, not a ref handed down from above: a child's layout effect runs
+  // before the parent's ref is attached, so a passed-in ref is still null here.
+  // ResizeObserver catches reflow from a rotation, a late webfont, or the
+  // breakpoint flipping row layout.
   useLayoutEffect(() => {
-    const host = rowsRef.current;
+    const host = svgRef.current?.parentElement;
     if (!host) return;
 
     const measure = () => {
@@ -388,7 +390,7 @@ function ChainRail({
     ro.observe(host);
     host.querySelectorAll<HTMLElement>(".ag-node").forEach((r) => ro.observe(r));
     return () => ro.disconnect();
-  }, [rowsRef, count]);
+  }, [count]);
 
   const atomX = (i: number) => (i % 2 ? w * 0.66 : w * 0.34);
 
@@ -433,8 +435,9 @@ function ChainRail({
     };
   }, [ys, w]);
 
-  if (!ys.length) return null;
-
+  // The SVG always renders — it is what the measure step reads the host from.
+  // On the very first paint it is empty; the layout effect fills it before the
+  // browser draws, so nothing flashes.
   const bonds = ys.map((y, i) => `${i ? "L" : "M"} ${atomX(i).toFixed(1)} ${y.toFixed(1)}`).join(" ");
   const r = w < RAIL_W ? 3.6 : 4.5;
 
@@ -447,7 +450,9 @@ function ChainRail({
       style={{ overflow: "visible" }}
       aria-hidden
     >
-      <path d={bonds} fill="none" stroke={`${tint}55`} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      {ys.length > 1 && (
+        <path d={bonds} fill="none" stroke={`${tint}55`} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+      )}
       {ys.map((y, i) => {
         const on = hovered === i;
         return (
@@ -481,8 +486,6 @@ export function AgendaPage() {
   const [track, setTrack] = useState<AgendaTrack>("Undergraduate");
   // Shared between the chain and the rows so hovering either lights both.
   const [hovered, setHovered] = useState<number | null>(null);
-  // The chain measures these rows rather than assuming a fixed row height.
-  const rowsRef = useRef<HTMLDivElement>(null);
 
   const dayData = AGENDA_DAYS.find((d) => d.id === day) || AGENDA_DAYS[0];
 
@@ -628,8 +631,8 @@ export function AgendaPage() {
               No sessions listed for this track on this day.
             </div>
           ) : (
-            <div className="relative" key={`${day}-${track}`} ref={rowsRef}>
-              <ChainRail rowsRef={rowsRef} count={items.length} tint={tint} hovered={hovered} onHover={setHovered} />
+            <div className="relative" key={`${day}-${track}`}>
+              <ChainRail count={items.length} tint={tint} hovered={hovered} onHover={setHovered} />
 
               {items.map((it, i) => (
                 <div
