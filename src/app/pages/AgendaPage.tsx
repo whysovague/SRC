@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Calendar, Clock, Layers, MapPin, Zap } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
@@ -349,23 +349,55 @@ function DayMolecule({ rings, tint }: { rings: number; tint: string }) {
 
 // ─── Schedule chain ───────────────────────────────────────────────────────────
 // The spine down the left of the schedule is drawn as a skeletal formula: a
-// zig-zag carbon backbone with one atom per session. Hovering a row lights its
-// atom and vice versa, and atoms drift toward the pointer as it passes.
-const RAIL_W = 64;
-const ROW_H = 78;
-const atomX = (i: number) => (i % 2 ? 42 : 22);
-const atomY = (i: number) => i * ROW_H + ROW_H / 2;
+// zig-zag carbon backbone with one atom per session. Atom positions are measured
+// from the rows themselves rather than assumed, so the chain stays locked to its
+// sessions whether a row is one line tall on desktop or two stacked on a phone.
+const RAIL_W = 64;   // desktop gutter
+const RAIL_W_SM = 32; // phone gutter
 
 function ChainRail({
-  count, tint, hovered, onHover,
-}: { count: number; tint: string; hovered: number | null; onHover: (i: number | null) => void }) {
+  rowsRef, count, tint, hovered, onHover,
+}: {
+  rowsRef: React.RefObject<HTMLDivElement | null>;
+  count: number;
+  tint: string;
+  hovered: number | null;
+  onHover: (i: number | null) => void;
+}) {
   const svgRef = useRef<SVGSVGElement>(null);
   const atomsRef = useRef<(SVGGElement | null)[]>([]);
+  const [ys, setYs] = useState<number[]>([]);
+  const [h, setH] = useState(0);
+  const [w, setW] = useState(RAIL_W);
 
-  // Pointer magnetism — atoms lean toward the cursor, strongest within ~90px.
+  // Measure where the rows actually sit. ResizeObserver catches reflow from a
+  // rotation, a late webfont, or the breakpoint flipping row layout.
+  useLayoutEffect(() => {
+    const host = rowsRef.current;
+    if (!host) return;
+
+    const measure = () => {
+      const rows = Array.from(host.querySelectorAll<HTMLElement>(".ag-node"));
+      setYs(rows.map((r) => r.offsetTop + r.offsetHeight / 2));
+      setH(host.offsetHeight);
+      setW(host.clientWidth >= 768 ? RAIL_W : RAIL_W_SM);
+    };
+    measure();
+
+    const ro = new ResizeObserver(measure);
+    ro.observe(host);
+    host.querySelectorAll<HTMLElement>(".ag-node").forEach((r) => ro.observe(r));
+    return () => ro.disconnect();
+  }, [rowsRef, count]);
+
+  const atomX = (i: number) => (i % 2 ? w * 0.66 : w * 0.34);
+
+  // Pointer magnetism — atoms lean toward the cursor. Mouse only; on a touch
+  // screen there is no hover to lean toward and pointermove means a scroll.
   useEffect(() => {
     const svg = svgRef.current;
-    if (!svg) return;
+    if (!svg || !ys.length) return;
+    if (!window.matchMedia?.("(hover: hover) and (pointer: fine)").matches) return;
     if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
 
     let raf = 0, mx = -9999, my = -9999;
@@ -378,14 +410,14 @@ function ChainRail({
 
     const frame = () => {
       atomsRef.current.forEach((g, i) => {
-        if (!g) return;
+        if (!g || ys[i] == null) return;
         const dx = mx - atomX(i);
-        const dy = my - atomY(i);
+        const dy = my - ys[i];
         const d = Math.hypot(dx, dy);
         const pull = d < 110 ? (1 - d / 110) ** 2 * 7 : 0;
-        const tx = d ? (dx / d) * pull : 0;
-        const ty = d ? (dy / d) * pull : 0;
-        g.style.transform = `translate(${tx.toFixed(2)}px, ${ty.toFixed(2)}px)`;
+        g.style.transform = d
+          ? `translate(${((dx / d) * pull).toFixed(2)}px, ${((dy / d) * pull).toFixed(2)}px)`
+          : "translate(0px, 0px)";
       });
       raf = requestAnimationFrame(frame);
     };
@@ -399,32 +431,36 @@ function ChainRail({
       parent?.removeEventListener("pointermove", onMove);
       parent?.removeEventListener("pointerleave", onLeave);
     };
-  }, [count]);
+  }, [ys, w]);
 
-  const bonds = Array.from({ length: count }, (_, i) => `${i ? "L" : "M"} ${atomX(i)} ${atomY(i)}`).join(" ");
+  if (!ys.length) return null;
+
+  const bonds = ys.map((y, i) => `${i ? "L" : "M"} ${atomX(i).toFixed(1)} ${y.toFixed(1)}`).join(" ");
+  const r = w < RAIL_W ? 3.6 : 4.5;
 
   return (
     <svg
       ref={svgRef}
-      width={RAIL_W}
-      height={count * ROW_H}
-      className="hidden md:block absolute left-0 top-0"
+      width={w}
+      height={h}
+      className="ag-rail absolute left-0 top-0 pointer-events-none"
       style={{ overflow: "visible" }}
+      aria-hidden
     >
       <path d={bonds} fill="none" stroke={`${tint}55`} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-      {Array.from({ length: count }, (_, i) => {
+      {ys.map((y, i) => {
         const on = hovered === i;
         return (
           <g
             key={i}
             ref={(el) => { atomsRef.current[i] = el; }}
-            style={{ transition: "none", cursor: "pointer" }}
+            style={{ transition: "none", cursor: "pointer", pointerEvents: "auto" }}
             onMouseEnter={() => onHover(i)}
             onMouseLeave={() => onHover(null)}
           >
-            <circle cx={atomX(i)} cy={atomY(i)} r={14} fill="transparent" />
+            <circle cx={atomX(i)} cy={y} r={14} fill="transparent" />
             <circle
-              cx={atomX(i)} cy={atomY(i)} r={on ? 7 : 4.5}
+              cx={atomX(i)} cy={y} r={on ? r + 2.5 : r}
               fill={on ? tint : "#0A1626"}
               stroke={tint}
               strokeWidth={2}
@@ -445,6 +481,8 @@ export function AgendaPage() {
   const [track, setTrack] = useState<AgendaTrack>("Undergraduate");
   // Shared between the chain and the rows so hovering either lights both.
   const [hovered, setHovered] = useState<number | null>(null);
+  // The chain measures these rows rather than assuming a fixed row height.
+  const rowsRef = useRef<HTMLDivElement>(null);
 
   const dayData = AGENDA_DAYS.find((d) => d.id === day) || AGENDA_DAYS[0];
 
@@ -471,11 +509,8 @@ export function AgendaPage() {
         .ag-node {
           animation: agSlideIn .45s cubic-bezier(.16,.84,.44,1) both;
           transition: background .22s ease;
-          border-left: 2px solid var(--ag-b);
         }
         .ag-node:hover { background: rgba(255,255,255,0.03); }
-        /* From md up the molecular chain is the rail, so the plain border goes. */
-        @media (min-width: 768px) { .ag-node { border-left: 0; } }
         .ag-daytitle { animation: agSlideIn .5s cubic-bezier(.16,.84,.44,1) both; }
         @media (prefers-reduced-motion: reduce) {
           .ag-node, .ag-daytitle { animation: none; }
@@ -593,19 +628,16 @@ export function AgendaPage() {
               No sessions listed for this track on this day.
             </div>
           ) : (
-            <div className="relative" key={`${day}-${track}`}>
-              <ChainRail count={items.length} tint={tint} hovered={hovered} onHover={setHovered} />
+            <div className="relative" key={`${day}-${track}`} ref={rowsRef}>
+              <ChainRail rowsRef={rowsRef} count={items.length} tint={tint} hovered={hovered} onHover={setHovered} />
 
               {items.map((it, i) => (
                 <div
                   key={i}
                   onMouseEnter={() => setHovered(i)}
                   onMouseLeave={() => setHovered(null)}
-                  className="ag-node md:h-[78px] flex flex-col md:flex-row md:items-center gap-1 md:gap-6 py-3 md:py-0 md:pl-[86px] pl-4"
-                  style={{
-                    animationDelay: `${Math.min(i, 12) * 45}ms`,
-                    ["--ag-b" as string]: hovered === i ? tint : `${tint}30`,
-                  } as React.CSSProperties}
+                  className="ag-node md:h-[78px] flex flex-col md:flex-row md:items-center gap-1 md:gap-6 py-3.5 md:py-0 md:pl-[86px] pl-[42px]"
+                  style={{ animationDelay: `${Math.min(i, 12) * 45}ms` }}
                 >
                   <div
                     className="text-sm font-mono tracking-tight md:w-[150px] flex-shrink-0 transition-colors duration-200"
