@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, MessageSquare, Presentation, Trophy, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, Medal, MessageSquare, Presentation, Trophy, Wrench } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
@@ -9,6 +9,8 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
   const competitions: {
     icon: React.ReactNode; title: string; category: "Competition" | "Activity";
     desc: string; details: string[]; color: string; compId?: Competition; comingSoon?: boolean;
+    /** Small eligibility line under the title, e.g. which years can enter. */
+    note?: string;
   }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
@@ -47,6 +49,16 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       compId: "poster-competition",
     },
     {
+      icon: <Medal className="w-7 h-7" />,
+      title: "SRC Science Olympiad",
+      category: "Competition",
+      desc: "The SRC Science Olympiad is an interactive Kahoot-style competition that brings together high school students and KFUPM university students to form mixed teams. Working together, they will solve exciting science, engineering, and critical-thinking questions in a fun and competitive environment, encouraging collaboration, mentorship, and knowledge sharing.",
+      details: ["Mixed high school & university teams", "Live Kahoot-style rounds", "Science, engineering & critical thinking"],
+      color: TEAL,
+      comingSoon: true,
+      note: "Sophomore & Junior",
+    },
+    {
       icon: <Wrench className="w-7 h-7" />,
       title: "Workshops",
       category: "Activity",
@@ -62,7 +74,6 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
       details: ["Expert panelists", "Q&A sessions", "Industry insights"],
       color: TEAL,
-      comingSoon: true,
     },
     {
       icon: <Lightbulb className="w-7 h-7" />,
@@ -71,7 +82,6 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       desc: "Cultural tours, social events, an opening ceremony, closing gala, and more. Making SRC 2026 an unforgettable complete experience.",
       details: ["Opening ceremony", "Closing gala", "Cultural activities"],
       color: TEAL,
-      comingSoon: true,
     },
   ];
 
@@ -119,7 +129,7 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
 
         {/* Filter pills */}
         <div className="faq-pop flex gap-2 mb-12" style={{ animationDelay: "80ms" }}>
-          {([ "Competition", "Activity"] as const).map((f) => (
+          {(["All", "Competition", "Activity"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -165,6 +175,16 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
                     </div>
                   </div>
                   <h3 className="font-display font-bold text-lg text-white mb-2">{item.title}</h3>
+                  {item.note && (
+                    <div className="mb-2">
+                      <span
+                        className="inline-block text-[11px] font-mono tracking-wide px-2 py-0.5 rounded-md"
+                        style={{ color: item.color, background: `${item.color}12`, border: `1px solid ${item.color}30` }}
+                      >
+                        {item.note}
+                      </span>
+                    </div>
+                  )}
                   <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
                   <ul className="space-y-1 mb-5">
                     {item.details.map((d) => (
