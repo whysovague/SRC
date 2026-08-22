@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Lightbulb, Lock, Medal, MessageSquare, Presentation, Trophy, Wrench } from "lucide-react";
+import { ArrowRight, CheckCircle, FileText, FlaskConical, Lock, Medal, MessageSquare, Presentation, Trophy, Users, Wrench } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
@@ -76,12 +76,13 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       color: TEAL,
     },
     {
-      icon: <Lightbulb className="w-7 h-7" />,
-      title: "Additional Programs",
+      icon: <Users className="w-7 h-7" />,
+      title: "Women in STEM",
       category: "Activity",
-      desc: "Cultural tours, social events, an opening ceremony, closing gala, and more. Making SRC 2026 an unforgettable complete experience.",
-      details: ["Opening ceremony", "Closing gala", "Cultural activities"],
-      color: TEAL,
+      desc: "An inspiring panel featuring successful women in Science, Technology, Engineering, and Mathematics who will share their academic and professional journeys, discuss challenges and opportunities, and encourage young women to pursue STEM careers. The session aims to empower participants through personal stories, practical advice, and interactive discussion.",
+      details: ["Panel of women working in STEM", "Academic & professional journeys", "Personal stories & interactive discussion"],
+      color: ORANGE,
+      note: "Day 3 · 9:00 – 9:45 am",
     },
   ];
 
