@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import type { Section, Competition } from "./types";
-import { pathToSection, sectionToPath, PAGE_META } from "./routes";
+import { pathToSection, sectionToPath } from "./routes";
 import { HomePage } from "./pages/HomePage";
 import { CompetitionsPage } from "./pages/CompetitionsPage";
 import { FAQPage } from "./pages/FAQPage";
@@ -31,28 +31,16 @@ export default function App() {
     if (matched === null) navigate("/", { replace: true });
   }, [matched, navigate]);
 
-  // Give each page its own title and description. index.html covers the home
-  // page for crawlers that do not run JavaScript; this keeps the other pages
-  // correct in the tab, in shared links and for crawlers that do.
-  useEffect(() => {
-    const meta = PAGE_META[section];
-    if (!meta) return;
-    document.title = meta.title;
-    for (const selector of ['meta[name="description"]', 'meta[property="og:description"]']) {
-      document.querySelector(selector)?.setAttribute("content", meta.description);
-    }
-    document.querySelector('meta[property="og:title"]')?.setAttribute("content", meta.title);
-    const url = `${window.location.origin}${sectionToPath(section)}`;
-    document.querySelector('link[rel="canonical"]')?.setAttribute("href", url);
-    document.querySelector('meta[property="og:url"]')?.setAttribute("content", url);
-  }, [section]);
-
   const [regModalOpen, setRegModalOpen] = useState(false);
   // Competition preselected from a Competitions-page card ("Participate")
   const [regCompetition, setRegCompetition] = useState<Competition>(null);
+  // Explains why the modal opened, when it was not opened by the user directly
+  // — e.g. an activity sign-up that needs a conference registration first.
+  const [regNotice, setRegNotice] = useState<string | undefined>(undefined);
 
-  const openRegistration = (competition: Competition = null) => {
+  const openRegistration = (competition: Competition = null, notice?: string) => {
     setRegCompetition(competition);
+    setRegNotice(notice);
     setRegModalOpen(true);
   };
 
@@ -92,7 +80,7 @@ export default function App() {
 
   const pages: Record<Section, React.ReactNode> = {
     home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} />,
-    competitions: <CompetitionsPage onParticipate={openRegistration} />,
+    competitions: <CompetitionsPage onParticipate={openRegistration} user={currentUser} />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
     partnership: <PartnershipPage goToContactForm={goToContactForm} />,
@@ -122,6 +110,7 @@ export default function App() {
         onClose={() => setRegModalOpen(false)}
         onLoginSuccess={handleLoginSuccess}
         initialCompetition={regCompetition}
+        notice={regNotice}
       />
 
       <main>

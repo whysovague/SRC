@@ -18,6 +18,38 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // ─── Activity sign-ups ──────────────────────────────────────────────────
+    // One document per person per session. The ID is `email__activityId`, so a
+    // repeat sign-up overwrites rather than duplicating.
+    //
+    // `get` is allowed but `list` is not. A card can check its own state by
+    // asking for one document whose ID it already knows; nobody can page
+    // through the collection to harvest attendees' questions.
+    match /activitySignups/{signupId} {
+      allow get: if true;
+      allow list: if false;
+      allow delete: if false;
+
+      allow create, update: if
+        request.resource.data.activityId in [
+          'intro-to-che',
+          'fresh-vs-experienced',
+          'women-in-stem'
+        ]
+        // The ID must match the payload, or one person could write into
+        // another person's slot.
+        && signupId == request.resource.data.email + '__' + request.resource.data.activityId
+        && request.resource.data.email is string
+        && request.resource.data.email == request.resource.data.email.lower()
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.fullName is string
+        && request.resource.data.fullName.size() <= 120
+        && request.resource.data.activityTitle is string
+        && request.resource.data.activityTitle.size() <= 120
+        && request.resource.data.question is string
+        && request.resource.data.question.size() <= 500;
+    }
+
     // ─── Lightweight login users + badge profile ────────────────────────────
     // `read: if true` is inherited from the original rules and is required by
     // the current design: login looks a user up by email, and the profile page

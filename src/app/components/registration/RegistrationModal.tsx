@@ -16,11 +16,14 @@ import {
   REG_TYPES, COMPETITIONS, TEAM_COMPETITIONS, INDIVIDUAL_COMPETITIONS, STEP_LABELS,
 } from "./registration.data";
 
-export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompetition = null }: {
+export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompetition = null, notice }: {
   open: boolean;
   onClose: () => void;
   onLoginSuccess: (user: AppUser) => void;
   initialCompetition?: Competition;
+  /** Shown above the first step when the modal was opened on the user's behalf
+   *  — e.g. an activity sign-up that needs a conference registration first. */
+  notice?: string;
 }) {
   // "register" = the existing conference flow (unchanged).
   // "login"    = the modal body is swapped for the lightweight login screen.
@@ -695,6 +698,14 @@ export function RegistrationModal({ open, onClose, onLoginSuccess, initialCompet
           {/* STEP 0 — TYPE SELECTION */}
           {mode === "register" && !submitted && step === 0 && (
             <div className="reg-step">
+              {notice && (
+                <div
+                  className="mb-6 rounded-lg px-4 py-3 text-sm leading-relaxed"
+                  style={{ color: "#f5c451", background: "rgba(245,196,81,0.08)", border: "1px solid rgba(245,196,81,0.28)" }}
+                >
+                  {notice}
+                </div>
+              )}
               <div className="flex flex-wrap justify-center gap-4">
                 {REG_TYPES.map((type) => (
                   <button key={type.id} className="reg-card-type reg-card-type-lg w-full sm:w-[calc(50%-0.5rem)] max-w-sm" onClick={() => handleTypeSelect(type.id)}>

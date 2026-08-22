@@ -1,16 +1,27 @@
-import { useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Lock, Medal, MessageSquare, Presentation, Trophy, Users, Wrench } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle, FileText, FlaskConical, Loader2, Lock, Medal, MessageSquare, Presentation, Sparkles, Trophy, Users, Wrench, X } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
+import type { AppUser } from "@/app/lib/users";
+import { getSignedUpSet, saveActivitySignup, MAX_QUESTION_CHARS, type ActivityId } from "@/app/lib/activities";
 import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetwork } from "@/app/components/common";
 
-export function CompetitionsPage({ onParticipate }: { onParticipate: (competition: Competition) => void }) {
+export function CompetitionsPage({ onParticipate, user }: {
+  onParticipate: (competition: Competition, notice?: string) => void;
+  user: AppUser | null;
+}) {
   const competitions: {
     icon: React.ReactNode; title: string; category: "Competition" | "Activity";
-    desc: string; details: string[]; color: string; compId?: Competition; comingSoon?: boolean;
-    /** Small eligibility line under the title, e.g. which years can enter. */
+    /** Both optional — a session whose copy hasn't been written yet shows the
+     *  title, its slot and the button, and nothing invented to fill the space. */
+    desc?: string; details?: string[];
+    color: string; compId?: Competition; comingSoon?: boolean;
+    /** Small line under the title — eligibility, or the day and time. */
     note?: string;
+    /** Set on the sessions people can sign up for once they hold a conference
+     *  registration. Conference registration itself stays in the main modal. */
+    activityId?: ActivityId;
   }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
@@ -68,12 +79,20 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       comingSoon: true,
     },
     {
-      icon: <MessageSquare className="w-7 h-7" />,
-      title: "Panels & Sessions",
+      icon: <Sparkles className="w-7 h-7" />,
+      title: "Intro to ChE",
       category: "Activity",
-      desc: "Moderated panel discussions featuring leaders from industry, academia, and startups exploring the future of chemical engineering and energy in the GCC.",
-      details: ["Expert panelists", "Q&A sessions", "Industry insights"],
       color: TEAL,
+      note: "Day 1 · 9:35 – 10:05 am",
+      activityId: "intro-to-che",
+    },
+    {
+      icon: <MessageSquare className="w-7 h-7" />,
+      title: "Fresh vs Experienced",
+      category: "Activity",
+      color: ORANGE,
+      note: "Day 2 · 9:00 – 9:40 am",
+      activityId: "fresh-vs-experienced",
     },
     {
       icon: <Users className="w-7 h-7" />,
@@ -83,11 +102,37 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
       details: ["Panel of women working in STEM", "Academic & professional journeys", "Personal stories & interactive discussion"],
       color: ORANGE,
       note: "Day 3 · 9:00 – 9:45 am",
+      activityId: "women-in-stem",
     },
   ];
 
   const [filter, setFilter] = useState<"All" | "Competition" | "Activity">("All");
   const filtered = competitions.filter((c) => filter === "All" || c.category === filter);
+
+  // ─── Activity sign-ups ──────────────────────────────────────────────────
+  // Which of this person's sign-ups already exist, so a card can show
+  // "Registered" instead of inviting them to do it twice.
+  const [signedUp, setSignedUp] = useState<Set<ActivityId>>(new Set());
+  const [dialog, setDialog] = useState<{ id: ActivityId; title: string; color: string } | null>(null);
+
+  const activityIds = competitions
+    .map((c) => c.activityId)
+    .filter((id): id is ActivityId => Boolean(id));
+  const activityKey = activityIds.join(",");
+
+  useEffect(() => {
+    if (!user?.email) { setSignedUp(new Set()); return; }
+    let cancelled = false;
+    getSignedUpSet(user.email, activityIds).then((set) => {
+      if (!cancelled) setSignedUp(set);
+    });
+    return () => { cancelled = true; };
+    // activityIds is rebuilt each render; compare it by value, not identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.email, activityKey]);
+
+  const REGISTER_FIRST_NOTICE =
+    "You need a conference registration before you can sign up for individual activities. Register below, or log in if you already have.";
 
   return (
     <div
@@ -186,15 +231,19 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
                       </span>
                     </div>
                   )}
-                  <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
-                  <ul className="space-y-1 mb-5">
-                    {item.details.map((d) => (
-                      <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
-                        {d}
-                      </li>
-                    ))}
-                  </ul>
+                  {item.desc && (
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
+                  )}
+                  {item.details && item.details.length > 0 && (
+                    <ul className="space-y-1 mb-5">
+                      {item.details.map((d) => (
+                        <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
+                          <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
+                          {d}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {/* Register / Participate → opens the registration & login modal,
                       preselecting this competition when the card is one */}
                   <div className="mt-auto pt-1">
@@ -220,9 +269,30 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
                       >
                         <Lock className="w-4 h-4" /> Coming Soon
                       </div>
+                    ) : item.activityId && signedUp.has(item.activityId) ? (
+                      // Already signed up — say so rather than inviting a repeat.
+                      <div
+                        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold"
+                        style={{
+                          color: item.color,
+                          background: `${item.color}1A`,
+                          border: `1px solid ${item.color}55`,
+                        }}
+                      >
+                        <CheckCircle className="w-4 h-4" /> Registered
+                      </div>
                     ) : (
                       <button
-                        onClick={() => onParticipate(item.compId ?? null)}
+                        onClick={() => {
+                          // Signing up for a session assumes a conference
+                          // registration. Without one, send them there first.
+                          if (item.activityId) {
+                            if (!user) { onParticipate(null, REGISTER_FIRST_NOTICE); return; }
+                            setDialog({ id: item.activityId, title: item.title, color: item.color });
+                            return;
+                          }
+                          onParticipate(item.compId ?? null);
+                        }}
                         className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5"
                         style={{
                           color: item.color,
@@ -240,6 +310,157 @@ export function CompetitionsPage({ onParticipate }: { onParticipate: (competitio
               </InteractiveCard>
             </RevealOnScroll>
           ))}
+        </div>
+      </div>
+
+      {dialog && user && (
+        <ActivitySignupDialog
+          activityId={dialog.id}
+          title={dialog.title}
+          color={dialog.color}
+          user={user}
+          onClose={() => setDialog(null)}
+          onDone={(id) => {
+            setSignedUp((prev) => new Set(prev).add(id));
+            setDialog(null);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
+ * Sign-up dialog for a single session. The person is already registered for the
+ * conference, so nothing personal is asked for — only an optional question for
+ * the speakers.
+ */
+function ActivitySignupDialog({ activityId, title, color, user, onClose, onDone }: {
+  activityId: ActivityId;
+  title: string;
+  color: string;
+  user: AppUser;
+  onClose: () => void;
+  onDone: (id: ActivityId) => void;
+}) {
+  const [question, setQuestion] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Escape closes; body scroll stays locked while it is open.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !saving) onClose(); };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose, saving]);
+
+  const confirm = async () => {
+    if (saving) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await saveActivitySignup({
+        email: user.email,
+        fullName: user.fullName,
+        activityId,
+        question,
+      });
+      onDone(activityId);
+    } catch (e: any) {
+      console.error("Activity sign-up failed:", e);
+      setError(e?.message || "Could not save your sign-up. Please try again.");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ background: "rgba(4,10,18,0.72)", backdropFilter: "blur(6px)" }}
+      onClick={() => { if (!saving) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Sign up for ${title}`}
+        className="w-full max-w-md rounded-2xl border p-6"
+        style={{
+          background: "rgba(7,17,30,0.97)",
+          borderColor: "rgba(255,255,255,0.1)",
+          boxShadow: "0 30px 80px -40px rgba(0,0,0,0.9)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 mb-1">
+          <div>
+            <div className="text-[11px] font-mono tracking-[0.2em] uppercase mb-1" style={{ color }}>
+              Sign up
+            </div>
+            <h3 className="font-display font-bold text-xl text-white">{title}</h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            aria-label="Close"
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.06)", color: "var(--muted-foreground)" }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <p className="text-sm text-muted-foreground mt-3 mb-5">
+          You're signed in as <span className="text-white">{user.fullName || user.email}</span>.
+        </p>
+
+        <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+          A question for the speakers <span className="font-normal">— optional</span>
+        </label>
+        <textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value.slice(0, MAX_QUESTION_CHARS))}
+          rows={3}
+          disabled={saving}
+          className="w-full rounded-lg px-3 py-2.5 text-sm text-white resize-none outline-none transition-colors disabled:opacity-60"
+          style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.12)",
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+        />
+        <div className="text-[11px] font-mono mt-1 text-right" style={{ color: "var(--muted-foreground)" }}>
+          {question.length}/{MAX_QUESTION_CHARS}
+        </div>
+
+        {error && <p className="text-xs mt-3" style={{ color: "#ff8a8a" }}>{error}</p>}
+
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="text-xs text-muted-foreground hover:text-white transition-colors disabled:opacity-40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={confirm}
+            disabled={saving}
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 disabled:opacity-60"
+            style={{ color, background: `${color}18`, border: `1px solid ${color}45` }}
+          >
+            {saving
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+              : <>Confirm <ArrowRight className="w-4 h-4" /></>}
+          </button>
         </div>
       </div>
     </div>
