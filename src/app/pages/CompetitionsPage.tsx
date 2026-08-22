@@ -131,8 +131,11 @@ export function CompetitionsPage({ onParticipate, user }: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.email, activityKey]);
 
-  const REGISTER_FIRST_NOTICE =
-    "You need a conference registration before you can sign up for individual activities. Register below, or log in if you already have.";
+  // Phrased around logging in, because that is what the card actually checks.
+  // Someone who registered on another device already has an account and only
+  // needs to log in — telling them to register would be wrong.
+  const LOGIN_FIRST_NOTICE =
+    "You need to be logged in to sign up for activities. If you haven't registered for SRC 2026 yet, register below.";
 
   return (
     <div
@@ -287,7 +290,7 @@ export function CompetitionsPage({ onParticipate, user }: {
                           // Signing up for a session assumes a conference
                           // registration. Without one, send them there first.
                           if (item.activityId) {
-                            if (!user) { onParticipate(null, REGISTER_FIRST_NOTICE); return; }
+                            if (!user) { onParticipate(null, LOGIN_FIRST_NOTICE); return; }
                             setDialog({ id: item.activityId, title: item.title, color: item.color });
                             return;
                           }
