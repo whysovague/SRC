@@ -82,6 +82,7 @@ export function CompetitionsPage({ onParticipate, user }: {
       icon: <Sparkles className="w-7 h-7" />,
       title: "Intro to ChE",
       category: "Activity",
+      desc: "An engaging introductory session designed for high school students to explore what Chemical Engineering is, how chemical engineers solve real-world problems, and the wide range of industries they work in. The session will highlight exciting applications in sustainability, energy, healthcare, food, and advanced materials while introducing students to studying Chemical Engineering at KFUPM.",
       color: TEAL,
       note: "Day 1 · 9:35 – 10:05 am",
       activityId: "intro-to-che",
