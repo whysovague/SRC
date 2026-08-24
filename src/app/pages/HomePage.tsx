@@ -11,7 +11,11 @@ import kfupmLogoImg from "@/assets/Full Stacked - negative.png";
 import aicheLogoImg from "@/assets/aichelogo.png";
 
 // ─── Home Page ────────────────────────────────────────────────────────────────
-export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Section) => void; onRegisterClick: () => void }) {
+export function HomePage({ setSection, onRegisterClick, onViewAgendaDay }: {
+  setSection: (s: Section) => void;
+  onRegisterClick: () => void;
+  onViewAgendaDay: (day: number) => void;
+}) {
   const aboutSectionRef = useRef<HTMLElement | null>(null);
   const stats: { to: number; suffix: string; label: string }[] = [
     { to: 1200, suffix: "+", label: "Expected Participants" },
@@ -87,6 +91,15 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
         .src-tl-card.is-in {
           opacity: 1;
           transform: translate3d(0, 0, 0);
+        }
+        /* Conference-day cards link to the schedule — whole card is the target */
+        .src-tl-link { cursor: pointer; }
+        .src-tl-cta { transition: gap .2s ease, background .2s ease; }
+        .src-tl-link:hover .src-tl-cta { gap: 0.6rem; }
+        .src-tl-cta:focus-visible {
+          outline: none;
+          background: rgba(255,255,255,0.08);
+          box-shadow: 0 0 0 2px currentColor;
         }
         @media (prefers-reduced-motion: reduce) {
           .src-rise, .src-rise-2, .src-rise-3 { animation: none; }
@@ -383,7 +396,7 @@ export function HomePage({ setSection, onRegisterClick }: { setSection: (s: Sect
         </div>
       </section>
 
-      <TimelineSection />
+      <TimelineSection onViewAgendaDay={onViewAgendaDay} />
 
       {/* CTA band */}
       <section className="py-16" style={{ background: `linear-gradient(135deg, ${TEAL}15 0%, ${ORANGE}10 100%)`, borderTop: `1px solid ${TEAL}25`, borderBottom: `1px solid ${TEAL}25` }}>

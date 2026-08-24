@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Calendar, Clock, Layers, MapPin, Zap } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
@@ -479,7 +480,15 @@ function ChainRail({
 }
 
 export function AgendaPage() {
-  const [day, setDay] = useState<number>(1);
+  // The day is held in the URL (`/agenda?day=2`) so a link can open a specific
+  // day, and so the address bar matches what is on screen if it gets shared.
+  const [params, setParams] = useSearchParams();
+  const parsed = Number(params.get("day"));
+  const day = AGENDA_DAYS.some((d) => d.id === parsed) ? parsed : 1;
+  const setDay = (next: number) => {
+    // `replace` so flicking between day tabs does not fill the back button.
+    setParams(next === 1 ? {} : { day: String(next) }, { replace: true });
+  };
   // Undergraduate is the default: it is the larger track and the conference's
   // primary audience. There is no combined view — the two tracks run in
   // parallel and interleaving them made the day harder to read, not easier.
