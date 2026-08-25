@@ -19,19 +19,14 @@ import type { AppUser } from "./lib/users";
 const USER_STORAGE_KEY = "src2026:user";
 
 export default function App() {
-  console.log("🔥 APP MOUNTED, path =", window.location.pathname);
 
   // The URL is the source of truth for which page is shown. Everything else in
   // the app still speaks in Sections, so `setSection` just navigates.
   const location = useLocation();
   const navigate = useNavigate();
   const matched = pathToSection(location.pathname);
-  console.log("🔥 matched =", matched);
   const section: Section = matched ?? "home";
   const setSection = (s: Section) => navigate(sectionToPath(s));
-  /** Open the agenda already showing a particular day. */
-  const goToAgendaDay = (day: number) =>
-    navigate(`${sectionToPath("agenda")}${day === 1 ? "" : `?day=${day}`}`);
 
   // Unknown URL — replace it with home so the address bar never shows a dead path.
   useEffect(() => {
@@ -85,8 +80,11 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, [section]);
 
+  const handleViewAgendaDay = (day: number) => {
+  navigate(day === 1 ? "/agenda" : `/agenda?day=${day}`);
+};
   const pages: Record<Section, React.ReactNode> = {
-    home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} onViewAgendaDay={goToAgendaDay} />,
+    home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} onViewAgendaDay={handleViewAgendaDay} />,
     competitions: <CompetitionsPage onParticipate={openRegistration} user={currentUser} />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,
@@ -96,6 +94,7 @@ export default function App() {
     //attendance: <AttendancePage user={currentUser} onRegisterClick={() => openRegistration()} />,
     attendance: <AttendancePage />,
   };
+  
 
   return (
     <div
