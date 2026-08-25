@@ -8,6 +8,7 @@ import { CompetitionsPage } from "./pages/CompetitionsPage";
 import { FAQPage } from "./pages/FAQPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AgendaPage, AgendaComingSoon, AGENDA_LIVE } from "./pages/AgendaPage";
+import { AttendancePage } from "./pages/AttendancePage";
 import { PartnershipPage } from "./pages/PartnershipPage";
 import { RegistrationModal } from "./components/registration/RegistrationModal";
 import { Navbar } from "./components/layout/Navbar";
@@ -18,11 +19,14 @@ import type { AppUser } from "./lib/users";
 const USER_STORAGE_KEY = "src2026:user";
 
 export default function App() {
+  console.log("🔥 APP MOUNTED, path =", window.location.pathname);
+
   // The URL is the source of truth for which page is shown. Everything else in
   // the app still speaks in Sections, so `setSection` just navigates.
   const location = useLocation();
   const navigate = useNavigate();
   const matched = pathToSection(location.pathname);
+  console.log("🔥 matched =", matched);
   const section: Section = matched ?? "home";
   const setSection = (s: Section) => navigate(sectionToPath(s));
 
@@ -86,6 +90,8 @@ export default function App() {
     partnership: <PartnershipPage goToContactForm={goToContactForm} />,
     faq: <FAQPage goToContactForm={goToContactForm} />,
     contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
+    //attendance: <AttendancePage user={currentUser} onRegisterClick={() => openRegistration()} />,
+    attendance: <AttendancePage />,
   };
 
   return (
