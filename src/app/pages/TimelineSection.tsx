@@ -1,52 +1,69 @@
 import { useState, useEffect, useRef } from "react";
-import { Calendar, Star } from "lucide-react";
+import { ArrowRight, Calendar, Star } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
+import { AGENDA_LIVE } from "./AgendaPage";
 import { SectionTitle, Divider, GradientEyebrow, InteractiveCard } from "@/app/components/common";
 
-export function TimelineSection() {
-  const milestones = [
+export function TimelineSection({ onViewAgendaDay }: { onViewAgendaDay: (day: number) => void }) {
+  const milestones: {
+    date: string;
+    event: string;
+    desc: string;
+    status: "upcoming" | "main";
+    /** Set on the conference days — the card opens the agenda on that day. */
+    agendaDay?: number;
+  }[] = [
     {
       date: "11/4/2026",
       event: "Competition Registrations Open",
       desc: "Registrations open for Chem-E-Car and Chem-E-Jeopardy.",
-      status: "upcoming" as const,
+      status: "upcoming",
     },
     {
       date: "8/6/2026",
       event: "Chem-E-Car Registration Deadline",
       desc: "Final deadline for teams to register for the Chem-E-Car competition.",
-      status: "upcoming" as const,
+      status: "upcoming",
     },
     {
       date: "31/7/2026",
       event: "Other Competitions Registration Deadline",
       desc: "ChemE Jeopardy, Technical Presentation, and Poster Competition registration closes.",
-      status: "upcoming" as const,
+      status: "upcoming",
     },
     {
       date: "10/8/2026",
       event: "Visitor Registration Opens",
       desc: "General visitor registration goes live.",
-      status: "upcoming" as const,
+      status: "upcoming",
     },
     {
       date: "31/8/2026",
       event: "SRC Day 1",
-      desc: "Agenda coming soon.",
-      status: "main" as const,
+      desc: AGENDA_LIVE
+        ? "Opening ceremony, keynote speakers and Chem-E-Jeopardy."
+        : "Agenda coming soon.",
+      status: "main",
+      agendaDay: AGENDA_LIVE ? 1 : undefined,
     },
     {
       date: "1/9/2026",
       event: "SRC Day 2",
-      desc: "Agenda coming soon.",
-      status: "upcoming" as const,
+      desc: AGENDA_LIVE
+        ? "Poster competitions, career workshop and site visits."
+        : "Agenda coming soon.",
+      status: "upcoming",
+      agendaDay: AGENDA_LIVE ? 2 : undefined,
     },
     {
       date: "2/9/2026",
       event: "SRC Day 3",
-      desc: "Agenda coming soon.",
-      status: "upcoming" as const,
+      desc: AGENDA_LIVE
+        ? "Chem-E-Car, technical presentations and the award banquet."
+        : "Agenda coming soon.",
+      status: "upcoming",
+      agendaDay: AGENDA_LIVE ? 3 : undefined,
     },
   ];
 
@@ -199,12 +216,15 @@ export function TimelineSection() {
                     >
                     <InteractiveCard
                       accent={accent}
-                      className="rounded-xl p-5 border overflow-hidden transition-colors duration-500"
+                      className={`rounded-xl p-5 border overflow-hidden transition-colors duration-500 ${m.agendaDay ? "src-tl-link" : ""}`}
                       style={{
                         background: isActive ? `${accent}0d` : "var(--card)",
                         borderColor: isActive ? `${accent}40` : "var(--border)",
                         opacity: isActive ? 1 : 0.75,
                       }}
+                      // A whole-card click target, so the affordance matches the
+                      // hit area. Keyboard users get the real button below.
+                      onClick={m.agendaDay ? () => onViewAgendaDay(m.agendaDay!) : undefined}
                     >
                       <div
                         className="text-xs font-mono font-bold mb-2 inline-block px-2 py-0.5 rounded"
@@ -214,6 +234,16 @@ export function TimelineSection() {
                       </div>
                       <h4 className="font-display font-bold text-white text-lg mb-1">{m.event}</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">{m.desc}</p>
+                      {m.agendaDay && (
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); onViewAgendaDay(m.agendaDay!); }}
+                          className="src-tl-cta mt-3 inline-flex items-center gap-1.5 text-xs font-semibold rounded-md px-2 py-1 -mx-2"
+                          style={{ color: accent }}
+                        >
+                          View agenda <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </InteractiveCard>
                     </div>
                   </div>

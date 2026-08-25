@@ -29,6 +29,9 @@ export default function App() {
   console.log("🔥 matched =", matched);
   const section: Section = matched ?? "home";
   const setSection = (s: Section) => navigate(sectionToPath(s));
+  /** Open the agenda already showing a particular day. */
+  const goToAgendaDay = (day: number) =>
+    navigate(`${sectionToPath("agenda")}${day === 1 ? "" : `?day=${day}`}`);
 
   // Unknown URL — replace it with home so the address bar never shows a dead path.
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function App() {
   }, [section]);
 
   const pages: Record<Section, React.ReactNode> = {
-    home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} />,
+    home: <HomePage setSection={setSection} onRegisterClick={() => openRegistration()} onViewAgendaDay={goToAgendaDay} />,
     competitions: <CompetitionsPage onParticipate={openRegistration} user={currentUser} />,
     // Agenda hidden until the schedule is public — set AGENDA_LIVE = true to restore.
       agenda: AGENDA_LIVE ? <AgendaPage /> : <AgendaComingSoon />,

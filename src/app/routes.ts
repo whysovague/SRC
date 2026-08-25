@@ -11,6 +11,7 @@ export const SECTION_PATHS: Record<Section, string> = {
   partnership: "/partnership",
   faq: "/faq",
   contact: "/contact",
+  attendance: "/attend",
 };
 
 const PATH_TO_SECTION = new Map<string, Section>(
@@ -58,6 +59,10 @@ export const PAGE_META: Record<Section, { title: string; description: string }> 
     description:
       "Get in touch with the SRC 2026 organizing team at the KFUPM AIChE Student Chapter, Dhahran, Saudi Arabia.",
   },
+  attendance: {
+    title: "Attendance | SRC 2026 KFUPM AIChE",
+    description: "Register and confirm your attendance for the SRC 2026 conference events at KFUPM.",
+  },
 };
 
 export function sectionToPath(section: Section): string {
@@ -70,3 +75,5 @@ export function pathToSection(pathname: string): Section | null {
   const clean = pathname.length > 1 ? pathname.replace(/\/+$/, "") : pathname;
   return PATH_TO_SECTION.get(clean || "/") ?? null;
 }
+console.log("🔥 SECTION_PATHS keys:", Object.keys(SECTION_PATHS));
+console.log("🔥 SECTION_PATHS.attendance:", SECTION_PATHS.attendance);
