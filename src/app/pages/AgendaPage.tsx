@@ -85,7 +85,7 @@ export const AGENDA_DAYS: {
       { time: "1:15 - 2:00 pm", start: 795, title: "Award Ceremony & Closing (youth)", track: "Youth" },
       { time: "1:00 - 1:15 pm", start: 780, title: "Registration & Check-in", track: "Undergraduate" },
       { time: "1:20 - 2:20 pm", start: 800, title: "Mock Interviews", track: "Undergraduate", note: "B54 · Room 004" },
-      //{ time: "1:20 - 2:20 pm", start: 800, title: "طبقات workshop", track: "Undergraduate" },
+      { time: "1:20 - 2:20 pm", start: 800, title: "Tabaqat workshop", track: "Undergraduate", note: "B54 · stage" },
       { time: "2:25 - 4:00 pm", start: 865, title: "Chem-E-Car Competition", track: "Undergraduate", note: "B54" },
       { time: "4:30 - 6:00 pm", start: 990, title: "International training program talk", track: "Undergraduate", note: "stage" },
       { time: "6:30 - 8:00 pm", start: 1110, title: "Engineering game show", track: "Undergraduate", note: "B54 · stage" },
