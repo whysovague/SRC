@@ -36,7 +36,7 @@ export const AGENDA_DAYS: {
     date: "August 31, 2026",
     weekday: "Monday",
     items: [
-      { time: "8:30 am – 9:00 am", start: 510, title: "Registration & Check-in", track: "Youth", note: "Building 70" },
+      { time: "8:30 am – 9:00 am", start: 510, title: "Registration & Check-in", track: "Youth" },
       { time: "9:05 am – 9:30 am", start: 545, title: "Opening Ceremony", track: "Youth" },
       { time: "9:35 am – 10:05 am", start: 575, title: "Intro to ChemE", track: "Youth" },
       { time: "10:15 am – 12:40 pm", start: 615, title: "KFUPM & Chemical Engineering Campus Tour", track: "Youth" },
@@ -87,7 +87,7 @@ export const AGENDA_DAYS: {
       { time: "2:25 pm – 5:25 pm", start: 865, title: "Chem-E-Car Competition", track: "Undergraduate" },
       { time: "4:00 pm – 7:00 pm", start: 960, title: "Regional Student Technical Presentation Competition", track: "Undergraduate" },
       { time: "4:30 pm – 6:00 pm", start: 990, title: "International Training Program Talk", track: "Undergraduate" },
-      { time: "8:30 pm – 10:00 pm", start: 1230, title: "Award Banquet", track: "Undergraduate", note: "Building 70" },
+      { time: "8:30 pm – 10:00 pm", start: 1230, title: "Award Banquet", track: "Undergraduate" },
     ],
   },
 ];

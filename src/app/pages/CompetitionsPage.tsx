@@ -108,7 +108,19 @@ export function CompetitionsPage({ onParticipate, user }: {
   ];
 
   const [filter, setFilter] = useState<"All" | "Competition" | "Activity">("All");
-  const filtered = competitions.filter((c) => filter === "All" || c.category === filter);
+  const filtered = competitions
+    .filter((c) => filter === "All" || c.category === filter)
+    .sort((a, b) => {
+      // Priority 0: Open for direct registration (has active activityId)
+      // Priority 1: Coming soon
+      // Priority 2: Closed competitions
+      const getPriority = (item: (typeof competitions)[number]) => {
+        if (item.compId) return 2;
+        if (item.comingSoon) return 1;
+        return 0;
+      };
+      return getPriority(a) - getPriority(b);
+    });
 
   // ─── Activity sign-ups ──────────────────────────────────────────────────
   // Which of this person's sign-ups already exist, so a card can show
