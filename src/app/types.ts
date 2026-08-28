@@ -8,7 +8,8 @@ export type Section =
   | "home" | "competitions"
   | "agenda"
   | "partnership"
-  | "faq" | "contact";
+  | "faq" | "contact"
+  | "attendance"
 
 /** Which track a visitor registers under in the registration modal. */
 export type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;
