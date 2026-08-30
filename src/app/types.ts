@@ -10,6 +10,7 @@ export type Section =
   | "partnership"
   | "faq" | "contact"
   | "attendance"
+  | "registrants"
 
 /** Which track a visitor registers under in the registration modal. */
 export type RegType = "participant" | "team" | "speaker" | "volunteer" | "partner" | null;

@@ -9,6 +9,7 @@ import { FAQPage } from "./pages/FAQPage";
 import { ContactPage } from "./pages/ContactPage";
 import { AgendaPage, AgendaComingSoon, AGENDA_LIVE } from "./pages/AgendaPage";
 import { AttendancePage } from "./pages/AttendancePage";
+import { RegistrantsExportPage } from "./pages/RegistrantsExportPage";
 import { PartnershipPage } from "./pages/PartnershipPage";
 import { RegistrationModal } from "./components/registration/RegistrationModal";
 import { Navbar } from "./components/layout/Navbar";
@@ -93,6 +94,7 @@ export default function App() {
     contact: <ContactPage focusForm={contactFocus} onFocusHandled={() => setContactFocus(false)} />,
     //attendance: <AttendancePage user={currentUser} onRegisterClick={() => openRegistration()} />,
     attendance: <AttendancePage />,
+    registrants: <RegistrantsExportPage />,
   };
   
 

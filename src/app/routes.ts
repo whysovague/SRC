@@ -12,6 +12,9 @@ export const SECTION_PATHS: Record<Section, string> = {
   faq: "/faq",
   contact: "/contact",
   attendance: "/attend",
+  // Unlisted, for the organising team. Deliberately absent from the navbar, the
+  // footer and sitemap.xml; the slug is random so the path cannot be guessed.
+  registrants: "/registrants-x7k2m9",
 };
 
 const PATH_TO_SECTION = new Map<string, Section>(
@@ -62,6 +65,12 @@ export const PAGE_META: Record<Section, { title: string; description: string }> 
   attendance: {
     title: "Attendance | SRC 2026 KFUPM AIChE",
     description: "Register and confirm your attendance for the SRC 2026 conference events at KFUPM.",
+  },
+  // No SRC/KFUPM/AIChE keywords here, unlike every entry above: this page is
+  // noindex'd and there is nothing to be gained from it ranking for anything.
+  registrants: {
+    title: "Registrant Export",
+    description: "Internal page for the SRC 2026 organising team.",
   },
 };
 
