@@ -54,8 +54,6 @@ export const AGENDA_DAYS: {
       { time: "5:10 - 6:10 pm", start: 1030, title: "Tabaqat 3D printing workshop", track: "Undergraduate" },
       { time: "6:10 - 6:30 pm", start: 1090, title: "Prayer Break", track: "Undergraduate" },
       { time: "6:30 - 7:30 pm", start: 1110, title: "Chem-E-Jeopardy Final", track: "Undergraduate", note: "stage · B54" },
-      { time: "7:30 - 8:00 pm", start: 1170, title: "Prayer Break", track: "Undergraduate" },
-      { time: "8:00 - 10:00 pm", start: 1200, title: "Welcome Dinner", track: "Undergraduate", note: "outside the venue" },
     ],
   },
   {
