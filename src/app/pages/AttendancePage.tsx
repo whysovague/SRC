@@ -5,9 +5,16 @@ import { MoleculeNetwork, GradientEyebrow, Divider } from "@/app/components/comm
 
 // ── Firestore ──────────────────────────────────────────────────────────────
 import { collection, addDoc, serverTimestamp, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase"; // نفس الملف اللي تستخدمه صفحة تسجيل الدخول
+import { db } from "../lib/firebase";
+import { isValidEmail, MAX_NAME_CHARS, MAX_EMAIL_CHARS } from "../lib/workshops"; // نفس الملف اللي تستخدمه صفحة تسجيل الدخول
 
-type AttendanceRecord = { time: string; date: string };
+type AttendanceRecord = {
+  time: string;
+  date: string;
+  /** "" on records written before check-in started asking for identity. */
+  fullName: string;
+  email: string;
+};
 
 // ── Tabaqat 3D printing workshop ────────────────────────────────────────────
 // A second, independent check-in that lives on this same page. It writes to its
@@ -37,6 +44,18 @@ const TIME_OPTS = { hour: "2-digit", minute: "2-digit", hour12: true } as const;
 const DATE_OPTS = { year: "numeric", month: "long", day: "numeric" } as const;
 
 export function AttendancePage() {
+  // ── Who is checking in ──────────────────────────────────────────────────
+  // Shared by both check-ins on this page rather than duplicated per form:
+  // someone attending the conference *and* the workshop is one person, and
+  // making them type their name twice on one screen invites typos that split
+  // them across two rows in the export.
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+
+  const nameOk = fullName.trim().length >= 2;
+  const emailOk = isValidEmail(email);
+  const identityOk = nameOk && emailOk;
+
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -65,7 +84,12 @@ export function AttendancePage() {
         const data: AttendanceRecord[] = [];
         snap.forEach((doc) => {
           const d = doc.data();
-          data.push({ time: d.time, date: d.date });
+          data.push({
+            time: d.time,
+            date: d.date,
+            fullName: String(d.fullName ?? ""),
+            email: String(d.email ?? ""),
+          });
         });
         return data;
       };
@@ -94,10 +118,14 @@ export function AttendancePage() {
   };
 
   const downloadCSV = (rows: AttendanceRecord[], label: string) => {
-    const header = "Time,Date";
-    const body = rows.map((r) => `${r.time},${r.date}`);
-    const csv = [header, ...body].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    // Escaped rather than joined raw: a name may contain a comma, which would
+    // otherwise shift every following column on that row. The BOM stops Excel
+    // on Windows mangling Arabic names.
+    const cell = (v: string) => (/[",\r\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const header = ["Name", "Email", "Time", "Date"].map(cell).join(",");
+    const body = rows.map((r) => [r.fullName, r.email, r.time, r.date].map(cell).join(","));
+    const csv = "﻿" + [header, ...body].join("\r\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -114,7 +142,7 @@ export function AttendancePage() {
     // Guarded here as well as on the button's `disabled`, so the write cannot
     // happen without the box ticked even if the button is reached some other
     // way (keyboard, a stale render, devtools).
-    if (!tabaqatConfirmed || tabaqatSubmitting || tabaqatDone) return;
+    if (!identityOk || !tabaqatConfirmed || tabaqatSubmitting || tabaqatDone) return;
     setTabaqatSubmitting(true);
     setTabaqatError("");
 
@@ -124,6 +152,8 @@ export function AttendancePage() {
 
     try {
       await addDoc(collection(db, TABAQAT_COLLECTION), {
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
         time,
         date,
         workshop: TABAQAT_LABEL,
@@ -189,7 +219,7 @@ export function AttendancePage() {
       <button
         type="button"
         onClick={handleTabaqat}
-        disabled={!tabaqatConfirmed || tabaqatSubmitting || tabaqatDone}
+        disabled={!identityOk || !tabaqatConfirmed || tabaqatSubmitting || tabaqatDone}
         className="w-full py-3.5 rounded-xl font-bold text-sm text-center transition-all disabled:cursor-not-allowed"
         // Opacity is set inline rather than via `disabled:opacity-40`: an inline
         // opacity always beats the utility class, so mixing the two would dim
@@ -202,7 +232,7 @@ export function AttendancePage() {
                 background: "rgba(255,255,255,0.04)",
                 color: "#fff",
                 border: `1px solid ${ORANGE}40`,
-                opacity: tabaqatSubmitting ? 0.6 : tabaqatConfirmed ? 1 : 0.4,
+                opacity: tabaqatSubmitting ? 0.6 : (tabaqatConfirmed && identityOk) ? 1 : 0.4,
               }
         }
       >
@@ -230,7 +260,7 @@ export function AttendancePage() {
   // ── Submit attendance ──────────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!confirmed) return;
+    if (!confirmed || !identityOk) return;
     setSubmitting(true);
     setError("");
 
@@ -240,6 +270,8 @@ export function AttendancePage() {
 
     try {
       await addDoc(collection(db, "attendance"), {
+        fullName: fullName.trim(),
+        email: email.trim().toLowerCase(),
         time,
         date,
         timestamp: serverTimestamp(),
@@ -295,13 +327,15 @@ export function AttendancePage() {
 
               {/* Records list */}
               <div className="rounded-xl overflow-hidden border" style={{ borderColor: `${TEAL}20` }}>
-                <div className="px-4 py-2 text-xs font-mono grid grid-cols-2 gap-4"
+                <div className="px-4 py-2 text-xs font-mono grid grid-cols-4 gap-3"
                   style={{ background: `${TEAL}10`, color: `${TEAL}` }}>
-                  <span>Time</span><span>Date</span>
+                  <span>Name</span><span>Email</span><span>Time</span><span>Date</span>
                 </div>
                 {records.map((r, i) => (
-                  <div key={i} className="px-4 py-3 grid grid-cols-2 gap-4 text-sm border-t"
+                  <div key={i} className="px-4 py-3 grid grid-cols-4 gap-3 text-sm border-t"
                     style={{ borderColor: `${TEAL}10`, background: i % 2 === 0 ? "transparent" : `${TEAL}04` }}>
+                    <span className="text-muted-foreground truncate" title={r.fullName}>{r.fullName || "—"}</span>
+                    <span className="text-muted-foreground truncate" title={r.email}>{r.email || "—"}</span>
                     <span className="text-muted-foreground font-mono">{r.time}</span>
                     <span className="text-muted-foreground">{r.date}</span>
                   </div>
@@ -343,13 +377,15 @@ export function AttendancePage() {
                 )}
 
                 <div className="rounded-xl overflow-hidden border" style={{ borderColor: `${ORANGE}20` }}>
-                  <div className="px-4 py-2 text-xs font-mono grid grid-cols-2 gap-4"
+                  <div className="px-4 py-2 text-xs font-mono grid grid-cols-4 gap-3"
                     style={{ background: `${ORANGE}10`, color: ORANGE }}>
-                    <span>Time</span><span>Date</span>
+                    <span>Name</span><span>Email</span><span>Time</span><span>Date</span>
                   </div>
                   {tabaqatRecords.map((r, i) => (
-                    <div key={i} className="px-4 py-3 grid grid-cols-2 gap-4 text-sm border-t"
+                    <div key={i} className="px-4 py-3 grid grid-cols-4 gap-3 text-sm border-t"
                       style={{ borderColor: `${ORANGE}10`, background: i % 2 === 0 ? "transparent" : `${ORANGE}04` }}>
+                      <span className="text-muted-foreground truncate" title={r.fullName}>{r.fullName || "—"}</span>
+                      <span className="text-muted-foreground truncate" title={r.email}>{r.email || "—"}</span>
                       <span className="text-muted-foreground font-mono">{r.time}</span>
                       <span className="text-muted-foreground">{r.date}</span>
                     </div>
@@ -422,6 +458,49 @@ export function AttendancePage() {
               </p>
             </div>
 
+            {/* Identity first — nobody may confirm anything on this page
+                without it, so it sits above both check-ins rather than inside
+                either one. */}
+            <div className="mb-5 space-y-3">
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                  الاسم / Full name
+                </label>
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value.slice(0, MAX_NAME_CHARS))}
+                  autoComplete="name"
+                  className="w-full rounded-xl px-3 py-2.5 text-sm text-white outline-none transition-colors"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = TEAL; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                  الإيميل / Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value.slice(0, MAX_EMAIL_CHARS))}
+                  autoComplete="email"
+                  inputMode="email"
+                  className="w-full rounded-xl px-3 py-2.5 text-sm text-white outline-none transition-colors"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.12)" }}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = TEAL; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+                />
+                {email.length > 0 && !emailOk && (
+                  <p className="text-[11px] mt-1.5" style={{ color: ORANGE }}>
+                    Please enter a valid email address.
+                  </p>
+                )}
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
   {/* Confirmation checkbox */}
   <label
@@ -469,7 +548,7 @@ export function AttendancePage() {
   {/* Submit */}
   <button
     type="submit"
-    disabled={!confirmed || submitting}
+    disabled={!confirmed || !identityOk || submitting}
     className="w-full py-3.5 rounded-xl font-bold text-sm text-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
     style={{
       background: `linear-gradient(135deg, ${TEAL}, #08A8B8)`,
