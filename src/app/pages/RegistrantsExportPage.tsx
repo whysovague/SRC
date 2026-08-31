@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Download, Loader2, ShieldAlert, Users, Wrench } from "lucide-react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getCountFromServer, getDocs } from "firebase/firestore";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import { Divider, GradientEyebrow, GlassCard, MoleculeNetwork } from "@/app/components/common";
@@ -69,6 +69,8 @@ function downloadCsv(csv: string, filename: string) {
 
 export function RegistrantsExportPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
+  const [count, setCount] = useState<number | null>(null);
+  const [preparing, setPreparing] = useState(false);
   const [error, setError] = useState("");
 
   // Workshop registrations — a separate collection from `users`, loaded
@@ -99,10 +101,27 @@ export function RegistrantsExportPage() {
     };
   }, []);
 
+  // The headcount comes from a server-side aggregation: one read, a few bytes,
+  // and instant on a phone. Pulling the documents themselves just to call
+  // `.length` on them meant a ~16 MB download (badge photos are stored inline
+  // as base64), which is both 1,000+ reads against the daily quota and slow
+  // enough on mobile to starve everything else on the connection.
   useEffect(() => {
     let cancelled = false;
+    getCountFromServer(collection(db, "users"))
+      .then((snap) => { if (!cancelled) setCount(snap.data().count); })
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Registrant count failed:", e);
+        setError("Could not load the registrant count. Check your connection and reload.");
+      });
+    return () => { cancelled = true; };
+  }, []);
 
-    (async () => {
+  /** The heavy one — every document, including every badge photo. Deliberately
+   *  not run on mount: it only happens when someone actually asks for the file. */
+  const loadRows = async (): Promise<Row[]> => {
+    {
       try {
         const snap = await getDocs(collection(db, "users"));
         const out: Row[] = [];
@@ -135,42 +154,53 @@ export function RegistrantsExportPage() {
         });
 
         out.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
-        if (!cancelled) setRows(out);
+        setRows(out);
+        return out;
       } catch (e) {
-        if (!cancelled) {
-          setError(
-            "Could not load the registrant list. Check the network connection, " +
-            "or whether the Firestore rules for `users` have changed."
-          );
-          console.error("Registrant export failed:", e);
-        }
+        console.error("Registrant export failed:", e);
+        throw e;
       }
-    })();
+    }
+  };
 
-    return () => { cancelled = true; };
-  }, []);
+  // Only a permission error means the rule is missing. Anything else — a
+  // timeout on a slow phone, a dropped connection — is a transient failure, and
+  // saying "check the Firestore rule" would send someone to fix a rule that is
+  // already fine. Which is exactly what this message used to do.
+  const describeWorkshopError = (e: any): string =>
+    e?.code === "permission-denied"
+      ? "Could not load workshop registrations — check that the `workshopSignups` Firestore rule is published."
+      : "Could not load workshop registrations — the connection timed out. Tap retry.";
 
-  // Loaded separately from the registrant list above: this collection is tiny,
-  // so it resolves almost immediately rather than waiting on 1,000+ documents.
-  useEffect(() => {
-    let cancelled = false;
+  const loadWorkshops = () => {
+    setWorkshopError("");
+    setWorkshops(null);
     getAllWorkshopSignups()
-      .then((w) => { if (!cancelled) setWorkshops(w); })
+      .then(setWorkshops)
       .catch((e) => {
-        if (cancelled) return;
         console.error("Workshop registrations failed to load:", e);
-        setWorkshopError(
-          "Could not load workshop registrations — check that the `workshopSignups` Firestore rule is published."
-        );
+        setWorkshopError(describeWorkshopError(e));
       });
-    return () => { cancelled = true; };
-  }, []);
+  };
+
+  useEffect(loadWorkshops, []);
 
   const today = () => new Date().toISOString().slice(0, 10);
 
-  const download = () => {
-    if (!rows) return;
-    downloadCsv(toCsv(rows), `SRC2026_Registrants_${today()}.csv`);
+  // Fetches on demand if it has not already. The button reports progress
+  // because on a phone this is a multi-megabyte download, not an instant one.
+  const download = async () => {
+    if (preparing) return;
+    setPreparing(true);
+    setError("");
+    try {
+      const data = rows ?? (await loadRows());
+      downloadCsv(toCsv(data), `SRC2026_Registrants_${today()}.csv`);
+    } catch {
+      setError("Could not build the spreadsheet. Check your connection and try again.");
+    } finally {
+      setPreparing(false);
+    }
   };
 
   const downloadWorkshop = (id: WorkshopId) => {
@@ -213,9 +243,9 @@ export function RegistrantsExportPage() {
         <GlassCard className="mt-10 p-8 md:p-10" delay={120}>
           <div className="relative text-center">
 
-            {error ? (
+            {count === null && error ? (
               <p className="text-sm leading-relaxed" style={{ color: ORANGE }}>{error}</p>
-            ) : rows === null ? (
+            ) : count === null ? (
               <div className="flex items-center justify-center gap-3 py-6 text-muted-foreground">
                 <Loader2 className="w-5 h-5 animate-spin" style={{ color: TEAL }} />
                 <span className="text-sm">Loading registrants…</span>
@@ -231,29 +261,40 @@ export function RegistrantsExportPage() {
 
                 <div className="font-display text-5xl font-extrabold leading-none mb-2"
                   style={{ background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`, WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>
-                  {rows.length.toLocaleString()}
+                  {count.toLocaleString()}
                 </div>
                 <div className="text-xs font-mono tracking-[0.24em] uppercase mb-1" style={{ color: "var(--muted-foreground)" }}>
                   Registrants
                 </div>
+                {/* The badge-photo figure needs every document, so it only
+                    appears once the spreadsheet has actually been built. */}
                 <div className="text-sm text-muted-foreground mb-8">
-                  {withPhoto.toLocaleString()} with a badge photo
+                  {rows ? `${withPhoto.toLocaleString()} with a badge photo` : " "}
                 </div>
 
                 <button
                   onClick={download}
-                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-white transition-transform duration-200 hover:scale-[1.03]"
+                  disabled={preparing}
+                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl font-semibold text-white transition-transform duration-200 hover:scale-[1.03] disabled:cursor-wait"
                   style={{
                     background: `linear-gradient(120deg, ${TEAL}, ${ORANGE})`,
                     boxShadow: `0 18px 40px -18px ${TEAL}`,
+                    opacity: preparing ? 0.65 : 1,
                   }}
                 >
-                  <Download className="w-4 h-4" />
-                  Download spreadsheet (.csv)
+                  {preparing ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Preparing…</>
+                  ) : (
+                    <><Download className="w-4 h-4" /> Download spreadsheet (.csv)</>
+                  )}
                 </button>
 
+                {error && <p className="text-xs mt-4" style={{ color: ORANGE }}>{error}</p>}
+
                 <p className="text-xs text-muted-foreground mt-5 leading-relaxed">
-                  Opens directly in Excel, Numbers or Google Sheets.
+                  {preparing
+                    ? "Fetching every record — this can take a moment on mobile."
+                    : "Opens directly in Excel, Numbers or Google Sheets."}
                 </p>
               </>
             )}
@@ -272,7 +313,16 @@ export function RegistrantsExportPage() {
           </div>
 
           {workshopError ? (
-            <p className="text-sm leading-relaxed" style={{ color: ORANGE }}>{workshopError}</p>
+            <div>
+              <p className="text-sm leading-relaxed mb-3" style={{ color: ORANGE }}>{workshopError}</p>
+              <button
+                onClick={loadWorkshops}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold"
+                style={{ background: `${ORANGE}15`, color: ORANGE, border: `1px solid ${ORANGE}35` }}
+              >
+                Retry
+              </button>
+            </div>
           ) : workshops === null ? (
             <div className="flex items-center gap-3 py-4 text-muted-foreground">
               <Loader2 className="w-4 h-4 animate-spin" style={{ color: ORANGE }} />

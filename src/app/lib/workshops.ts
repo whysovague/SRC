@@ -172,7 +172,9 @@ export async function getAllWorkshopSignups(): Promise<Record<WorkshopId, Worksh
     "tabaqat-3d-printing": [],
   };
 
-  const snap = await withTimeout(getDocs(collection(getFirestore(), COLLECTION)), TIMEOUT_MS);
+  // A longer budget than the single-document helpers above: this reads the
+  // whole collection, and on a phone it may be queued behind other traffic.
+  const snap = await withTimeout(getDocs(collection(getFirestore(), COLLECTION)), 30_000);
 
   snap.forEach((d) => {
     const v = d.data() as Record<string, unknown>;
