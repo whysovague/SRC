@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, CheckCircle, FileText, FlaskConical, Loader2, Lock, Medal, MessageSquare, Presentation, Sparkles, Trophy, Users, Wrench, X } from "lucide-react";
+import { ArrowRight, Briefcase, CheckCircle, FileText, FlaskConical, Loader2, Lock, Medal, MessageSquare, Presentation, Sparkles, Trophy, Users, Wrench, X } from "lucide-react";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
 import type { AppUser } from "@/app/lib/users";
 import { getSignedUpSet, saveActivitySignup, MAX_QUESTION_CHARS, type ActivityId } from "@/app/lib/activities";
+import { saveWorkshopSignup, isValidEmail, MAX_NAME_CHARS, WORKSHOP_SESSIONS, type WorkshopId } from "@/app/lib/workshops";
 import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetwork } from "@/app/components/common";
+import tabaqatPoster from "@/assets/tabaqat-workshop.jpg";
 
 export function CompetitionsPage({ onParticipate, user }: {
   onParticipate: (competition: Competition, notice?: string) => void;
   user: AppUser | null;
 }) {
   const competitions: {
-    icon: React.ReactNode; title: string; category: "Competition" | "Activity";
+    icon: React.ReactNode; title: string; category: "Competition" | "Activity" | "Workshop";
     /** Both optional — a session whose copy hasn't been written yet shows the
      *  title, its slot and the button, and nothing invented to fill the space. */
     desc?: string; details?: string[];
@@ -28,6 +30,14 @@ export function CompetitionsPage({ onParticipate, user }: {
      *  that does not exist. `activityId` is kept on these so the sign-up flow
      *  can be switched back on by deleting this one line. */
     noAction?: boolean;
+    /** Workshops take their own registration — name and email, no conference
+     *  registration or login required, so anyone can sign up straight from the
+     *  card. Stored in `workshopSignups`, counted on the export page. */
+    workshopId?: WorkshopId;
+    /** Poster shown across the top of the card. Import it from `@/assets` so
+     *  Vite fingerprints and bundles it — a bare "/foo.png" string would skip
+     *  that and 404 on any path that is not the site root. */
+    image?: string;
   }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
@@ -76,13 +86,27 @@ export function CompetitionsPage({ onParticipate, user }: {
       note: "Sophomore & Junior",
     },
     {
+      icon: <Briefcase className="w-7 h-7" />,
+      title: "Career Workshop",
+      category: "Workshop",
+      desc: "Workshop on CV Writing and the Art of Passing Job Interviews.",
+      details: ["Presented by Amal Al Hersh", "Human Resources Development Fund (HRDF)"],
+      color: TEAL,
+      note: "Day 2 · 5:30 – 8:40 pm · Room 004",
+      workshopId: "career-workshop",
+    },
+    {
       icon: <Wrench className="w-7 h-7" />,
-      title: "Workshops",
-      category: "Activity",
-      desc: "Practical, skills-based sessions led by industry experts and faculty. Topics range from process safety to digital engineering tools and AI in chemical engineering.",
-      details: ["Industry-led sessions", "Hands-on learning", "Multiple tracks"],
+      title: "Tabaqat 3D Printing Workshop",
+      category: "Workshop",
+      desc: "Have you ever wondered how ideas are transformed into real-world prototypes? Join us for an interactive workshop where we'll explore the fundamentals of 3D printing and how it helps turn ideas into reality.",
       color: ORANGE,
-      comingSoon: true,
+      // Runs twice; the registration form asks which sitting. Kept vague here so
+      // the card and the form cannot drift apart — the times live in
+      // WORKSHOP_SESSIONS, which is what the form renders.
+      note: "Day 1 & Day 3 · choose your day when registering",
+      image: tabaqatPoster,
+      workshopId: "tabaqat-3d-printing",
     },
     {
       icon: <Sparkles className="w-7 h-7" />,
@@ -116,7 +140,7 @@ export function CompetitionsPage({ onParticipate, user }: {
     },
   ];
 
-  const [filter, setFilter] = useState<"All" | "Competition" | "Activity">("All");
+  const [filter, setFilter] = useState<"All" | "Competition" | "Activity" | "Workshop">("All");
   const filtered = competitions
     .filter((c) => filter === "All" || c.category === filter)
     .sort((a, b) => {
@@ -144,6 +168,15 @@ export function CompetitionsPage({ onParticipate, user }: {
   // "Registered" instead of inviting them to do it twice.
   const [signedUp, setSignedUp] = useState<Set<ActivityId>>(new Set());
   const [dialog, setDialog] = useState<{ id: ActivityId; title: string; color: string } | null>(null);
+
+  // ─── Workshop registrations ─────────────────────────────────────────────
+  // Open to anyone — no login, no conference registration first — so unlike the
+  // activity sign-ups above there is no signed-in email to check against. A
+  // card therefore cannot know whether this visitor already registered; the
+  // dialog just says so on success, and a repeat submission overwrites the
+  // same document rather than double-counting.
+  const [workshopDialog, setWorkshopDialog] =
+    useState<{ id: WorkshopId; title: string; color: string } | null>(null);
 
   // Informational cards are excluded: their sign-up state is never rendered,
   // so looking it up would be a Firestore read per card per page load for
@@ -212,7 +245,7 @@ export function CompetitionsPage({ onParticipate, user }: {
 
         {/* Filter pills */}
         <div className="faq-pop flex gap-2 mb-12" style={{ animationDelay: "80ms" }}>
-          {(["All", "Competition", "Activity"] as const).map((f) => (
+          {(["All", "Competition", "Workshop", "Activity"] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -233,10 +266,37 @@ export function CompetitionsPage({ onParticipate, user }: {
             <RevealOnScroll key={item.title} delay={(i % 3) * 100}>
               <InteractiveCard
                 accent={item.color}
-                className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300 h-full"
+                // `flex flex-col` so a card with a poster splits into image +
+                // content instead of the content claiming the card's whole
+                // height and pushing its button out through `overflow-hidden`.
+                className="rounded-xl border overflow-hidden group hover:border-[#0CBFCE]/40 transition-colors duration-300 h-full flex flex-col"
                 style={{ background: "var(--card)", borderColor: "var(--border)" }}
               >
-                <div className="p-6 flex flex-col h-full">
+                {/* Poster, when the session has one — full-bleed across the top
+                    of the card. The card already has `overflow-hidden`, so it
+                    inherits the rounded corners.
+
+                    The bottom dissolves into the card rather than ending on a
+                    rule: `mask-image` fades the image's own alpha to zero, so
+                    whatever the card background happens to be shows through. An
+                    overlay gradient would have to hard-code that background and
+                    would break the moment it changed. The content below is
+                    pulled up into the faded region, which is where the effect
+                    reads as one surface rather than a picture with a gap. */}
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={`${item.title} poster`}
+                    loading="lazy"
+                    className="w-full object-cover object-top flex-shrink-0"
+                    style={{
+                      aspectRatio: "5 / 4",
+                      maskImage: "linear-gradient(to bottom, black 45%, transparent 97%)",
+                      WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent 97%)",
+                    }}
+                  />
+                )}
+                <div className={`p-6 flex flex-col flex-1 ${item.image ? "-mt-16 relative" : ""}`}>
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: `${item.color}15`, color: item.color }}>
                       {item.icon}
@@ -325,6 +385,12 @@ export function CompetitionsPage({ onParticipate, user }: {
                     ) : (
                       <button
                         onClick={() => {
+                          // Workshops are open to anyone — straight to the
+                          // name/email form, no login gate.
+                          if (item.workshopId) {
+                            setWorkshopDialog({ id: item.workshopId, title: item.title, color: item.color });
+                            return;
+                          }
                           // Signing up for a session assumes a conference
                           // registration. Without one, send them there first.
                           if (item.activityId) {
@@ -366,6 +432,17 @@ export function CompetitionsPage({ onParticipate, user }: {
             setSignedUp((prev) => new Set(prev).add(id));
             setDialog(null);
           }}
+        />
+      )}
+
+      {/* No `&& user` guard, unlike the activity dialog — workshops are open to
+          anyone, which is the whole point of collecting the name and email. */}
+      {workshopDialog && (
+        <WorkshopSignupDialog
+          workshopId={workshopDialog.id}
+          title={workshopDialog.title}
+          color={workshopDialog.color}
+          onClose={() => setWorkshopDialog(null)}
         />
       )}
     </div>
@@ -504,6 +581,238 @@ function ActivitySignupDialog({ activityId, title, color, user, onClose, onDone 
               : <>Confirm <ArrowRight className="w-4 h-4" /></>}
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Workshop registration dialog ─────────────────────────────────────────────
+// Unlike ActivitySignupDialog above, this one is open to anyone: it collects the
+// name and email itself rather than reading them off a signed-in user, so a
+// visitor can register for a workshop without holding a conference registration.
+function WorkshopSignupDialog({ workshopId, title, color, onClose }: {
+  workshopId: WorkshopId;
+  title: string;
+  color: string;
+  onClose: () => void;
+}) {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Empty for a workshop that runs once — the picker is then skipped entirely
+  // rather than shown with a single option.
+  const sessions = WORKSHOP_SESSIONS[workshopId];
+  // Deliberately starts unset even though there are only two options: a
+  // pre-selected day would be silently submitted by anyone who did not read it.
+  const [sessionId, setSessionId] = useState("");
+
+  // Escape closes; body scroll stays locked while it is open.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape" && !saving) onClose(); };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose, saving]);
+
+  // Checked on every keystroke so the button's enabled state matches what the
+  // save would actually accept — no submitting into a rejection.
+  const nameOk = fullName.trim().length >= 2;
+  const emailOk = isValidEmail(email);
+  const sessionOk = sessions.length === 0 || sessionId !== "";
+  const canSubmit = nameOk && emailOk && sessionOk && !saving;
+
+  const submit = async () => {
+    if (!canSubmit) return;
+    setSaving(true);
+    setError(null);
+    try {
+      await saveWorkshopSignup({ workshopId, fullName, email, sessionId });
+      setDone(true);
+    } catch (e: any) {
+      console.error("Workshop registration failed:", e);
+      setError(e?.message || "Could not save your registration. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const field = {
+    background: "rgba(255,255,255,0.04)",
+    border: "1px solid rgba(255,255,255,0.12)",
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style={{ background: "rgba(4,10,18,0.72)", backdropFilter: "blur(6px)" }}
+      onClick={() => { if (!saving) onClose(); }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Register for ${title}`}
+        className="w-full max-w-md rounded-2xl border p-6"
+        style={{
+          background: "rgba(7,17,30,0.97)",
+          borderColor: "rgba(255,255,255,0.1)",
+          boxShadow: "0 30px 80px -40px rgba(0,0,0,0.9)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-start justify-between gap-4 mb-1">
+          <div>
+            <div className="text-[11px] font-mono tracking-[0.2em] uppercase mb-1" style={{ color }}>
+              Workshop registration
+            </div>
+            <h3 className="font-display font-bold text-xl text-white">{title}</h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            aria-label="Close"
+            className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-colors disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.06)", color: "var(--muted-foreground)" }}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {done ? (
+          // ── Success ──
+          <div className="text-center py-6">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ background: `${color}15`, border: `2px solid ${color}40` }}>
+              <CheckCircle className="w-8 h-8" style={{ color }} />
+            </div>
+            <p className="font-display font-bold text-lg text-white mb-1">You're registered</p>
+            <p className="text-sm text-muted-foreground">
+              We've saved your place for {title}.
+            </p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-6 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+              style={{ color, background: `${color}18`, border: `1px solid ${color}45` }}
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Day first — this workshop runs more than once, and which sitting
+                someone is coming to is the thing the organisers most need. */}
+            {sessions.length > 0 && (
+              <div className="mt-5 mb-4">
+                <label className="block text-xs font-semibold mb-2 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                  Choose your day
+                </label>
+                <div className="grid gap-2">
+                  {sessions.map((s) => {
+                    const picked = sessionId === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSessionId(s.id)}
+                        disabled={saving}
+                        className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-left transition-all disabled:opacity-60"
+                        style={{
+                          background: picked ? `${color}14` : "rgba(255,255,255,0.04)",
+                          border: `1px solid ${picked ? color + "70" : "rgba(255,255,255,0.12)"}`,
+                          color: picked ? "#fff" : "var(--muted-foreground)",
+                        }}
+                      >
+                        <span
+                          className="w-4 h-4 rounded-full flex-shrink-0 flex items-center justify-center"
+                          style={{ border: `2px solid ${picked ? color : "rgba(255,255,255,0.25)"}` }}
+                        >
+                          {picked && <span className="w-2 h-2 rounded-full" style={{ background: color }} />}
+                        </span>
+                        {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <label className={`block text-xs font-semibold mb-1.5 tracking-wide ${sessions.length > 0 ? "" : "mt-5"}`} style={{ color: "var(--muted-foreground)" }}>
+              Full name
+            </label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value.slice(0, MAX_NAME_CHARS))}
+              disabled={saving}
+              autoComplete="name"
+              className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-colors disabled:opacity-60 mb-4"
+              style={field}
+              onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+            />
+
+            <label className="block text-xs font-semibold mb-1.5 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={saving}
+              autoComplete="email"
+              inputMode="email"
+              className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-colors disabled:opacity-60"
+              style={field}
+              onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+              onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+            />
+            {/* Only nags once there is something to be wrong about. */}
+            {email.length > 0 && !emailOk && (
+              <p className="text-[11px] mt-1.5" style={{ color: "#ff8a8a" }}>
+                That doesn't look like a valid email address.
+              </p>
+            )}
+
+            {error && <p className="text-xs mt-3" style={{ color: "#ff8a8a" }}>{error}</p>}
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={saving}
+                className="text-xs text-muted-foreground hover:text-white transition-colors disabled:opacity-40"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={!canSubmit}
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200"
+                style={{
+                  color,
+                  background: `${color}18`,
+                  border: `1px solid ${color}45`,
+                  opacity: canSubmit ? 1 : 0.45,
+                  cursor: canSubmit ? "pointer" : "not-allowed",
+                }}
+              >
+                {saving
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                  : <>Register <ArrowRight className="w-4 h-4" /></>}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

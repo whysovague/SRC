@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Download, Loader2, ShieldAlert, Users } from "lucide-react";
+import { Download, Loader2, ShieldAlert, Users, Wrench } from "lucide-react";
 import { collection, getDocs } from "firebase/firestore";
 
 import { TEAL, ORANGE } from "@/app/theme";
 import { Divider, GradientEyebrow, GlassCard, MoleculeNetwork } from "@/app/components/common";
 import { db } from "../lib/firebase";
+import { getAllWorkshopSignups, WORKSHOPS, type WorkshopId, type WorkshopSignup } from "../lib/workshops";
 
 // ─── Registrant export ────────────────────────────────────────────────────────
 // An unlisted page for the organising team: it downloads the `users` collection
@@ -38,19 +39,42 @@ function csvCell(value: string): string {
   return /[",\r\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
+/** CRLF line endings and a UTF-8 BOM: without the BOM, Excel on Windows opens
+ *  the file in the system codepage and mangles every non-Latin name. */
+function buildCsv(header: string[], rows: string[][]): string {
+  const lines = [header, ...rows].map((cells) => cells.map(csvCell).join(","));
+  return "﻿" + lines.join("\r\n");
+}
+
 function toCsv(rows: Row[]): string {
-  const header = ["Full Name", "Email", "Registered At", "Has Badge Photo"];
-  const body = rows.map((r) =>
-    [r.fullName, r.email, r.createdAt, r.hasPhoto ? "Yes" : "No"].map(csvCell).join(",")
+  return buildCsv(
+    ["Full Name", "Email", "Registered At", "Has Badge Photo"],
+    rows.map((r) => [r.fullName, r.email, r.createdAt, r.hasPhoto ? "Yes" : "No"])
   );
-  // CRLF line endings and a UTF-8 BOM: without the BOM, Excel on Windows opens
-  // the file in the system codepage and mangles every non-Latin name.
-  return "﻿" + [header.map(csvCell).join(","), ...body].join("\r\n");
+}
+
+/** Shared by both download buttons — building a Blob and clicking a temporary
+ *  anchor is the only way to hand the browser a file we generated in memory. */
+function downloadCsv(csv: string, filename: string) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 export function RegistrantsExportPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [error, setError] = useState("");
+
+  // Workshop registrations — a separate collection from `users`, loaded
+  // independently so a failure on one does not blank the other.
+  const [workshops, setWorkshops] = useState<Record<WorkshopId, WorkshopSignup[]> | null>(null);
+  const [workshopError, setWorkshopError] = useState("");
 
   // Keep this page out of search results. index.html ships a site-wide
   // `<meta name="robots" content="index, follow, …">`, so this overwrites that
@@ -126,17 +150,36 @@ export function RegistrantsExportPage() {
     return () => { cancelled = true; };
   }, []);
 
+  // Loaded separately from the registrant list above: this collection is tiny,
+  // so it resolves almost immediately rather than waiting on 1,000+ documents.
+  useEffect(() => {
+    let cancelled = false;
+    getAllWorkshopSignups()
+      .then((w) => { if (!cancelled) setWorkshops(w); })
+      .catch((e) => {
+        if (cancelled) return;
+        console.error("Workshop registrations failed to load:", e);
+        setWorkshopError(
+          "Could not load workshop registrations — check that the `workshopSignups` Firestore rule is published."
+        );
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const today = () => new Date().toISOString().slice(0, 10);
+
   const download = () => {
     if (!rows) return;
-    const blob = new Blob([toCsv(rows)], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `SRC2026_Registrants_${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
+    downloadCsv(toCsv(rows), `SRC2026_Registrants_${today()}.csv`);
+  };
+
+  const downloadWorkshop = (id: WorkshopId) => {
+    const list = workshops?.[id] ?? [];
+    const csv = buildCsv(
+      ["Full Name", "Email", "Day", "Registered At"],
+      list.map((r) => [r.fullName, r.email, r.sessionLabel, r.createdAt])
+    );
+    downloadCsv(csv, `SRC2026_${WORKSHOPS[id].replace(/\s+/g, "")}_${today()}.csv`);
   };
 
   const withPhoto = rows?.filter((r) => r.hasPhoto).length ?? 0;
@@ -216,6 +259,61 @@ export function RegistrantsExportPage() {
             )}
           </div>
         </GlassCard>
+
+        {/* ── Workshop registrations ── one block per workshop, each with its
+            own count and its own CSV, kept clearly apart from the conference
+            registrant list above. */}
+        <div className="mt-10">
+          <div className="flex items-center gap-3 mb-4">
+            <Wrench className="w-4 h-4" style={{ color: ORANGE }} />
+            <span className="text-xs font-mono tracking-[0.28em] uppercase" style={{ color: ORANGE }}>
+              Workshop Registrations
+            </span>
+          </div>
+
+          {workshopError ? (
+            <p className="text-sm leading-relaxed" style={{ color: ORANGE }}>{workshopError}</p>
+          ) : workshops === null ? (
+            <div className="flex items-center gap-3 py-4 text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" style={{ color: ORANGE }} />
+              <span className="text-sm">Loading workshop registrations…</span>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {(Object.keys(WORKSHOPS) as WorkshopId[]).map((id) => {
+                const list = workshops[id];
+                return (
+                  <div key={id} className="rounded-xl p-5"
+                    style={{ background: "rgba(255,255,255,0.03)", border: `1px solid ${ORANGE}2A` }}>
+                    <div className="text-xs font-mono tracking-[0.18em] uppercase mb-2"
+                      style={{ color: "var(--muted-foreground)" }}>
+                      {WORKSHOPS[id]}
+                    </div>
+                    <div className="font-display text-4xl font-extrabold leading-none mb-4"
+                      style={{ color: ORANGE }}>
+                      {list.length.toLocaleString()}
+                    </div>
+                    <button
+                      onClick={() => downloadWorkshop(id)}
+                      disabled={list.length === 0}
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                      style={{
+                        background: `${ORANGE}15`,
+                        color: ORANGE,
+                        border: `1px solid ${ORANGE}35`,
+                        opacity: list.length === 0 ? 0.4 : 1,
+                        cursor: list.length === 0 ? "not-allowed" : "pointer",
+                      }}
+                    >
+                      <Download className="w-4 h-4" />
+                      Download .csv
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {/* Handling notice — the people in this file did not consent to it being
             passed around, so say so where whoever downloads it will read it. */}
