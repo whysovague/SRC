@@ -7,6 +7,7 @@ import type { AppUser } from "@/app/lib/users";
 import { getSignedUpSet, saveActivitySignup, MAX_QUESTION_CHARS, type ActivityId } from "@/app/lib/activities";
 import { saveWorkshopSignup, isValidEmail, MAX_NAME_CHARS, WORKSHOP_SESSIONS, type WorkshopId } from "@/app/lib/workshops";
 import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetwork } from "@/app/components/common";
+import careerPoster from "@/assets/career-workshop.jpg";
 import tabaqatPoster from "@/assets/tabaqat-workshop.jpg";
 
 export function CompetitionsPage({ onParticipate, user }: {
@@ -92,7 +93,8 @@ export function CompetitionsPage({ onParticipate, user }: {
       desc: "Workshop on CV Writing and the Art of Passing Job Interviews.",
       details: ["Presented by Amal Al Hersh", "Human Resources Development Fund (HRDF)"],
       color: TEAL,
-      note: "Day 2 · 5:30 – 8:40 pm · Room 004",
+      note: "Day 2 · 6:30 – 8:40 pm · Room 004",
+      image: careerPoster,
       workshopId: "career-workshop",
     },
     {
@@ -288,9 +290,12 @@ export function CompetitionsPage({ onParticipate, user }: {
                     src={item.image}
                     alt={`${item.title} poster`}
                     loading="lazy"
-                    className="w-full object-cover object-top flex-shrink-0"
+                    className="w-full h-auto block flex-shrink-0"
                     style={{
-                      aspectRatio: "5 / 4",
+                      // No fixed aspect ratio and no object-cover: these are
+                      // posters with logos and text at the edges, and forcing
+                      // them into a common box would crop those off — the two
+                      // are 1.27:1 and 1.62:1, so no single ratio suits both.
                       maskImage: "linear-gradient(to bottom, black 45%, transparent 97%)",
                       WebkitMaskImage: "linear-gradient(to bottom, black 45%, transparent 97%)",
                     }}
