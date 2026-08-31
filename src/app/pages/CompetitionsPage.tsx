@@ -22,6 +22,12 @@ export function CompetitionsPage({ onParticipate, user }: {
     /** Set on the sessions people can sign up for once they hold a conference
      *  registration. Conference registration itself stays in the main modal. */
     activityId?: ActivityId;
+    /** Informational card — renders no action control at all: no Register
+     *  button, no "Registered" pill, no disabled placeholder. For sessions
+     *  anyone can simply turn up to, where a button would only imply a step
+     *  that does not exist. `activityId` is kept on these so the sign-up flow
+     *  can be switched back on by deleting this one line. */
+    noAction?: boolean;
   }[] = [
     {
       icon: <FlaskConical className="w-7 h-7" />,
@@ -86,6 +92,7 @@ export function CompetitionsPage({ onParticipate, user }: {
       color: TEAL,
       note: "Day 1 · 9:35 – 10:05 am",
       activityId: "intro-to-che",
+      noAction: true,
     },
     {
       icon: <MessageSquare className="w-7 h-7" />,
@@ -94,6 +101,7 @@ export function CompetitionsPage({ onParticipate, user }: {
       color: ORANGE,
       note: "Day 2 · 9:00 – 9:40 am",
       activityId: "fresh-vs-experienced",
+      noAction: true,
     },
     {
       icon: <Users className="w-7 h-7" />,
@@ -104,6 +112,7 @@ export function CompetitionsPage({ onParticipate, user }: {
       color: ORANGE,
       note: "Day 3 · 9:00 – 9:45 am",
       activityId: "women-in-stem",
+      noAction: true,
     },
   ];
 
@@ -111,12 +120,20 @@ export function CompetitionsPage({ onParticipate, user }: {
   const filtered = competitions
     .filter((c) => filter === "All" || c.category === filter)
     .sort((a, b) => {
-      // Priority 0: Open for direct registration (has active activityId)
-      // Priority 1: Coming soon
-      // Priority 2: Closed competitions
+      // Priority 0: Open for registration right now — anything actionable
+      //             outranks a card the visitor can only read.
+      // Priority 1: Informational sessions (noAction) — no step to take, but
+      //             they are happening, so they stay above anything shut.
+      // Priority 2: Coming soon
+      // Priority 3: Closed competitions
+      //
+      // Nothing is priority 0 today, which is why the informational sessions
+      // sit at the top. The tier exists so that re-opening a registration
+      // automatically lifts it above them without touching this function.
       const getPriority = (item: (typeof competitions)[number]) => {
-        if (item.compId) return 2;
-        if (item.comingSoon) return 1;
+        if (item.compId) return 3;
+        if (item.comingSoon) return 2;
+        if (item.noAction) return 1;
         return 0;
       };
       return getPriority(a) - getPriority(b);
@@ -128,7 +145,11 @@ export function CompetitionsPage({ onParticipate, user }: {
   const [signedUp, setSignedUp] = useState<Set<ActivityId>>(new Set());
   const [dialog, setDialog] = useState<{ id: ActivityId; title: string; color: string } | null>(null);
 
+  // Informational cards are excluded: their sign-up state is never rendered,
+  // so looking it up would be a Firestore read per card per page load for
+  // nothing.
   const activityIds = competitions
+    .filter((c) => !c.noAction)
     .map((c) => c.activityId)
     .filter((id): id is ActivityId => Boolean(id));
   const activityKey = activityIds.join(",");
@@ -261,7 +282,11 @@ export function CompetitionsPage({ onParticipate, user }: {
                     </ul>
                   )}
                   {/* Register / Participate → opens the registration & login modal,
-                      preselecting this competition when the card is one */}
+                      preselecting this competition when the card is one.
+                      Skipped entirely for informational cards: no control at
+                      all, not a disabled one, so nothing suggests a step the
+                      visitor is missing. */}
+                  {!item.noAction && (
                   <div className="mt-auto pt-1">
                     {item.compId ? (
                       <div
@@ -322,6 +347,7 @@ export function CompetitionsPage({ onParticipate, user }: {
                       </button>
                     )}
                   </div>
+                  )}
                 </div>
               </InteractiveCard>
             </RevealOnScroll>
