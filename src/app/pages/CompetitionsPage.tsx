@@ -5,7 +5,7 @@ import { TEAL, ORANGE } from "@/app/theme";
 import type { Competition } from "@/app/types";
 import type { AppUser } from "@/app/lib/users";
 import { getSignedUpSet, saveActivitySignup, MAX_QUESTION_CHARS, type ActivityId } from "@/app/lib/activities";
-import { saveWorkshopSignup, isValidEmail, MAX_NAME_CHARS, WORKSHOP_SESSIONS, type WorkshopId } from "@/app/lib/workshops";
+import { saveWorkshopSignup, isValidEmail, isValidPhone, MAX_NAME_CHARS, MAX_PHONE_CHARS, MAX_OCCUPATION_CHARS, WORKSHOP_FIELDS, WORKSHOP_SESSIONS, type WorkshopId } from "@/app/lib/workshops";
 import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetwork } from "@/app/components/common";
 import careerPoster from "@/assets/career-workshop.jpg";
 import tabaqatPoster from "@/assets/tabaqat-workshop.jpg";
@@ -603,6 +603,8 @@ function WorkshopSignupDialog({ workshopId, title, color, onClose }: {
 }) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [occupation, setOccupation] = useState("");
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -628,17 +630,24 @@ function WorkshopSignupDialog({ workshopId, title, color, onClose }: {
 
   // Checked on every keystroke so the button's enabled state matches what the
   // save would actually accept — no submitting into a rejection.
+  // Which extra questions this particular workshop asks.
+  const fields = WORKSHOP_FIELDS[workshopId];
+  const wantsPhone = fields.includes("phone");
+  const wantsOccupation = fields.includes("occupation");
+
   const nameOk = fullName.trim().length >= 2;
   const emailOk = isValidEmail(email);
   const sessionOk = sessions.length === 0 || sessionId !== "";
-  const canSubmit = nameOk && emailOk && sessionOk && !saving;
+  const phoneOk = !wantsPhone || isValidPhone(phone);
+  const occupationOk = !wantsOccupation || occupation.trim().length >= 2;
+  const canSubmit = nameOk && emailOk && sessionOk && phoneOk && occupationOk && !saving;
 
   const submit = async () => {
     if (!canSubmit) return;
     setSaving(true);
     setError(null);
     try {
-      await saveWorkshopSignup({ workshopId, fullName, email, sessionId });
+      await saveWorkshopSignup({ workshopId, fullName, email, sessionId, phone, occupation });
       setDone(true);
     } catch (e: any) {
       console.error("Workshop registration failed:", e);
@@ -778,13 +787,61 @@ function WorkshopSignupDialog({ workshopId, title, color, onClose }: {
               style={field}
               onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
               onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
-              onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+              // Enter submits only when this is the last field; otherwise it
+              // would skip the questions rendered below it.
+              onKeyDown={(e) => { if (e.key === "Enter" && fields.length === 0) submit(); }}
             />
             {/* Only nags once there is something to be wrong about. */}
             {email.length > 0 && !emailOk && (
               <p className="text-[11px] mt-1.5" style={{ color: "#ff8a8a" }}>
-                That doesn't look like a valid email address.
+                Please enter a valid email address.
               </p>
+            )}
+
+            {wantsPhone && (
+              <>
+                <label className="block text-xs font-semibold mb-1.5 mt-4 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                  Mobile number
+                </label>
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value.slice(0, MAX_PHONE_CHARS))}
+                  disabled={saving}
+                  autoComplete="tel"
+                  inputMode="tel"
+                  placeholder="05X XXX XXXX"
+                  className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-colors disabled:opacity-60"
+                  style={field}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+                />
+                {phone.length > 0 && !phoneOk && (
+                  <p className="text-[11px] mt-1.5" style={{ color: "#ff8a8a" }}>
+                    Please enter a valid mobile number.
+                  </p>
+                )}
+              </>
+            )}
+
+            {wantsOccupation && (
+              <>
+                <label className="block text-xs font-semibold mb-1.5 mt-4 tracking-wide" style={{ color: "var(--muted-foreground)" }}>
+                  Occupation / Major
+                </label>
+                <input
+                  type="text"
+                  value={occupation}
+                  onChange={(e) => setOccupation(e.target.value.slice(0, MAX_OCCUPATION_CHARS))}
+                  disabled={saving}
+                  autoComplete="organization-title"
+                  className="w-full rounded-lg px-3 py-2.5 text-sm text-white outline-none transition-colors disabled:opacity-60"
+                  style={field}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = color; }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; }}
+                  onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+                />
+              </>
             )}
 
             {error && <p className="text-xs mt-3" style={{ color: "#ff8a8a" }}>{error}</p>}

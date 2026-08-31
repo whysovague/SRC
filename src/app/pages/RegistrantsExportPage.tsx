@@ -5,7 +5,7 @@ import { collection, getCountFromServer, getDocs } from "firebase/firestore";
 import { TEAL, ORANGE } from "@/app/theme";
 import { Divider, GradientEyebrow, GlassCard, MoleculeNetwork } from "@/app/components/common";
 import { db } from "../lib/firebase";
-import { getAllWorkshopSignups, WORKSHOPS, type WorkshopId, type WorkshopSignup } from "../lib/workshops";
+import { getAllWorkshopSignups, WORKSHOPS, WORKSHOP_FIELDS, WORKSHOP_SESSIONS, type WorkshopId, type WorkshopSignup } from "../lib/workshops";
 
 // ─── Registrant export ────────────────────────────────────────────────────────
 // An unlisted page for the organising team: it downloads the `users` collection
@@ -203,13 +203,33 @@ export function RegistrantsExportPage() {
     }
   };
 
+  // Columns follow what this workshop actually asks for, so the Career Workshop
+  // sheet carries phone and occupation while the Tabaqat one carries the day —
+  // rather than every sheet carrying every column with most of them empty.
   const downloadWorkshop = (id: WorkshopId) => {
     const list = workshops?.[id] ?? [];
-    const csv = buildCsv(
-      ["Full Name", "Email", "Day", "Registered At"],
-      list.map((r) => [r.fullName, r.email, r.sessionLabel, r.createdAt])
-    );
-    downloadCsv(csv, `SRC2026_${WORKSHOPS[id].replace(/\s+/g, "")}_${today()}.csv`);
+    const fields = WORKSHOP_FIELDS[id];
+    const hasDay = WORKSHOP_SESSIONS[id].length > 0;
+
+    const header = [
+      "Full Name",
+      "Email",
+      ...(fields.includes("phone") ? ["Mobile"] : []),
+      ...(fields.includes("occupation") ? ["Occupation / Major"] : []),
+      ...(hasDay ? ["Day"] : []),
+      "Registered At",
+    ];
+
+    const rows = list.map((r) => [
+      r.fullName,
+      r.email,
+      ...(fields.includes("phone") ? [r.phone] : []),
+      ...(fields.includes("occupation") ? [r.occupation] : []),
+      ...(hasDay ? [r.sessionLabel] : []),
+      r.createdAt,
+    ]);
+
+    downloadCsv(buildCsv(header, rows), `SRC2026_${WORKSHOPS[id].replace(/\s+/g, "")}_${today()}.csv`);
   };
 
   const withPhoto = rows?.filter((r) => r.hasPhoto).length ?? 0;

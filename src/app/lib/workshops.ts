@@ -58,11 +58,27 @@ export const WORKSHOP_SESSIONS: Record<WorkshopId, WorkshopSession[]> = {
   ],
 };
 
+/**
+ * Extra fields a workshop asks for beyond name and email. Per-workshop rather
+ * than global: the Career Workshop needs a phone number and what the attendee
+ * does, the 3D printing one does not, and asking for a phone number nobody will
+ * use is the kind of friction that loses sign-ups.
+ */
+export type WorkshopField = "phone" | "occupation";
+
+export const WORKSHOP_FIELDS: Record<WorkshopId, WorkshopField[]> = {
+  "career-workshop": ["phone", "occupation"],
+  "tabaqat-3d-printing": [],
+};
+
 export type WorkshopSignup = {
   workshopId: WorkshopId;
   workshopTitle: string;
   fullName: string;
   email: string;
+  /** "" when the workshop does not ask for it. */
+  phone: string;
+  occupation: string;
   /** "" for a workshop that runs only once. */
   sessionLabel: string;
   /** "YYYY-MM-DD HH:MM" in the reader's local time, or "" if the record has no
@@ -88,6 +104,8 @@ const TIMEOUT_MS = 10_000;
 
 export const MAX_NAME_CHARS = 120;
 export const MAX_EMAIL_CHARS = 254;
+export const MAX_PHONE_CHARS = 24;
+export const MAX_OCCUPATION_CHARS = 120;
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
@@ -95,6 +113,16 @@ const normalizeEmail = (email: string) => email.trim().toLowerCase();
 export function isValidEmail(email: string): boolean {
   const e = normalizeEmail(email);
   return e.length > 0 && e.length <= MAX_EMAIL_CHARS && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
+}
+
+/**
+ * Counts digits only, so `+966 50 123 4567`, `0501234567` and `966501234567`
+ * are all accepted. Formats vary by country and by habit, and rejecting a real
+ * number because of a space costs more than accepting an odd-looking one.
+ */
+export function isValidPhone(phone: string): boolean {
+  const digits = phone.replace(/\D/g, "");
+  return digits.length >= 9 && digits.length <= 15;
 }
 
 /** Firestore IDs may not contain `/` nor be `.`/`..`; an email is neither. */
@@ -116,6 +144,9 @@ export async function saveWorkshopSignup(input: {
   email: string;
   /** Required when the workshop has sessions; ignored when it does not. */
   sessionId?: string;
+  /** Required when the workshop lists them in WORKSHOP_FIELDS. */
+  phone?: string;
+  occupation?: string;
 }): Promise<void> {
   const email = normalizeEmail(input.email);
   const fullName = input.fullName.trim().slice(0, MAX_NAME_CHARS);
@@ -127,6 +158,19 @@ export async function saveWorkshopSignup(input: {
   const session = sessions.find((s) => s.id === input.sessionId);
   if (sessions.length > 0 && !session) throw new Error("Please choose a day.");
 
+  // Only validated when this workshop actually asks for them — and only stored
+  // then too, so a Tabaqat record never carries an empty phone column.
+  const fields = WORKSHOP_FIELDS[input.workshopId];
+  const phone = (input.phone ?? "").trim().slice(0, MAX_PHONE_CHARS);
+  const occupation = (input.occupation ?? "").trim().slice(0, MAX_OCCUPATION_CHARS);
+
+  if (fields.includes("phone") && !isValidPhone(phone)) {
+    throw new Error("Please enter a valid mobile number.");
+  }
+  if (fields.includes("occupation") && occupation.length < 2) {
+    throw new Error("Please enter your occupation or major.");
+  }
+
   await withTimeout(
     setDoc(
       signupRef(email, input.workshopId),
@@ -137,6 +181,8 @@ export async function saveWorkshopSignup(input: {
         email,
         // Stored flat rather than as an ID alone, so the export is readable
         // without having to look the session up in the code.
+        phone: fields.includes("phone") ? phone : "",
+        occupation: fields.includes("occupation") ? occupation : "",
         sessionId: session?.id ?? "",
         sessionLabel: session?.label ?? "",
         createdAt: serverTimestamp(),
@@ -187,6 +233,8 @@ export async function getAllWorkshopSignups(): Promise<Record<WorkshopId, Worksh
       workshopTitle: String(v.workshopTitle ?? WORKSHOPS[id] ?? ""),
       fullName: String(v.fullName ?? "").trim(),
       email: String(v.email ?? "").trim(),
+      phone: String(v.phone ?? ""),
+      occupation: String(v.occupation ?? ""),
       sessionLabel: String(v.sessionLabel ?? ""),
       createdAt: ts?.toDate ? formatLocal(ts.toDate()) : "",
     });
