@@ -106,7 +106,7 @@ export function CompetitionsPage({ onParticipate, user }: {
       // Runs twice; the registration form asks which sitting. Kept vague here so
       // the card and the form cannot drift apart — the times live in
       // WORKSHOP_SESSIONS, which is what the form renders.
-      note: "Day 1 & Day 3",
+      note: "Day 1 & Day 3 · Room 019",
       image: tabaqatPoster,
       workshopId: "tabaqat-3d-printing",
     },
