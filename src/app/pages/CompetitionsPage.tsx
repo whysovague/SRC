@@ -91,9 +91,16 @@ export function CompetitionsPage({ onParticipate, user }: {
       title: "Career Workshop",
       category: "Workshop",
       desc: "Workshop on CV Writing and the Art of Passing Job Interviews.",
-      details: ["Presented by Amal Al Hersh", "Human Resources Development Fund (HRDF)"],
+      // The three sittings spelled out, matching the agenda exactly — a single
+      // "6:30 – 8:40 pm" range hid the 5:30 start and the breaks in between.
+      details: [
+        "5:30 – 6:00 pm · First half",
+        "6:30 – 7:30 pm · Second half",
+        "7:40 – 8:40 pm · Second half",
+        "Presented by Amal Al Hersh (HRDF)",
+      ],
       color: TEAL,
-      note: "Day 2 · 6:30 – 8:40 pm · Room 004",
+      note: "Day 2 · Room 004",
       image: careerPoster,
       workshopId: "career-workshop",
     },

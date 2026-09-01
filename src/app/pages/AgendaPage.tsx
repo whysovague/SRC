@@ -73,6 +73,7 @@ export const AGENDA_DAYS: {
       { time: "4:00 - 6:00 pm", start: 960, title: "Research Poster Competition", track: "Undergraduate" },
       { time: "5:30 - 6:00 pm", start: 1050, title: "Career Workshop — First half", track: "Undergraduate", note: "B54 · Room 004" },
       { time: "6:00 - 6:30 pm", start: 1080, title: "Prayer Break", track: "Undergraduate" },
+      { time: "6:30 - 7:30 pm", start: 1110, title: "Chem-E-Jeopardy Final", track: "Undergraduate", note: "stage · B54" },
       { time: "6:30 - 7:30 pm", start: 1110, title: "Career Workshop — Second half", track: "Undergraduate", note: "B54 · Room 004" },
       { time: "7:30 - 7:40 pm", start: 1170, title: "Break", track: "Undergraduate" },
       { time: "7:40 - 8:40 pm", start: 1180, title: "Career Workshop — Second half", track: "Undergraduate", note: "B54 · Room 004" },
