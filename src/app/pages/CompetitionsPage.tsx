@@ -10,6 +10,27 @@ import { Divider, GradientEyebrow, RevealOnScroll, InteractiveCard, MoleculeNetw
 import careerPoster from "@/assets/career-workshop.jpg";
 import tabaqatPoster from "@/assets/tabaqat-workshop.jpg";
 
+/**
+ * True when the string contains Arabic script.
+ *
+ * `dir="auto"` is not enough for these lines: it takes its direction from the
+ * FIRST strong character, and a line like "6:45 - 7:30 pm · إعداد" starts with
+ * Latin digits, so it lays out left-to-right and puts the bullet on the wrong
+ * side. Looking for Arabic anywhere in the line gets it right.
+ */
+const hasArabic = (s: string) => /[؀-ۿݐ-ݿ]/.test(s);
+
+/**
+ * Wraps a Latin run in U+2066 LEFT-TO-RIGHT ISOLATE / U+2069 POP DIRECTIONAL
+ * ISOLATE so it lays out left-to-right regardless of the surrounding text.
+ *
+ * Without this, "6:45 - 7:30 pm" inside an Arabic line renders mirrored as
+ * "pm 7:30 - 6:45": the bidi algorithm treats the digits and "pm" as separate
+ * runs and orders them right-to-left. That is not merely ugly — it swaps the
+ * start and end times, so the line states the wrong thing.
+ */
+const ltr = (s: string) => `⁦${s}⁩`;
+
 export function CompetitionsPage({ onParticipate, user }: {
   onParticipate: (competition: Competition, notice?: string) => void;
   user: AppUser | null;
@@ -90,14 +111,13 @@ export function CompetitionsPage({ onParticipate, user }: {
       icon: <Briefcase className="w-7 h-7" />,
       title: "Career Workshop",
       category: "Workshop",
-      desc: "Workshop on CV Writing and the Art of Passing Job Interviews.",
-      // The three sittings spelled out, matching the agenda exactly — a single
-      // "6:30 – 8:40 pm" range hid the 5:30 start and the breaks in between.
+      desc: "ورشة عمل في إعداد السيرة الذاتية وفن اجتياز المقابلات الشخصية.",
+      // Two named sittings, each with the advisor delivering it. The 5:30 – 6:00
+      // slot is deliberately absent: the organisers dropped it from this card,
+      // though the agenda page still lists it.
       details: [
-        "5:30 – 6:00 pm · First half",
-        "6:30 – 7:30 pm · Second half",
-        "7:40 – 8:40 pm · Second half",
-        "Presented by Amal Al Hersh (HRDF)",
+        `${ltr("6:45 – 7:30 pm")} · إعداد السيرة الذاتية — المرشد المهني: أمل الهرش`,
+        `${ltr("7:45 – 8:30 pm")} · اجتياز المقابلات الشخصية — المرشد المهني: موسى الأسمري`,
       ],
       color: TEAL,
       note: "Day 2 · Room 004",
@@ -341,12 +361,19 @@ export function CompetitionsPage({ onParticipate, user }: {
                     </div>
                   )}
                   {item.desc && (
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-4">{item.desc}</p>
+                    <p
+                      dir={hasArabic(item.desc) ? "rtl" : "auto"}
+                      className={`text-sm text-muted-foreground leading-relaxed mb-4 ${hasArabic(item.desc) ? "text-right" : ""}`}
+                    >{item.desc}</p>
                   )}
                   {item.details && item.details.length > 0 && (
                     <ul className="space-y-1 mb-5">
                       {item.details.map((d) => (
-                        <li key={d} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <li
+                          key={d}
+                          dir={hasArabic(d) ? "rtl" : "auto"}
+                          className={`flex items-center gap-2 text-xs text-muted-foreground ${hasArabic(d) ? "text-right" : ""}`}
+                        >
                           <CheckCircle className="w-3 h-3 flex-shrink-0" style={{ color: item.color }} />
                           {d}
                         </li>
